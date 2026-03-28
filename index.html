@@ -371,8 +371,14 @@ body.dark-mode tr:hover td { background:#1e2334 !important; }
 body.dark-mode tr.row-done td { background:#1a1e2a !important; opacity:.55; }
 body.dark-mode tr.row-selected td { background:rgba(76,175,130,.18) !important; }
 body.dark-mode .add-row-tr td { background:transparent !important; }
-/* tags — darken bg, keep text readable */
-body.dark-mode .tag-chip { filter:brightness(.7) saturate(.8); color:#e2e6f0 !important; }
+/* tags — darken bg, restore contrast */
+body.dark-mode .tag-chip,
+body.dark-mode .tag-pill { filter:brightness(.5) saturate(1.2) !important; color:unset !important; }
+/* table borders → subtle dark lines */
+body.dark-mode .grid-table tbody td { border-right-color:#2a2f3d !important; }
+body.dark-mode .grid-table tbody tr { border-bottom-color:#2a2f3d !important; }
+body.dark-mode .grid-table thead th { border-right-color:#2a2f3d !important; border-bottom-color:#363c4d !important; }
+body.dark-mode .table-wrap { border-color:#2a2f3d !important; }
 /* textarea + input inside cells */
 body.dark-mode td textarea,
 body.dark-mode td input { background:#252a36 !important; color:#e2e6f0 !important; border-color:#363c4d !important; }
