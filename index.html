@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>多维 Todo</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Todo清单">
+<meta name="theme-color" content="#4caf82">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f6fa;--white:#fff;--border:#e0e3e8;--border2:#c9cdd4;
+  --text:#1f2329;--text2:#646a73;--text3:#9fa8b5;
+  --accent:#4caf82;--accent2:#3d9970;
+  --row-hover:#f7f8fa;--header-bg:#f0f2f5;
+  --shadow:0 2px 12px rgba(0,0,0,.08);
+}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+
+/* ── Topbar ── */
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 18px;height:54px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:300;box-shadow:0 1px 6px rgba(0,0,0,.06)}
+.title-wrap{display:flex;align-items:center;gap:6px;min-width:0}
+.title-display{font-size:17px;font-weight:700;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;padding:3px 6px;border-radius:5px}
+.title-display:hover{background:var(--header-bg)}
+.title-input{font-size:17px;font-weight:700;border:1.5px solid var(--accent);border-radius:6px;padding:3px 8px;outline:none;width:220px;display:none}
+.spacer{flex:1}
+.chip{background:#eaf7f0;color:var(--accent2);font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;white-space:nowrap}
+.tb-btn{background:var(--header-bg);color:var(--text2);border:1px solid var(--border);border-radius:7px;padding:5px 12px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;white-space:nowrap;transition:all .15s}
+.tb-btn:hover{background:var(--border2);color:var(--text)}
+.tb-btn.active{background:#eaf7f0;color:var(--accent);border-color:var(--accent)}
+.tb-btn.green{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tb-btn.green:hover{background:var(--accent2)}
+.tb-sep{width:1px;height:22px;background:var(--border);flex-shrink:0}
+
+/* ── Panels ── */
+.panel-area{padding:10px 18px 0}
+.panel{background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow);padding:14px 16px;margin-bottom:10px;animation:fadeIn .12s ease}
+.panel-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.panel-close{background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;line-height:1}
+.panel-close:hover{color:var(--text)}
+
+/* Group panel */
+.group-rows{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.group-row{display:flex;align-items:center;gap:6px;background:var(--header-bg);border-radius:7px;padding:5px 10px}
+.group-lbl{font-size:12px;color:var(--text3);min-width:28px}
+.group-sel{flex:1;border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:13px;color:var(--text);outline:none;background:#fff}
+.group-sel:focus{border-color:var(--accent)}
+.group-del{background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:1px 4px;border-radius:4px}
+.group-del:hover{color:#e35454;background:#fff0f0}
+.panel-link{font-size:13px;color:var(--accent);background:none;border:none;cursor:pointer;padding:0}
+.panel-link:hover{text-decoration:underline}
+.panel-link.danger{color:var(--text3);margin-left:auto}
+.panel-link.danger:hover{color:#e35454}
+
+/* Filter panel */
+.filter-row{display:flex;align-items:center;gap:6px;background:var(--header-bg);border-radius:7px;padding:5px 10px;margin-bottom:6px}
+.filter-sel{border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:13px;color:var(--text);outline:none;background:#fff;flex:1}
+.filter-sel:focus{border-color:var(--accent)}
+.filter-inp{border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:13px;color:var(--text);outline:none;background:#fff;flex:1.5}
+.filter-inp:focus{border-color:var(--accent)}
+
+/* Sort panel */
+.sort-row{display:flex;align-items:center;gap:6px;background:var(--header-bg);border-radius:7px;padding:5px 10px;margin-bottom:6px}
+
+/* ── Table wrapper ── */
+.wrapper{padding:12px 18px 80px;overflow-x:auto}
+.table-wrap{background:var(--white);border-radius:12px;border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden}
+.grid-table{width:100%;border-collapse:collapse}
+
+/* Head */
+.grid-table thead tr{background:var(--header-bg)}
+.grid-table thead th{padding:0;border-right:1px solid var(--border);border-bottom:2px solid var(--border2);position:relative;user-select:none}
+.grid-table thead th:last-child{border-right:none}
+.th-inner{display:flex;align-items:center;padding:9px 12px;gap:5px;font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;min-height:38px;cursor:default}
+.th-drag-handle{cursor:col-resize;color:var(--text3);font-size:13px;padding:0 2px;opacity:0;transition:opacity .15s}
+th:hover .th-drag-handle{opacity:1}
+.th-menu-btn{opacity:0;background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:0 2px;line-height:1;margin-left:auto;flex-shrink:0}
+th:hover .th-menu-btn{opacity:1}
+.th-menu-btn:hover{color:var(--text)}
+.th-type-icon{font-size:13px;opacity:.7;flex-shrink:0}
+.th-label{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.th-sort-icon{font-size:11px;color:var(--accent);flex-shrink:0}
+.col-check{width:40px;text-align:center}
+.col-num{width:44px;text-align:center}
+.th-drag-over-left{border-left:2px solid var(--accent) !important}
+.th-drag-over-right{border-right:2px solid var(--accent) !important}
+
+/* Body */
+.grid-table tbody tr{border-bottom:1px solid var(--border);transition:background .08s}
+.grid-table tbody tr:last-child{border-bottom:none}
+.grid-table tbody tr:hover{background:var(--row-hover)}
+.grid-table tbody tr.row-done{opacity:.5}
+.grid-table tbody tr.row-drag-over{box-shadow:inset 0 2px 0 var(--accent)}
+.grid-table tbody tr.row-dragging{opacity:.4}
+.grid-table tbody td{padding:0;border-right:1px solid var(--border);vertical-align:top;position:relative}
+.grid-table tbody td:last-child{border-right:none}
+.check-cell{width:40px;text-align:center;padding:10px 0;vertical-align:middle !important}
+.num-cell{text-align:center;color:var(--text3);font-size:12px;padding:10px 4px;vertical-align:middle !important;cursor:grab}
+.num-cell:active{cursor:grabbing}
+.row-drag-handle{opacity:0;color:var(--text3);font-size:13px}
+tr:hover .row-drag-handle{opacity:1}
+.custom-check{width:18px;height:18px;border:2px solid var(--border2);border-radius:5px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;background:#fff}
+.custom-check.checked{background:var(--accent);border-color:var(--accent)}
+.custom-check.checked::after{content:'';width:4px;height:8px;border:2px solid #fff;border-top:none;border-left:none;transform:rotate(45deg) translateY(-1px)}
+
+/* Indent */
+.indent-wrap{display:flex;align-items:flex-start}
+.indent-spacer{flex-shrink:0}
+.toggle-btn{background:none;border:none;cursor:pointer;color:var(--text3);font-size:11px;padding:11px 3px 0 0;line-height:1;flex-shrink:0;transition:color .1s}
+.toggle-btn.no-children{opacity:0;pointer-events:none}
+.toggle-btn:hover{color:var(--text)}
+.cell-inner{flex:1;min-width:0}
+.add-child-btn{display:none;background:none;border:none;cursor:pointer;color:var(--text3);font-size:11px;padding:2px 5px;border-radius:4px;margin-top:2px}
+tr:hover .add-child-btn{display:inline-flex;align-items:center;gap:3px}
+.add-child-btn:hover{color:var(--accent);background:#eaf7f0}
+
+/* Text cell */
+.cell-text-wrap{padding:9px 12px;min-height:38px;cursor:text}
+.cell-text-view{font-size:14px;color:var(--text);line-height:1.5;word-break:break-all;white-space:pre-wrap}
+.cell-text-view.clamped{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;white-space:normal}
+.cell-expand-btn{font-size:11px;color:var(--accent);background:none;border:none;cursor:pointer;padding:2px 0;display:block;margin-top:2px}
+.cell-expand-btn:hover{text-decoration:underline}
+.cell-edit-ta{display:none;width:100%;border:none;outline:none;background:transparent;font-size:14px;color:var(--text);resize:none;overflow:hidden;line-height:1.5;min-height:20px;padding:0;font-family:inherit}
+.cell-text-wrap.editing .cell-text-view,.cell-text-wrap.editing .cell-expand-btn{display:none}
+.cell-text-wrap.editing .cell-edit-ta{display:block}
+td.cell-focus{box-shadow:inset 0 0 0 2px var(--accent);background:#fafffd !important}
+
+/* Select cell */
+.cell-select-wrap{padding:6px 8px;min-height:38px;display:flex;align-items:center;flex-wrap:wrap;gap:4px;cursor:pointer}
+.tag-pill{display:inline-flex;align-items:center;gap:3px;font-size:12px;font-weight:600;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.tag-rm{cursor:pointer;opacity:.5;font-size:11px;line-height:1}
+.tag-rm:hover{opacity:1}
+.cell-add-hint{color:var(--text3);font-size:16px;line-height:1}
+
+/* URL cell */
+.cell-url-wrap{padding:6px 10px;min-height:38px;display:flex;flex-direction:column;gap:4px}
+.url-row{display:flex;align-items:center;gap:6px}
+.url-link{font-size:13px;color:#2563eb;text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.url-link:hover{text-decoration:underline}
+.url-rm{background:none;border:none;cursor:pointer;color:var(--text3);font-size:12px;opacity:0;flex-shrink:0}
+td:hover .url-rm,.url-row:hover .url-rm{opacity:1}
+.url-rm:hover{color:#e35454}
+.url-add-btn{font-size:12px;color:var(--accent);background:none;border:none;cursor:pointer;padding:1px 0;display:none}
+td:hover .url-add-btn{display:block}
+.url-add-btn:hover{text-decoration:underline}
+
+/* Date */
+.cell-date{width:100%;border:none;outline:none;background:transparent;font-size:13px;color:var(--text);padding:10px 12px;cursor:pointer;min-height:38px;display:block}
+.cell-date::-webkit-calendar-picker-indicator{opacity:.4;cursor:pointer}
+
+/* Number */
+.cell-num-wrap{padding:9px 12px;min-height:38px;cursor:text;text-align:right;font-size:14px;color:var(--text)}
+
+/* Checkbox col type */
+.cell-bool-wrap{padding:10px 12px;min-height:38px;display:flex;align-items:center}
+
+/* Row actions */
+.row-actions{position:absolute;right:6px;top:6px;display:none;gap:2px;background:var(--white);border:1px solid var(--border);border-radius:6px;padding:2px 3px;box-shadow:0 2px 8px rgba(0,0,0,.08);z-index:20}
+tr:hover .row-actions{display:flex}
+.row-act{background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;padding:2px 5px;border-radius:4px;transition:all .1s}
+.row-act:hover{color:var(--text);background:var(--header-bg)}
+.row-act.del:hover{color:#e35454;background:#fff0f0}
+
+/* Add row */
+.add-row-tr td{padding:0;border-right:none !important;border-bottom:none !important}
+.add-row-btn{display:flex;align-items:center;gap:7px;padding:10px 16px;color:var(--text3);font-size:13px;cursor:pointer;transition:color .15s,background .15s;width:100%;background:none;border:none;text-align:left;border-top:1px solid var(--border)}
+.add-row-btn:hover{color:var(--accent);background:#f4fdf8}
+.add-col-th{background:var(--header-bg);border-left:1px solid var(--border);width:46px !important;min-width:46px}
+.add-col-btn{width:100%;height:38px;display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;color:var(--text3);font-size:20px}
+.add-col-btn:hover{color:var(--accent)}
+
+/* Group header */
+.group-hdr-tr td{padding:0;background:var(--header-bg);border-bottom:1px solid var(--border)}
+.group-hdr-inner{display:flex;align-items:center;gap:8px;padding:7px 14px;font-size:13px;font-weight:700;color:var(--text2);cursor:pointer;user-select:none}
+.group-hdr-inner:hover{color:var(--text)}
+.gtoggle{font-size:11px;transition:transform .2s;display:inline-block}
+.gtoggle.col{transform:rotate(-90deg)}
+.gcnt{font-size:11px;background:rgba(0,0,0,.06);padding:1px 7px;border-radius:10px;color:var(--text3);font-weight:500}
+.gdone{font-size:11px;background:#eaf7f0;padding:1px 7px;border-radius:10px;color:var(--accent2);font-weight:500}
+
+/* Popover */
+.popover-mask{position:fixed;inset:0;z-index:999}
+.popover{position:fixed;z-index:1000;background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.14);min-width:220px;overflow:hidden;animation:fadeIn .12s ease;max-height:80vh;overflow-y:auto}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.pop-title{font-size:11px;font-weight:700;color:var(--text3);padding:10px 14px 5px;text-transform:uppercase;letter-spacing:.4px;background:var(--white);border-bottom:1px solid var(--border)}
+.pop-item{display:flex;align-items:center;gap:9px;padding:8px 14px;cursor:pointer;transition:background .1s;font-size:13px}
+.pop-item:hover{background:var(--row-hover)}
+.pop-item.danger:hover{background:#fff0f0;color:#e35454}
+.pop-icon{width:20px;text-align:center;font-size:14px}
+.pop-div{height:1px;background:var(--border);margin:4px 0}
+.pop-search{padding:8px 12px;border-bottom:1px solid var(--border)}
+.pop-search input{width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 9px;font-size:13px;outline:none}
+.pop-search input:focus{border-color:var(--accent)}
+.tag-opt-item{display:flex;align-items:center;gap:8px;padding:6px 14px;cursor:pointer;transition:background .1s}
+.tag-opt-item:hover{background:var(--row-hover)}
+.tag-opt-item.sel::after{content:'✓';margin-left:auto;color:var(--accent);font-weight:700}
+.color-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+.add-opt-row{display:flex;align-items:center;gap:7px;padding:8px 14px;border-top:1px solid var(--border)}
+.add-opt-row input{flex:1;border:1.5px solid var(--border);border-radius:6px;padding:5px 9px;font-size:13px;outline:none}
+.add-opt-row input:focus{border-color:var(--accent)}
+.add-opt-row button{background:var(--accent);color:#fff;border:none;border-radius:6px;padding:5px 11px;font-size:12px;font-weight:600;cursor:pointer}
+
+/* Col editor */
+.col-editor{padding:12px 14px;display:flex;flex-direction:column;gap:9px;min-width:240px}
+.col-editor label{font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.col-editor input,.col-editor select{border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;width:100%}
+.col-editor input:focus,.col-editor select:focus{border-color:var(--accent)}
+.col-type-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px}
+.ctype-btn{background:var(--header-bg);border:1.5px solid var(--border);border-radius:7px;padding:6px 4px;font-size:12px;cursor:pointer;text-align:center;transition:all .15s;display:flex;align-items:center;gap:4px;justify-content:center;white-space:nowrap}
+.ctype-btn:hover{border-color:var(--accent);color:var(--accent)}
+.ctype-btn.active{border-color:var(--accent);background:#eaf7f0;color:var(--accent);font-weight:700}
+.col-editor-btns{display:flex;gap:7px;justify-content:flex-end}
+.btn-sm{border:none;border-radius:6px;padding:6px 13px;font-size:12px;font-weight:600;cursor:pointer}
+.btn-sm.primary{background:var(--accent);color:#fff}
+.btn-sm.primary:hover{background:var(--accent2)}
+.btn-sm.ghost{background:var(--header-bg);color:var(--text2)}
+.btn-sm.ghost:hover{background:var(--border)}
+
+/* Modal */
+.modal-mask{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:2000;display:flex;align-items:center;justify-content:center}
+.modal-box{background:var(--white);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.18);padding:20px 24px;width:380px;max-width:95vw}
+.modal-title{font-size:15px;font-weight:700;margin-bottom:14px}
+.modal-field{margin-bottom:10px}
+.modal-field label{font-size:12px;color:var(--text3);display:block;margin-bottom:4px}
+.modal-field input{width:100%;border:1.5px solid var(--border);border-radius:7px;padding:8px 11px;font-size:13px;color:var(--text);outline:none}
+.modal-field input:focus{border-color:var(--accent)}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+
+/* Stats bar */
+.stats-bar{display:flex;gap:16px;padding:10px 18px;background:var(--white);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.stat-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.stat-dot{width:8px;height:8px;border-radius:50%}
+.stat-val{font-weight:700;color:var(--text)}
+
+/* Toast */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(10px);background:#1f2329;color:#fff;padding:8px 18px;border-radius:20px;font-size:13px;opacity:0;transition:all .25s;pointer-events:none;z-index:9999}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* Search highlight */
+.hl{background:#fff3a3;border-radius:2px}
+/* Frozen row while searching */
+.row-hidden{display:none}
+
+/* ── Safe areas (iPhone notch/home bar) ── */
+body{padding-bottom:env(safe-area-inset-bottom,0px)}
+.topbar{padding-top:env(safe-area-inset-top,0px);height:calc(54px + env(safe-area-inset-top,0px))}
+
+/* ── Mobile card view ── */
+.mobile-view{display:none;padding:10px 12px 100px}
+.mobile-search{display:none;padding:8px 12px;background:#fff;border-bottom:1px solid var(--border)}
+.mobile-search input{width:100%;border:1.5px solid var(--border);border-radius:20px;padding:8px 16px;font-size:15px;outline:none;background:var(--header-bg);-webkit-appearance:none}
+.mobile-search input:focus{border-color:var(--accent);background:#fff}
+.tb-btn-more{display:none !important}
+
+@media(max-width:768px){
+  .wrapper{display:none !important}
+  .mobile-view{display:block}
+  .mobile-search{display:block}
+  .stats-bar{padding:8px 12px;gap:10px;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}
+  .panel-area{padding:8px 12px 0}
+  .topbar{padding-left:12px;padding-right:12px;gap:6px;flex-wrap:nowrap}
+  .title-display{max-width:130px;font-size:15px}
+  .tb-btn-desktop{display:none !important}
+  .tb-btn-more{display:flex !important}
+  .chip{font-size:11px;padding:2px 8px}
+}
+
+/* ── Cards ── */
+.m-card{background:#fff;border-radius:12px;border:1px solid var(--border);box-shadow:0 1px 6px rgba(0,0,0,.06);padding:13px 14px;margin-bottom:8px;transition:opacity .2s;position:relative}
+.m-card.done{opacity:.45}
+.m-card.child{margin-left:18px;border-left:3px solid var(--accent);border-radius:0 12px 12px 0}
+.m-card-top{display:flex;align-items:flex-start;gap:10px}
+.m-card-check{flex-shrink:0;margin-top:2px}
+.m-card-title{flex:1;font-size:15px;font-weight:600;line-height:1.45;color:var(--text);word-break:break-all}
+.m-card-title.struck{text-decoration:line-through;color:var(--text3)}
+.m-toggle{background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer;padding:2px 4px;flex-shrink:0;margin-top:1px}
+.m-card-body{margin-top:8px;display:flex;flex-direction:column;gap:5px}
+.m-field{display:flex;align-items:center;flex-wrap:wrap;gap:4px;font-size:12px}
+.m-field-lbl{color:var(--text3);flex-shrink:0;margin-right:2px}
+.m-card-footer{display:flex;align-items:center;gap:6px;margin-top:10px;padding-top:8px;border-top:1px solid var(--border)}
+.m-card-num{font-size:11px;color:var(--text3);margin-right:auto}
+.m-btn{background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:12px;color:var(--text2);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.m-btn:active{background:var(--header-bg)}
+.m-btn.del:active{color:#e35454;border-color:#e35454}
+.m-grp-hdr{font-size:13px;font-weight:700;color:var(--text2);padding:12px 4px 6px;display:flex;align-items:center;gap:8px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.m-gcnt{font-size:11px;background:rgba(0,0,0,.06);padding:1px 7px;border-radius:10px}
+.m-gdone{font-size:11px;background:#eaf7f0;padding:1px 7px;border-radius:10px;color:var(--accent2)}
+
+/* ── FAB ── */
+.fab{position:fixed;bottom:calc(28px + env(safe-area-inset-bottom,0px));right:20px;width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;font-size:28px;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(76,175,130,.5);display:none;align-items:center;justify-content:center;z-index:500;-webkit-tap-highlight-color:transparent;transition:transform .12s}
+.fab:active{transform:scale(.91)}
+@media(max-width:768px){.fab{display:flex}}
+
+/* ── Bottom sheet ── */
+.sheet-mask{position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:700;display:none;opacity:0;transition:opacity .25s}
+.sheet-mask.show{opacity:1}
+.bottom-sheet{position:fixed;bottom:0;left:0;right:0;background:#fff;border-radius:22px 22px 0 0;box-shadow:0 -4px 28px rgba(0,0,0,.13);z-index:800;transform:translateY(110%);transition:transform .3s cubic-bezier(.32,.72,0,1);padding-bottom:env(safe-area-inset-bottom,16px);max-height:75vh;overflow-y:auto}
+.bottom-sheet.open{transform:translateY(0)}
+.sheet-handle{width:36px;height:4px;background:#e0e0e0;border-radius:2px;margin:12px auto 6px}
+.sheet-title{font-size:15px;font-weight:700;padding:4px 18px 12px;border-bottom:1px solid var(--border);color:var(--text)}
+.sheet-item{display:flex;align-items:center;gap:13px;padding:15px 18px;font-size:15px;cursor:pointer;border-bottom:1px solid var(--border);color:var(--text);-webkit-tap-highlight-color:transparent}
+.sheet-item:active{background:var(--header-bg)}
+.sheet-item.on{color:var(--accent);font-weight:600}
+.sheet-icon{font-size:18px;width:24px;text-align:center}
+</style>
+</head>
+<body>
+
+<!-- Topbar -->
+<div class="topbar">
+  <div class="title-wrap">
+    <span class="title-display" id="titleDisplay" onclick="startEditTitle()">📋 多维 Todo</span>
+    <input class="title-input" id="titleInput" onblur="stopEditTitle()" onkeydown="if(event.key==='Enter')stopEditTitle()">
+  </div>
+  <div class="spacer"></div>
+
+  <!-- Search -->
+  <div style="position:relative;display:flex;align-items:center">
+    <input id="searchInp" placeholder="🔍 搜索…" style="border:1px solid var(--border);border-radius:7px;padding:5px 10px 5px 28px;font-size:13px;outline:none;width:160px;color:var(--text);background:var(--header-bg)" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'" oninput="onSearch(this.value)">
+    <span style="position:absolute;left:9px;color:var(--text3);font-size:13px;pointer-events:none">🔍</span>
+  </div>
+
+  <div class="tb-sep tb-btn-desktop"></div>
+  <div class="chip" id="progressChip">0 / 0 完成</div>
+  <button class="tb-btn tb-btn-desktop" id="filterBtn" onclick="togglePanel('filter')">🔽 筛选</button>
+  <button class="tb-btn tb-btn-desktop" id="sortBtn" onclick="togglePanel('sort')">↕ 排序</button>
+  <button class="tb-btn tb-btn-desktop" id="groupBtn" onclick="togglePanel('group')">⊞ 分组</button>
+  <div class="tb-sep tb-btn-desktop"></div>
+  <button class="tb-btn green tb-btn-desktop" onclick="exportCSV()">⬇ 导出</button>
+  <button class="tb-btn tb-btn-more" id="moreBtn" onclick="openSheet()">⋯</button>
+</div>
+
+<!-- Mobile search -->
+<div class="mobile-search">
+  <input id="mobileSearchInp" placeholder="🔍 搜索…" oninput="onSearch(this.value);document.getElementById('searchInp').value=this.value">
+</div>
+
+<!-- Stats bar -->
+<div class="stats-bar" id="statsBar"></div>
+
+<!-- Panel area -->
+<div class="panel-area" id="panelArea"></div>
+
+<!-- Mobile card view -->
+<div class="mobile-view" id="mobileView"></div>
+
+<!-- Table -->
+<div class="wrapper">
+  <div class="table-wrap">
+    <table class="grid-table" id="gridTable">
+      <thead id="gridHead"></thead>
+      <tbody id="gridBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- URL Modal -->
+<div class="modal-mask" id="urlModal" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="modal-box">
+    <div class="modal-title">🔗 添加链接</div>
+    <div class="modal-field"><label>链接标题（可选）</label><input id="urlTitle" placeholder="例：飞书文档"></div>
+    <div class="modal-field"><label>URL 地址</label><input id="urlHref" placeholder="https://…" onkeydown="if(event.key==='Enter')confirmAddUrl()"></div>
+    <div class="modal-btns">
+      <button class="btn-sm ghost" onclick="document.getElementById('urlModal').style.display='none'">取消</button>
+      <button class="btn-sm primary" onclick="confirmAddUrl()">添加</button>
+    </div>
+  </div>
+</div>
+
+<!-- Popover -->
+<div class="popover-mask" id="popMask" style="display:none" onclick="closePop()"></div>
+<div class="popover" id="pop" style="display:none"></div>
+
+<div class="toast" id="toast"></div>
+
+<!-- FAB -->
+<button class="fab" onclick="addRow()">＋</button>
+
+<!-- Bottom sheet -->
+<div class="sheet-mask" id="sheetMask" onclick="closeSheet()"></div>
+<div class="bottom-sheet" id="bottomSheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title">操作菜单</div>
+  <div class="sheet-item" onclick="closeSheet();togglePanel('filter')" id="sheetFilter"><span class="sheet-icon">🔽</span>筛选</div>
+  <div class="sheet-item" onclick="closeSheet();togglePanel('sort')" id="sheetSort"><span class="sheet-icon">↕</span>排序</div>
+  <div class="sheet-item" onclick="closeSheet();togglePanel('group')" id="sheetGroup"><span class="sheet-icon">⊞</span>分组</div>
+  <div class="sheet-item" onclick="closeSheet();exportCSV()"><span class="sheet-icon">⬇</span>导出 CSV</div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════
+   DATA
+═══════════════════════════════════════════ */
+const STORE = 'jt_v7';
+const TAG_COLORS=[
+  {bg:'#fff3cd',fg:'#b87333'},{bg:'#d4f5e2',fg:'#2d7a4f'},
+  {bg:'#fde8f0',fg:'#c0476e'},{bg:'#dde8ff',fg:'#3355cc'},
+  {bg:'#f3e8ff',fg:'#7c3aed'},{bg:'#ffe8cc',fg:'#c05c00'},
+  {bg:'#e0f5ff',fg:'#0077aa'},{bg:'#ffeaea',fg:'#cc2222'},
+  {bg:'#f0fff0',fg:'#1a7a1a'},{bg:'#fdf0ff',fg:'#8b008b'},
+];
+const COL_TYPES=[
+  {type:'text',  icon:'Ⓐ',label:'文本'},
+  {type:'select',icon:'🏷',label:'标签'},
+  {type:'date',  icon:'📅',label:'日期'},
+  {type:'number',icon:'#', label:'数字'},
+  {type:'url',   icon:'🔗',label:'链接'},
+  {type:'bool',  icon:'☑', label:'勾选'},
+];
+
+const DEF={
+  title:'27的升学毕业待办清单',
+  groupBy:[],filters:[],sorts:[],
+  columns:[
+    {id:'c0',type:'text',  label:'事项',    width:260},
+    {id:'c1',type:'select',label:'类别',    width:110,options:[
+      {id:'o1',label:'升学',colorIdx:0},{id:'o2',label:'毕业',colorIdx:1},{id:'o3',label:'香港',colorIdx:2}
+    ]},
+    {id:'c2',type:'select',label:'状态',    width:110,options:[
+      {id:'s1',label:'未开始',colorIdx:7},{id:'s2',label:'进行中',colorIdx:5},
+      {id:'s3',label:'已完成',colorIdx:1},{id:'s4',label:'已延期',colorIdx:0}
+    ]},
+    {id:'c3',type:'date',  label:'截止日期',width:140},
+    {id:'c4',type:'url',   label:'参考链接',width:200},
+    {id:'c5',type:'text',  label:'备注',    width:180},
+  ],
+  rows:[
+    {id:'r1', p:null,col:false,done:false,cells:{c0:'准备学校签证材料',     c1:['o1'],c2:['s2'],c3:'2026-03-31',c4:[],c5:'护照、照片、表格等'}},
+    {id:'r1a',p:'r1', col:false,done:false,cells:{c0:'身份证/户口本/港澳通行证复印件',c1:['o1'],c2:['s4'],c3:'2026-03-31',c4:[],c5:''}},
+    {id:'r1b',p:'r1', col:false,done:false,cells:{c0:'表格填写',             c1:['o1'],c2:['s4'],c3:'2026-03-31',c4:[],c5:''}},
+    {id:'r1c',p:'r1', col:false,done:false,cells:{c0:'申请表打印签名',       c1:['o1'],c2:['s4'],c3:'2026-03-31',c4:[],c5:''}},
+    {id:'r1d',p:'r1', col:false,done:false,cells:{c0:'存款时点证明',         c1:['o1'],c2:['s4'],c3:'2026-03-31',c4:[],c5:''}},
+    {id:'r1e',p:'r1', col:false,done:false,cells:{c0:'证件照',               c1:['o1'],c2:['s4'],c3:'2026-03-31',c4:[],c5:''}},
+    {id:'r2', p:null, col:false,done:false,cells:{c0:'查看香港租房事项',     c1:['o3'],c2:['s1'],c3:'2026-03-31',c4:[],c5:''}},
+    {id:'r3', p:null, col:false,done:false,cells:{c0:'完成论文初稿并提交',   c1:['o2'],c2:['s2'],c3:'2026-03-25',c4:[],c5:'初稿截止3月25日'}},
+    {id:'r4', p:null, col:false,done:false,cells:{c0:'跟进学签evisa进度',    c1:['o1'],c2:['s1'],c3:'2026-04-30',c4:[],c5:''}},
+    {id:'r5', p:null, col:false,done:false,cells:{c0:'论文修改',             c1:['o2'],c2:['s1'],c3:'2026-04-20',c4:[],c5:''}},
+    {id:'r6', p:null, col:false,done:false,cells:{c0:'毕业答辩',             c1:['o2'],c2:['s1'],c3:'2026-04-30',c4:[],c5:'4月底'}},
+    {id:'r7', p:null, col:false,done:false,cells:{c0:'毕业体检',             c1:['o2'],c2:['s1'],c3:'2026-04-30',c4:[],c5:''}},
+    {id:'r8', p:null, col:false,done:false,cells:{c0:'毕业证、学位证、成绩单',c1:['o1','o2'],c2:['s1'],c3:'2026-04-30',c4:[],c5:''}},
+    {id:'r9', p:null, col:false,done:false,cells:{c0:'确定香港租房',         c1:['o3'],c2:['s1'],c3:'2026-04-30',c4:[],c5:''}},
+    {id:'r10',p:null, col:false,done:false,cells:{c0:'本科毕业证、学位证',   c1:['o1'],c2:['s1'],c3:'2026-05-20',c4:[],c5:''}},
+    {id:'r11',p:null, col:false,done:false,cells:{c0:'办理学信网认证报告',   c1:['o1'],c2:['s1'],c3:'2026-05-25',c4:[],c5:''}},
+    {id:'r12',p:null, col:false,done:false,cells:{c0:'换取无条件offer',      c1:['o1'],c2:['s1'],c3:'2026-05-31',c4:[],c5:''}},
+    {id:'r13',p:null, col:false,done:false,cells:{c0:'深圳租房开始看房',     c1:['o3'],c2:['s1'],c3:'2026-05-31',c4:[],c5:''}},
+    {id:'r14',p:null, col:false,done:false,cells:{c0:'收到学签并打印备份',   c1:['o1'],c2:['s1'],c3:'2026-05-31',c4:[],c5:''}},
+    {id:'r15',p:null, col:false,done:false,cells:{c0:'毕业典礼',             c1:['o2'],c2:['s1'],c3:'2026-06-15',c4:[],c5:''}},
+    {id:'r16',p:null, col:false,done:false,cells:{c0:'筹备香港/深圳租房',    c1:['o3'],c2:['s1'],c3:'2026-06-30',c4:[],c5:''}},
+    {id:'r17',p:null, col:false,done:false,cells:{c0:'宿舍清宿，解决住所',   c1:['o3'],c2:['s1'],c3:'2026-07-15',c4:[],c5:''}},
+    {id:'r18',p:null, col:false,done:false,cells:{c0:'驾照科三+科四',        c1:[],    c2:['s1'],c3:'2026-07-31',c4:[],c5:''}},
+  ]
+};
+
+let S=JSON.parse(localStorage.getItem(STORE)||'null')||DEF;
+if(!S.groupBy)S.groupBy=[];
+if(!S.filters)S.filters=[];
+if(!S.sorts)S.sorts=[];
+S.rows.forEach(r=>{
+  if(r.p===undefined)r.p=null;
+  if(r.col===undefined)r.col=false;
+  S.columns.forEach(c=>{
+    if((c.type==='select'||c.type==='url')&&!Array.isArray(r.cells[c.id]))r.cells[c.id]=[];
+    if(c.type==='bool'&&r.cells[c.id]===undefined)r.cells[c.id]=false;
+  });
+});
+
+const save=()=>localStorage.setItem(STORE,JSON.stringify(S));
+const gid=()=>'id'+Date.now()+Math.floor(Math.random()*9999);
+const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+/* ═══ UI STATE ═══ */
+let openPanel=null;
+let expandedCells=new Set();
+let collapsedGroups=new Set();
+let editingCell=null;
+let pendingColType='text';
+let urlTarget=null;
+let dragColId=null,dragRowId=null;
+let searchQ='';
+
+/* ═══ TOAST ═══ */
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
+
+/* ═══ TITLE ═══ */
+function startEditTitle(){
+  const d=document.getElementById('titleDisplay'),i=document.getElementById('titleInput');
+  i.value=S.title;d.style.display='none';i.style.display='block';i.focus();i.select();
+}
+function stopEditTitle(){
+  const d=document.getElementById('titleDisplay'),i=document.getElementById('titleInput');
+  S.title=i.value.trim()||S.title;save();
+  d.textContent='📋 '+S.title;d.style.display='';i.style.display='none';
+}
+
+/* ═══ POPOVER ═══ */
+let popCb=null;
+function openPop(anchor,html,cb){
+  const m=document.getElementById('popMask'),p=document.getElementById('pop');
+  p.innerHTML=html;m.style.display='block';p.style.display='block';popCb=cb||null;
+  const r=anchor.getBoundingClientRect();
+  let top=r.bottom+4,left=r.left;
+  if(left+260>window.innerWidth)left=window.innerWidth-268;
+  if(top+340>window.innerHeight)top=Math.max(4,r.top-344);
+  p.style.top=top+'px';p.style.left=left+'px';
+}
+function closePop(){
+  document.getElementById('popMask').style.display='none';
+  document.getElementById('pop').style.display='none';
+  if(popCb){popCb();popCb=null;}
+}
+
+/* ═══ PANELS ═══ */
+function togglePanel(name){
+  if(openPanel===name){openPanel=null;}else{openPanel=name;}
+  ['filter','sort','group'].forEach(n=>{
+    document.getElementById(n+'Btn').classList.toggle('active',openPanel===n);
+  });
+  renderPanels();
+}
+function renderPanels(){
+  const el=document.getElementById('panelArea');
+  if(!openPanel){el.innerHTML='';return;}
+  if(openPanel==='group')el.innerHTML=renderGroupPanel();
+  if(openPanel==='filter')el.innerHTML=renderFilterPanel();
+  if(openPanel==='sort')el.innerHTML=renderSortPanel();
+}
+
+/* ─ GROUP ─ */
+function renderGroupPanel(){
+  const selCols=S.columns.filter(c=>c.type==='select'||c.type==='date');
+  const rows=S.groupBy.map((colId,i)=>{
+    const opts=selCols.map(c=>`<option value="${c.id}"${c.id===colId?' selected':''}>${esc(c.label)}</option>`).join('');
+    return `<div class="group-row">
+      <span class="group-lbl">${i===0?'按':'再按'}</span>
+      <select class="group-sel" onchange="updGroupCond(${i},this.value)">${opts}</select>
+      <button class="group-del" onclick="delGroupCond(${i})">✕</button>
+    </div>`;
+  }).join('');
+  return `<div class="panel"><div class="panel-title">⊞ 分组设置
+    <button class="panel-close" onclick="togglePanel('group')">✕</button></div>
+    <div class="group-rows">${rows||'<span style="color:var(--text3);font-size:13px">暂未设置分组条件</span>'}</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
+      <button class="panel-link" onclick="addGroupCond()">＋ 添加分组条件</button>
+      <button class="panel-link danger" onclick="clearGroups()">清除</button>
+    </div></div>`;
+}
+function addGroupCond(){
+  const sc=S.columns.filter(c=>c.type==='select'||c.type==='date');
+  if(!sc.length){toast('请先添加标签/日期列');return;}
+  const av=sc.find(c=>!S.groupBy.includes(c.id));
+  if(!av){toast('可分组的列都已添加');return;}
+  S.groupBy.push(av.id);save();renderPanels();renderTable();
+}
+function updGroupCond(i,v){S.groupBy[i]=v;save();renderTable();}
+function delGroupCond(i){S.groupBy.splice(i,1);save();renderPanels();renderTable();}
+function clearGroups(){S.groupBy=[];save();renderPanels();renderTable();}
+
+/* ─ FILTER ─ */
+function renderFilterPanel(){
+  const rows=S.filters.map((f,i)=>{
+    const colOpts=S.columns.map(c=>`<option value="${c.id}"${c.id===f.colId?' selected':''}>${esc(c.label)}</option>`).join('');
+    const opOpts=['包含','不包含','等于','不等于','为空','不为空'].map(o=>`<option${o===f.op?' selected':''}>${o}</option>`).join('');
+    return `<div class="filter-row">
+      <select class="filter-sel" style="max-width:90px" onchange="updFilter(${i},'colId',this.value)">${colOpts}</select>
+      <select class="filter-sel" style="max-width:80px" onchange="updFilter(${i},'op',this.value)">${opOpts}</select>
+      <input class="filter-inp" value="${esc(f.val||'')}" placeholder="值…" onchange="updFilter(${i},'val',this.value)">
+      <button class="group-del" onclick="delFilter(${i})">✕</button>
+    </div>`;
+  }).join('');
+  return `<div class="panel"><div class="panel-title">🔽 筛选条件
+    <button class="panel-close" onclick="togglePanel('filter')">✕</button></div>
+    ${rows||'<span style="color:var(--text3);font-size:13px;display:block;margin-bottom:8px">暂未设置筛选</span>'}
+    <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
+      <button class="panel-link" onclick="addFilter()">＋ 添加筛选条件</button>
+      <button class="panel-link danger" onclick="clearFilters()">清除</button>
+    </div></div>`;
+}
+function addFilter(){S.filters.push({colId:S.columns[0].id,op:'包含',val:''});save();renderPanels();renderTable();}
+function updFilter(i,k,v){S.filters[i][k]=v;save();renderTable();}
+function delFilter(i){S.filters.splice(i,1);save();renderPanels();renderTable();}
+function clearFilters(){S.filters=[];save();renderPanels();renderTable();}
+
+/* ─ SORT ─ */
+function renderSortPanel(){
+  const rows=S.sorts.map((s,i)=>{
+    const colOpts=S.columns.map(c=>`<option value="${c.id}"${c.id===s.colId?' selected':''}>${esc(c.label)}</option>`).join('');
+    return `<div class="sort-row">
+      <select class="group-sel" onchange="updSort(${i},'colId',this.value)">${colOpts}</select>
+      <select class="group-sel" style="max-width:80px" onchange="updSort(${i},'dir',this.value)">
+        <option value="asc"${s.dir==='asc'?' selected':''}>升序 ↑</option>
+        <option value="desc"${s.dir==='desc'?' selected':''}>降序 ↓</option>
+      </select>
+      <button class="group-del" onclick="delSort(${i})">✕</button>
+    </div>`;
+  }).join('');
+  return `<div class="panel"><div class="panel-title">↕ 排序规则
+    <button class="panel-close" onclick="togglePanel('sort')">✕</button></div>
+    ${rows||'<span style="color:var(--text3);font-size:13px;display:block;margin-bottom:8px">暂未设置排序</span>'}
+    <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
+      <button class="panel-link" onclick="addSort()">＋ 添加排序条件</button>
+      <button class="panel-link danger" onclick="clearSorts()">清除</button>
+    </div></div>`;
+}
+function addSort(){S.sorts.push({colId:S.columns[0].id,dir:'asc'});save();renderPanels();renderTable();}
+function updSort(i,k,v){S.sorts[i][k]=v;save();renderTable();}
+function delSort(i){S.sorts.splice(i,1);save();renderPanels();renderTable();}
+function clearSorts(){S.sorts=[];save();renderPanels();renderTable();}
+
+/* ═══ PROGRESS & STATS ═══ */
+function updateStats(){
+  const total=S.rows.length,done=S.rows.filter(r=>r.done).length;
+  document.getElementById('progressChip').textContent=`${done} / ${total} 完成`;
+  const tags={};
+  S.columns.filter(c=>c.type==='select').forEach(col=>{
+    (col.options||[]).forEach(opt=>{
+      const cnt=S.rows.filter(r=>(r.cells[col.id]||[]).includes(opt.id)).length;
+      if(cnt){const c=TAG_COLORS[opt.colorIdx%TAG_COLORS.length];tags[opt.label]={cnt,bg:c.bg,fg:c.fg};}
+    });
+  });
+  const bar=document.getElementById('statsBar');
+  let h=`<div class="stat-item"><span class="stat-dot" style="background:var(--accent)"></span>总计 <span class="stat-val">${total}</span></div>`;
+  h+=`<div class="stat-item"><span class="stat-dot" style="background:#4caf82"></span>完成 <span class="stat-val">${done}</span></div>`;
+  h+=`<div class="stat-item"><span class="stat-dot" style="background:#ff9800"></span>未完成 <span class="stat-val">${total-done}</span></div>`;
+  Object.entries(tags).forEach(([label,{cnt,bg,fg}])=>{
+    h+=`<div class="stat-item"><span class="stat-dot" style="background:${bg};border:1px solid ${fg}"></span>${label} <span class="stat-val">${cnt}</span></div>`;
+  });
+  bar.innerHTML=h;
+}
+
+/* ═══ FILTER LOGIC ═══ */
+function rowPassesFilters(row){
+  if(!S.filters.length)return true;
+  return S.filters.every(f=>{
+    const col=S.columns.find(c=>c.id===f.colId);if(!col)return true;
+    const val=row.cells[f.colId];
+    let str='';
+    if(col.type==='select')str=(val||[]).map(id=>{const o=(col.options||[]).find(x=>x.id===id);return o?o.label:'';}).join('、');
+    else if(col.type==='url')str=(val||[]).map(u=>u.title+''+u.href).join(' ');
+    else str=String(val||'');
+    if(f.op==='包含')return str.includes(f.val);
+    if(f.op==='不包含')return !str.includes(f.val);
+    if(f.op==='等于')return str===f.val;
+    if(f.op==='不等于')return str!==f.val;
+    if(f.op==='为空')return !str.trim();
+    if(f.op==='不为空')return !!str.trim();
+    return true;
+  });
+}
+
+/* ═══ SORT LOGIC ═══ */
+function getRowSortVal(row,colId){
+  const col=S.columns.find(c=>c.id===colId);if(!col)return '';
+  const val=row.cells[colId];
+  if(col.type==='select')return (val||[]).map(id=>{const o=(col.options||[]).find(x=>x.id===id);return o?o.label:'';}).join('');
+  if(col.type==='date')return val||'';
+  if(col.type==='number')return parseFloat(val)||0;
+  if(col.type==='bool')return val?1:0;
+  return String(val||'');
+}
+
+/* ═══ SEARCH ═══ */
+function onSearch(q){searchQ=q.toLowerCase();renderTable();}
+function rowMatchesSearch(row){
+  if(!searchQ)return true;
+  return S.columns.some(col=>{
+    const val=row.cells[col.id];
+    if(col.type==='select')return (val||[]).some(id=>{const o=(col.options||[]).find(x=>x.id===id);return o&&o.label.toLowerCase().includes(searchQ);});
+    if(col.type==='url')return (val||[]).some(u=>(u.title+u.href).toLowerCase().includes(searchQ));
+    return String(val||'').toLowerCase().includes(searchQ);
+  });
+}
+function hlText(text){
+  if(!searchQ||!text)return esc(text);
+  const re=new RegExp('('+searchQ.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+  return esc(text).replace(re,'<mark class="hl">$1</mark>');
+}
+
+/* ═══ GROUP KEY ═══ */
+function getGroupKey(row){
+  if(!S.groupBy.length)return null;
+  return S.groupBy.map(colId=>{
+    const col=S.columns.find(c=>c.id===colId);if(!col)return '无';
+    const val=row.cells[colId];
+    if(col.type==='select'){const ids=Array.isArray(val)?val:[];if(!ids.length)return'（无'+col.label+'）';return ids.map(id=>{const o=(col.options||[]).find(x=>x.id===id);return o?o.label:'?';}).join('、');}
+    if(col.type==='date')return val?val.slice(0,7):'（无日期）';
+    return val||'（空）';
+  }).join(' › ');
+}
+
+/* ═══ FLATTEN TREE ═══ */
+function flattenTree(row,result,depth){
+  result.push({row,depth});
+  if(!row.col){const ch=S.rows.filter(r=>r.p===row.id);ch.forEach(c=>flattenTree(c,result,depth+1));}
+}
+function getDepth(id){let d=0,cur=S.rows.find(r=>r.id===id);while(cur&&cur.p){d++;cur=S.rows.find(r=>r.id===cur.p);}return d;}
+
+/* ═══ BUILD DISPLAY ROWS ═══ */
+function buildRows(){
+  // top-level rows
+  let tops=S.rows.filter(r=>!r.p);
+  // apply filters
+  tops=tops.filter(r=>rowPassesFilters(r));
+  // apply search
+  tops=tops.filter(r=>rowMatchesSearch(r));
+  // apply sorts
+  if(S.sorts.length){
+    tops=[...tops].sort((a,b)=>{
+      for(const s of S.sorts){
+        const av=getRowSortVal(a,s.colId),bv=getRowSortVal(b,s.colId);
+        if(av<bv)return s.dir==='asc'?-1:1;
+        if(av>bv)return s.dir==='asc'?1:-1;
+      }
+      return 0;
+    });
+  }
+  if(!S.groupBy.length){
+    const result=[];
+    tops.forEach(r=>flattenTree(r,result,0));
+    return{grouped:false,rows:result};
+  }
+  const groups={},order=[];
+  tops.forEach(r=>{
+    const k=getGroupKey(r);
+    if(!groups[k]){groups[k]=[];order.push(k);}
+    groups[k].push(r);
+  });
+  return{grouped:true,groups,order};
+}
+
+/* ═══ RENDER TABLE ═══ */
+function renderTable(){
+  updateStats();
+  const thead=document.getElementById('gridHead');
+  const tbody=document.getElementById('gridBody');
+  const totalCols=S.columns.length+3;
+
+  // Head
+  let hh='<tr>';
+  hh+=`<th class="col-check"><div class="th-inner" style="justify-content:center">✓</div></th>`;
+  hh+=`<th class="col-num"><div class="th-inner" style="justify-content:center">#</div></th>`;
+  S.columns.forEach(col=>{
+    const ti=COL_TYPES.find(t=>t.type===col.type)||COL_TYPES[0];
+    const sortInfo=S.sorts.find(s=>s.colId===col.id);
+    hh+=`<th data-col="${col.id}" style="min-width:${col.width||140}px;width:${col.width||140}px"
+      draggable="true"
+      ondragstart="colDragStart(event,'${col.id}')"
+      ondragover="colDragOver(event,'${col.id}')"
+      ondrop="colDrop(event,'${col.id}')"
+      ondragleave="colDragLeave(event)"
+      ondragend="colDragEnd()">
+      <div class="th-inner">
+        <span class="th-drag-handle" title="拖拽移动列">⠿</span>
+        <span class="th-type-icon">${ti.icon}</span>
+        <span class="th-label">${esc(col.label)}</span>
+        ${sortInfo?`<span class="th-sort-icon">${sortInfo.dir==='asc'?'↑':'↓'}</span>`:''}
+        <button class="th-menu-btn" onclick="event.stopPropagation();openColMenu('${col.id}',this)">⋯</button>
+      </div></th>`;
+  });
+  hh+=`<th class="add-col-th"><button class="add-col-btn" onclick="openAddCol(this)">＋</button></th>`;
+  hh+='</tr>';
+  thead.innerHTML=hh;
+
+  // Body
+  const{grouped,rows,groups,order}=buildRows();
+  let bh='';
+  if(!grouped){
+    let vi=0;
+    rows.forEach(({row,depth})=>{vi++;bh+=renderRowHtml(row,vi,depth,totalCols);});
+  } else {
+    let vi=0;
+    order.forEach(key=>{
+      const isColl=collapsedGroups.has(key);
+      const gr=groups[key];
+      const total=gr.length,done=gr.filter(r=>r.done).length;
+      bh+=`<tr class="group-hdr-tr"><td colspan="${totalCols}">
+        <div class="group-hdr-inner" onclick="toggleGrp('${esc(key)}')">
+          <span class="gtoggle ${isColl?'col':''}">▼</span>
+          <span>${esc(key)}</span>
+          <span class="gcnt">${total} 项</span>
+          <span class="gdone">✓ ${done}</span>
+        </div></td></tr>`;
+      if(!isColl){
+        gr.forEach(row=>{
+          const flat=[];flattenTree(row,flat,0);
+          flat.forEach(({row:r,depth})=>{vi++;bh+=renderRowHtml(r,vi,depth,totalCols);});
+        });
+      }
+    });
+  }
+  bh+=`<tr class="add-row-tr"><td colspan="${totalCols}">
+    <button class="add-row-btn" onclick="addRow()">＋ 添加一行</button></td></tr>`;
+  tbody.innerHTML=bh;
+
+  // Auto-resize textareas
+  tbody.querySelectorAll('textarea').forEach(ta=>autoResize(ta));
+
+  // Mobile card view (called here so single renderTable() handles both)
+  renderMobileCards();
+}
+
+/* ─ Row HTML ─ */
+function renderRowHtml(row,vi,depth,totalCols){
+  const children=S.rows.filter(r=>r.p===row.id);
+  const hasChildren=children.length>0;
+  let h=`<tr class="${row.done?'row-done':''}" data-row="${row.id}"
+    draggable="true"
+    ondragstart="rowDragStart(event,'${row.id}')"
+    ondragover="rowDragOver(event,'${row.id}')"
+    ondrop="rowDrop(event,'${row.id}')"
+    ondragleave="this.classList.remove('row-drag-over')"
+    ondragend="rowDragEnd()">`;
+  h+=`<td class="check-cell"><div class="custom-check ${row.done?'checked':''}" onclick="toggleDone('${row.id}')"></div></td>`;
+  h+=`<td class="num-cell"><span class="row-drag-handle">⠿</span>${vi}</td>`;
+  S.columns.forEach((col,ci)=>{
+    h+=`<td data-row="${row.id}" data-col="${col.id}">`;
+    if(ci===0){
+      const indent=depth*22;
+      h+=`<div class="indent-wrap">
+        <div class="indent-spacer" style="width:${indent}px"></div>
+        <button class="toggle-btn ${!hasChildren?'no-children':''}" onclick="toggleChildren('${row.id}')">${row.col?'▶':'▼'}</button>
+        <div class="cell-inner">`;
+    }
+    h+=renderCellHtml(row,col);
+    if(ci===0){
+      h+=`<button class="add-child-btn" onclick="addChild('${row.id}')">⤵ 子项</button>`;
+      h+=`</div></div>`;
+    }
+    h+='</td>';
+  });
+  h+=`<td style="border-right:none;position:relative;min-width:80px">
+    <div class="row-actions">
+      <button class="row-act" onclick="addChild('${row.id}')" title="添加子项">⤵</button>
+      <button class="row-act" onclick="duplicateRow('${row.id}')" title="复制行">⎘</button>
+      <button class="row-act del" onclick="deleteRow('${row.id}')" title="删除">✕</button>
+    </div></td>`;
+  h+='</tr>';
+  return h;
+}
+
+/* ─ Cell HTML ─ */
+function renderCellHtml(row,col){
+  const val=row.cells[col.id];
+  const key=row.id+':'+col.id;
+  const isEditing=editingCell&&editingCell.rowId===row.id&&editingCell.colId===col.id;
+
+  if(col.type==='select'){
+    const vals=Array.isArray(val)?val:[];
+    const pills=vals.map(oid=>{
+      const opt=(col.options||[]).find(o=>o.id===oid);if(!opt)return'';
+      const c=TAG_COLORS[opt.colorIdx%TAG_COLORS.length];
+      const label=searchQ?hlText(opt.label):esc(opt.label);
+      return `<span class="tag-pill" style="background:${c.bg};color:${c.fg}">${label}<span class="tag-rm" onclick="event.stopPropagation();rmTag('${row.id}','${col.id}','${oid}')">×</span></span>`;
+    }).join('');
+    return `<div class="cell-select-wrap" onclick="openCellSel('${row.id}','${col.id}',this)">${pills}<span class="cell-add-hint">+</span></div>`;
+  }
+  if(col.type==='date'){
+    return `<input type="date" class="cell-date" value="${esc(val||'')}" onchange="updCell('${row.id}','${col.id}',this.value)">`;
+  }
+  if(col.type==='url'){
+    const urls=Array.isArray(val)?val:[];
+    let lh=urls.map((u,i)=>{
+      const t=searchQ?hlText(u.title||u.href):esc(u.title||u.href);
+      return `<div class="url-row"><a class="url-link" href="${esc(u.href)}" target="_blank" title="${esc(u.href)}">${t}</a>
+        <button class="url-rm" onclick="event.stopPropagation();rmUrl('${row.id}','${col.id}',${i})">✕</button></div>`;
+    }).join('');
+    return `<div class="cell-url-wrap">${lh}<button class="url-add-btn" onclick="openUrlModal('${row.id}','${col.id}')">＋ 添加链接</button></div>`;
+  }
+  if(col.type==='bool'){
+    return `<div class="cell-bool-wrap"><div class="custom-check ${val?'checked':''}" onclick="updCell('${row.id}','${col.id}',${!val})"></div></div>`;
+  }
+  // text / number
+  const text=String(val||'');
+  const lines=text.split('\n');
+  const isLong=lines.length>2||text.length>60;
+  const isExp=expandedCells.has(key);
+  if(isEditing){
+    return `<div class="cell-text-wrap editing">
+      <textarea class="cell-edit-ta" rows="1"
+        onblur="blurCell('${row.id}','${col.id}',this)"
+        oninput="autoResize(this)"
+        style="${col.type==='number'?'text-align:right':''}"
+      >${esc(text)}</textarea></div>`;
+  }
+  const displayText=searchQ?hlText(text):esc(text);
+  let exp='';
+  if(isLong)exp=`<button class="cell-expand-btn" onclick="event.stopPropagation();toggleExp('${row.id}','${col.id}')">${isExp?'↑ 收起':'↓ 展开'}</button>`;
+  return `<div class="cell-text-wrap" onclick="startEdit('${row.id}','${col.id}',this)">
+    <div class="cell-text-view ${isLong&&!isExp?'clamped':''}">${displayText||'<span style="color:var(--text3)">—</span>'}</div>${exp}</div>`;
+}
+
+/* ═══ TEXT EDITING ═══ */
+function startEdit(rowId,colId,wrapEl){
+  editingCell={rowId,colId};
+  patchCell(rowId,colId);
+  setTimeout(()=>{
+    const ta=document.querySelector(`td[data-row="${rowId}"][data-col="${colId}"] textarea`);
+    if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);autoResize(ta);}
+  },20);
+}
+function blurCell(rowId,colId,ta){
+  updCell(rowId,colId,ta.value);
+  editingCell=null;
+  patchCell(rowId,colId);
+}
+function patchCell(rowId,colId){
+  const td=document.querySelector(`td[data-row="${rowId}"][data-col="${colId}"]`);
+  if(!td)return;
+  const col=S.columns.find(c=>c.id===colId);
+  const row=S.rows.find(r=>r.id===rowId);
+  if(!col||!row)return;
+  const isFirst=S.columns[0].id===colId;
+  if(isFirst){
+    const inner=td.querySelector('.cell-inner');
+    const children=S.rows.filter(r=>r.p===row.id);
+    if(inner)inner.innerHTML=renderCellHtml(row,col)+`<button class="add-child-btn" onclick="addChild('${rowId}')">⤵ 子项</button>`;
+  } else {
+    td.innerHTML=renderCellHtml(row,col);
+  }
+}
+function toggleExp(rowId,colId){
+  const key=rowId+':'+colId;
+  expandedCells.has(key)?expandedCells.delete(key):expandedCells.add(key);
+  patchCell(rowId,colId);
+}
+function autoResize(ta){ta.style.height='auto';ta.style.height=Math.max(20,ta.scrollHeight)+'px';}
+
+/* ═══ ROW OPS ═══ */
+function addRow(){
+  const cells={};
+  S.columns.forEach(c=>{cells[c.id]=(c.type==='select'||c.type==='url')?[]:c.type==='bool'?false:'';});
+  S.rows.push({id:gid(),p:null,col:false,done:false,cells});
+  save();renderTable();
+  setTimeout(()=>{const el=document.querySelector('tbody tr:nth-last-child(2) .cell-text-wrap');if(el)el.click();},60);
+}
+function addChild(parentId){
+  const cells={};
+  S.columns.forEach(c=>{cells[c.id]=(c.type==='select'||c.type==='url')?[]:c.type==='bool'?false:'';});
+  const pi=S.rows.findIndex(r=>r.id===parentId);
+  let ins=pi+1;
+  while(ins<S.rows.length&&S.rows[ins].p===parentId)ins++;
+  S.rows.splice(ins,0,{id:gid(),p:parentId,col:false,done:false,cells});
+  const parent=S.rows.find(r=>r.id===parentId);
+  if(parent)parent.col=false;
+  save();renderTable();
+}
+function duplicateRow(rowId){
+  const row=S.rows.find(r=>r.id===rowId);if(!row)return;
+  const idx=S.rows.findIndex(r=>r.id===rowId);
+  const newRow={...JSON.parse(JSON.stringify(row)),id:gid()};
+  S.rows.splice(idx+1,0,newRow);
+  save();renderTable();toast('已复制');
+}
+function deleteRow(rowId){
+  const toDelete=new Set([rowId]);
+  let changed=true;
+  while(changed){changed=false;S.rows.forEach(r=>{if(r.p&&toDelete.has(r.p)&&!toDelete.has(r.id)){toDelete.add(r.id);changed=true;}});}
+  S.rows=S.rows.filter(r=>!toDelete.has(r.id));
+  save();renderTable();
+}
+function toggleDone(rowId){
+  const row=S.rows.find(r=>r.id===rowId);if(!row)return;
+  row.done=!row.done;
+  S.rows.forEach(r=>{if(r.p===rowId)r.done=row.done;});
+  save();renderTable();
+}
+function toggleChildren(rowId){
+  const row=S.rows.find(r=>r.id===rowId);if(row){row.col=!row.col;save();renderTable();}
+}
+function toggleGrp(key){collapsedGroups.has(key)?collapsedGroups.delete(key):collapsedGroups.add(key);renderTable();}
+function updCell(rowId,colId,value){const row=S.rows.find(r=>r.id===rowId);if(row){row.cells[colId]=value;save();}}
+
+/* ═══ TAGS ═══ */
+function rmTag(rowId,colId,optId){
+  const row=S.rows.find(r=>r.id===rowId);if(!row)return;
+  row.cells[colId]=(row.cells[colId]||[]).filter(id=>id!==optId);
+  save();renderTable();
+}
+function openCellSel(rowId,colId,anchor){
+  const col=S.columns.find(c=>c.id===colId);
+  const row=S.rows.find(r=>r.id===rowId);
+  if(!col||!row)return;
+  const sel=row.cells[colId]||[];
+  let items=(col.options||[]).map(opt=>{
+    const c=TAG_COLORS[opt.colorIdx%TAG_COLORS.length];
+    return`<div class="tag-opt-item ${sel.includes(opt.id)?'sel':''}" onclick="toggleCellTag('${rowId}','${colId}','${opt.id}',this)">
+      <div class="color-dot" style="background:${c.bg};border:1.5px solid ${c.fg}"></div>
+      <span class="tag-pill" style="background:${c.bg};color:${c.fg}">${esc(opt.label)}</span>
+    </div>`;
+  }).join('');
+  const h=`<div class="pop-title">选择标签</div>
+    ${items||'<div style="padding:8px 14px;color:#aaa;font-size:13px">暂无选项</div>'}
+    <div class="add-opt-row">
+      <input id="qOpt" placeholder="快速添加…" onkeydown="if(event.key==='Enter')qAddTag('${rowId}','${colId}')">
+      <button onclick="qAddTag('${rowId}','${colId}')">添加</button>
+    </div>`;
+  openPop(anchor,h,()=>renderTable());
+}
+function toggleCellTag(rowId,colId,optId,el){
+  const row=S.rows.find(r=>r.id===rowId);if(!row)return;
+  if(!row.cells[colId])row.cells[colId]=[];
+  const i=row.cells[colId].indexOf(optId);
+  if(i>=0)row.cells[colId].splice(i,1);else row.cells[colId].push(optId);
+  save();el.classList.toggle('sel',i<0);
+  patchCell(rowId,colId);
+}
+function qAddTag(rowId,colId){
+  const inp=document.getElementById('qOpt');const label=inp?.value.trim();if(!label)return;
+  const col=S.columns.find(c=>c.id===colId);if(!col.options)col.options=[];
+  const newId=gid();
+  col.options.push({id:newId,label,colorIdx:col.options.length%TAG_COLORS.length});
+  const row=S.rows.find(r=>r.id===rowId);
+  if(!row.cells[colId])row.cells[colId]=[];
+  row.cells[colId].push(newId);
+  save();
+  const anchor=document.querySelector(`td[data-row="${rowId}"][data-col="${colId}"] .cell-select-wrap`)||document.body;
+  openCellSel(rowId,colId,anchor);renderTable();
+}
+
+/* ═══ URL ═══ */
+function openUrlModal(rowId,colId){
+  urlTarget={rowId,colId};
+  document.getElementById('urlTitle').value='';
+  document.getElementById('urlHref').value='';
+  document.getElementById('urlModal').style.display='flex';
+  setTimeout(()=>document.getElementById('urlHref').focus(),50);
+}
+function confirmAddUrl(){
+  if(!urlTarget)return;
+  const href=document.getElementById('urlHref').value.trim();
+  if(!href){toast('请输入URL');return;}
+  const title=document.getElementById('urlTitle').value.trim()||href;
+  const row=S.rows.find(r=>r.id===urlTarget.rowId);if(!row)return;
+  if(!Array.isArray(row.cells[urlTarget.colId]))row.cells[urlTarget.colId]=[];
+  row.cells[urlTarget.colId].push({title,href});
+  save();document.getElementById('urlModal').style.display='none';renderTable();
+}
+function rmUrl(rowId,colId,idx){
+  const row=S.rows.find(r=>r.id===rowId);if(!row||!Array.isArray(row.cells[colId]))return;
+  row.cells[colId].splice(idx,1);save();renderTable();
+}
+
+/* ═══ COL MENU ═══ */
+function openColMenu(colId,el){
+  const col=S.columns.find(c=>c.id===colId);if(!col)return;
+  const h=`<div class="pop-title">列操作</div>
+    <div class="pop-item" onclick="openColEditor('${colId}')"><span class="pop-icon">✏️</span>编辑名称/类型</div>
+    ${col.type==='select'?`<div class="pop-item" onclick="openTagMgr('${colId}')"><span class="pop-icon">🏷</span>管理标签选项</div>`:''}
+    <div class="pop-div"></div>
+    <div class="pop-item" onclick="addSort_col('${colId}','asc')"><span class="pop-icon">↑</span>升序排序</div>
+    <div class="pop-item" onclick="addSort_col('${colId}','desc')"><span class="pop-icon">↓</span>降序排序</div>
+    <div class="pop-div"></div>
+    <div class="pop-item danger" onclick="deleteCol('${colId}')"><span class="pop-icon">🗑</span>删除列</div>`;
+  openPop(el,h);
+}
+function addSort_col(colId,dir){
+  closePop();
+  S.sorts=S.sorts.filter(s=>s.colId!==colId);
+  S.sorts.unshift({colId,dir});
+  save();renderTable();renderPanels();
+}
+function openColEditor(colId){
+  closePop();
+  const col=S.columns.find(c=>c.id===colId);
+  const anchor=document.querySelector(`th[data-col="${colId}"] .th-inner`)||document.body;
+  pendingColType=col.type;
+  const typeBtns=COL_TYPES.map(t=>`<button class="ctype-btn ${col.type===t.type?'active':''}" onclick="setPendingType('${t.type}',this)">${t.icon} ${t.label}</button>`).join('');
+  const h=`<div class="col-editor">
+    <label>列名称</label><input id="colNameInp" value="${esc(col.label)}">
+    <label>数据类型</label><div class="col-type-grid">${typeBtns}</div>
+    <div class="col-editor-btns">
+      <button class="btn-sm ghost" onclick="closePop()">取消</button>
+      <button class="btn-sm primary" onclick="saveColEdit('${colId}')">保存</button>
+    </div></div>`;
+  openPop(anchor,h);
+}
+function setPendingType(t,btn){
+  document.querySelectorAll('.ctype-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');pendingColType=t;
+}
+function saveColEdit(colId){
+  const col=S.columns.find(c=>c.id===colId);
+  const inp=document.getElementById('colNameInp');
+  if(inp)col.label=inp.value.trim()||col.label;
+  col.type=pendingColType;
+  save();closePop();renderTable();
+}
+function openTagMgr(colId){
+  closePop();
+  const col=S.columns.find(c=>c.id===colId);
+  const anchor=document.querySelector(`th[data-col="${colId}"] .th-inner`)||document.body;
+  renderTagMgr(colId,anchor);
+}
+function renderTagMgr(colId,anchor){
+  const col=S.columns.find(c=>c.id===colId);
+  const items=(col.options||[]).map(opt=>{
+    const c=TAG_COLORS[opt.colorIdx%TAG_COLORS.length];
+    return`<div class="tag-opt-item">
+      <div class="color-dot" style="background:${c.bg};border:1.5px solid ${c.fg}"></div>
+      <span class="tag-pill" style="background:${c.bg};color:${c.fg}">${esc(opt.label)}</span>
+      <button style="margin-left:auto;background:none;border:none;cursor:pointer;color:#ccc;font-size:14px" onclick="delTagOpt('${colId}','${opt.id}')">×</button>
+    </div>`;
+  }).join('');
+  const h=`<div class="pop-title">标签选项</div>
+    <div>${items||'<div style="padding:8px 14px;color:#aaa;font-size:13px">暂无</div>'}</div>
+    <div class="add-opt-row">
+      <input id="newOptInp" placeholder="添加选项…" onkeydown="if(event.key==='Enter')addTagOpt('${colId}')">
+      <button onclick="addTagOpt('${colId}')">添加</button>
+    </div>`;
+  openPop(anchor,h);
+  setTimeout(()=>document.getElementById('newOptInp')?.focus(),40);
+}
+function addTagOpt(colId){
+  const inp=document.getElementById('newOptInp');const label=inp?.value.trim();if(!label)return;
+  const col=S.columns.find(c=>c.id===colId);if(!col.options)col.options=[];
+  col.options.push({id:gid(),label,colorIdx:col.options.length%TAG_COLORS.length});
+  save();renderTagMgr(colId,document.querySelector(`th[data-col="${colId}"] .th-inner`)||document.body);renderTable();
+}
+function delTagOpt(colId,optId){
+  const col=S.columns.find(c=>c.id===colId);if(!col.options)return;
+  col.options=col.options.filter(o=>o.id!==optId);
+  S.rows.forEach(r=>{if(Array.isArray(r.cells[colId]))r.cells[colId]=r.cells[colId].filter(id=>id!==optId);});
+  save();renderTagMgr(colId,document.querySelector(`th[data-col="${colId}"] .th-inner`)||document.body);renderTable();
+}
+function deleteCol(colId){
+  closePop();if(S.columns.length<=1){toast('至少保留一列');return;}
+  S.columns=S.columns.filter(c=>c.id!==colId);
+  S.groupBy=S.groupBy.filter(id=>id!==colId);
+  S.sorts=S.sorts.filter(s=>s.colId!==colId);
+  S.filters=S.filters.filter(f=>f.colId!==colId);
+  S.rows.forEach(r=>delete r.cells[colId]);
+  save();renderTable();toast('列已删除');
+}
+
+/* ═══ ADD COL ═══ */
+function openAddCol(el){
+  pendingColType='text';
+  const typeBtns=COL_TYPES.map(t=>`<button class="ctype-btn ${t.type==='text'?'active':''}" onclick="setPendingType('${t.type}',this)">${t.icon} ${t.label}</button>`).join('');
+  const h=`<div class="col-editor">
+    <label>列名称</label><input id="newColName" placeholder="列名称">
+    <label>数据类型</label><div class="col-type-grid">${typeBtns}</div>
+    <div class="col-editor-btns">
+      <button class="btn-sm ghost" onclick="closePop()">取消</button>
+      <button class="btn-sm primary" onclick="confirmAddCol()">添加</button>
+    </div></div>`;
+  openPop(el,h);setTimeout(()=>document.getElementById('newColName')?.focus(),40);
+}
+function confirmAddCol(){
+  const name=(document.getElementById('newColName')?.value||'').trim()||'新列';
+  const type=pendingColType||'text';
+  const col={id:gid(),type,label:name,width:160};
+  if(type==='select')col.options=[];
+  S.columns.push(col);
+  S.rows.forEach(r=>{r.cells[col.id]=(type==='select'||type==='url')?[]:type==='bool'?false:'';});
+  save();closePop();renderTable();
+}
+
+/* ═══ DRAG COLUMNS ═══ */
+function colDragStart(e,colId){dragColId=colId;e.dataTransfer.effectAllowed='move';}
+function colDragOver(e,colId){
+  if(!dragColId||dragColId===colId)return;
+  e.preventDefault();e.dataTransfer.dropEffect='move';
+  const th=e.currentTarget;
+  const r=th.getBoundingClientRect();
+  const mid=(r.left+r.right)/2;
+  document.querySelectorAll('thead th').forEach(t=>{t.classList.remove('th-drag-over-left','th-drag-over-right');});
+  th.classList.add(e.clientX<mid?'th-drag-over-left':'th-drag-over-right');
+}
+function colDragLeave(e){e.currentTarget.classList.remove('th-drag-over-left','th-drag-over-right');}
+function colDrop(e,targetColId){
+  e.preventDefault();
+  if(!dragColId||dragColId===targetColId)return;
+  const th=e.currentTarget;
+  const r=th.getBoundingClientRect();const mid=(r.left+r.right)/2;
+  const fromIdx=S.columns.findIndex(c=>c.id===dragColId);
+  let toIdx=S.columns.findIndex(c=>c.id===targetColId);
+  if(e.clientX>mid)toIdx++;
+  if(fromIdx===toIdx)return;
+  const col=S.columns.splice(fromIdx,1)[0];
+  const ins=fromIdx<toIdx?toIdx-1:toIdx;
+  S.columns.splice(ins,0,col);
+  save();dragColId=null;renderTable();
+}
+function colDragEnd(){
+  dragColId=null;
+  document.querySelectorAll('thead th').forEach(t=>{t.classList.remove('th-drag-over-left','th-drag-over-right');});
+}
+
+/* ═══ DRAG ROWS ═══ */
+function rowDragStart(e,rowId){dragRowId=rowId;e.dataTransfer.effectAllowed='move';}
+function rowDragOver(e,rowId){
+  if(!dragRowId||dragRowId===rowId)return;
+  e.preventDefault();e.dataTransfer.dropEffect='move';
+  document.querySelectorAll('tbody tr').forEach(r=>r.classList.remove('row-drag-over'));
+  e.currentTarget.classList.add('row-drag-over');
+}
+function rowDrop(e,targetRowId){
+  e.preventDefault();
+  document.querySelectorAll('tbody tr').forEach(r=>r.classList.remove('row-drag-over'));
+  if(!dragRowId||dragRowId===targetRowId)return;
+  const fromIdx=S.rows.findIndex(r=>r.id===dragRowId);
+  let toIdx=S.rows.findIndex(r=>r.id===targetRowId);
+  if(fromIdx<0||toIdx<0)return;
+  const row=S.rows.splice(fromIdx,1)[0];
+  const ins=fromIdx<toIdx?toIdx:toIdx;
+  S.rows.splice(ins,0,row);
+  save();dragRowId=null;renderTable();
+}
+function rowDragEnd(){
+  dragRowId=null;
+  document.querySelectorAll('tbody tr').forEach(r=>r.classList.remove('row-drag-over','row-dragging'));
+}
+
+/* ═══ EXPORT CSV ═══ */
+function exportCSV(){
+  let csv=['完成','序号','层级',...S.columns.map(c=>c.label)].join(',')+'\n';
+  S.rows.forEach((row,i)=>{
+    const depth=getDepth(row.id);
+    const cells=[row.done?'✓':'',i+1,depth,...S.columns.map(col=>{
+      const val=row.cells[col.id];
+      if(col.type==='select')return'"'+(val||[]).map(id=>{const o=(col.options||[]).find(x=>x.id===id);return o?o.label:'';}).filter(Boolean).join('、')+'"';
+      if(col.type==='url')return'"'+(val||[]).map(u=>u.title+'('+u.href+')').join(' | ')+'"';
+      if(col.type==='bool')return val?'✓':'';
+      return'"'+String(val||'').replace(/"/g,'""')+'"';
+    })];
+    csv+=cells.join(',')+'\n';
+  });
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=(S.title||'todo')+'.csv';a.click();
+}
+
+/* ═══ KEYBOARD SHORTCUTS ═══ */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    if(document.getElementById('urlModal').style.display!=='none'){document.getElementById('urlModal').style.display='none';}
+    else closePop();
+  }
+  // Ctrl+F focus search
+  if((e.ctrlKey||e.metaKey)&&e.key==='f'){e.preventDefault();document.getElementById('searchInp').focus();}
+});
+
+/* ═══ TITLE INIT ═══ */
+document.getElementById('titleDisplay').textContent='📋 '+S.title;
+
+/* ═══ MOBILE SHEET ═══ */
+function openSheet(){
+  const m=document.getElementById('sheetMask'),s=document.getElementById('bottomSheet');
+  m.style.display='block';requestAnimationFrame(()=>{m.classList.add('show');s.classList.add('open');});
+  // sync active state
+  ['filter','sort','group'].forEach(n=>{
+    document.getElementById('sheet'+n.charAt(0).toUpperCase()+n.slice(1))?.classList.toggle('on',openPanel===n);
+  });
+}
+function closeSheet(){
+  const m=document.getElementById('sheetMask'),s=document.getElementById('bottomSheet');
+  m.classList.remove('show');s.classList.remove('open');
+  setTimeout(()=>{m.style.display='none';},280);
+}
+
+/* ═══ MOBILE CARDS ═══ */
+function isMobile(){return window.innerWidth<=768;}
+
+function renderMobileCards(){
+  if(!isMobile())return;
+  const el=document.getElementById('mobileView');
+  if(!el)return;
+  const {grouped,rows,groups,order}=buildRows();
+  let h='';
+  if(!grouped){
+    let vi=0;
+    rows.forEach(({row,depth})=>{vi++;h+=mCard(row,vi,depth);});
+  } else {
+    let vi=0;
+    order.forEach(key=>{
+      const isColl=collapsedGroups.has(key);
+      const gr=groups[key];
+      const done=gr.filter(r=>r.done).length;
+      const arrow=isColl?'▶':'▼';
+      h+=`<div class="m-grp-hdr" onclick="toggleGrp('${esc(key)}')">
+        <span style="font-size:10px">${arrow}</span>
+        <span>${esc(key)}</span>
+        <span class="m-gcnt">${gr.length}项</span>
+        <span class="m-gdone">✓${done}</span>
+      </div>`;
+      if(!isColl){
+        gr.forEach(row=>{
+          const flat=[];flattenTree(row,flat,0);
+          flat.forEach(({row:r,depth})=>{vi++;h+=mCard(r,vi,depth);});
+        });
+      }
+    });
+  }
+  h+='<div style="height:32px"></div>';
+  el.innerHTML=h;
+}
+
+function mCard(row,vi,depth){
+  const fc=S.columns[0];
+  const title=String(row.cells[fc.id]||'（无标题）');
+  const hasChildren=S.rows.some(r=>r.p===row.id);
+  let body='';
+  S.columns.slice(1).forEach(col=>{
+    const val=row.cells[col.id];
+    let content='';
+    if(col.type==='select'){
+      const ids=Array.isArray(val)?val:[];
+      if(!ids.length)return;
+      content=ids.map(oid=>{
+        const opt=(col.options||[]).find(o=>o.id===oid);if(!opt)return'';
+        const c=TAG_COLORS[opt.colorIdx%TAG_COLORS.length];
+        return`<span class="tag-pill" style="background:${c.bg};color:${c.fg}">${esc(opt.label)}</span>`;
+      }).filter(Boolean).join('');
+    } else if(col.type==='date'){
+      if(!val)return;
+      const isOverdue=val<new Date().toISOString().slice(0,10)&&!row.done;
+      content=`<span style="color:${isOverdue?'#e35454':'var(--text2)'}">📅 ${esc(val)}</span>`;
+    } else if(col.type==='url'){
+      const urls=Array.isArray(val)?val:[];
+      if(!urls.length)return;
+      content=urls.map(u=>`<a href="${esc(u.href)}" target="_blank" style="color:#2563eb;text-decoration:none">🔗 ${esc(u.title||u.href)}</a>`).join(' ');
+    } else if(col.type==='bool'){
+      if(!val)return;
+      content=`<span style="color:var(--accent)">✓ ${esc(col.label)}</span>`;
+    } else {
+      const s=String(val||'');if(!s.trim())return;
+      content=`<span style="color:var(--text2)">${esc(s.length>80?s.slice(0,80)+'…':s)}</span>`;
+    }
+    if(!content)return;
+    body+=`<div class="m-field"><span class="m-field-lbl">${esc(col.label)}：</span>${content}</div>`;
+  });
+  return`<div class="m-card ${row.done?'done':''} ${depth>0?'child':''}">
+    <div class="m-card-top">
+      <div class="custom-check m-card-check ${row.done?'checked':''}" onclick="toggleDone('${row.id}');renderMobileCards()"></div>
+      ${hasChildren?`<button class="m-toggle" onclick="event.stopPropagation();toggleChildren('${row.id}');renderMobileCards()">${row.col?'▶':'▼'}</button>`:''}
+      <div class="m-card-title ${row.done?'struck':''}">${searchQ?hlText(title):esc(title)}</div>
+    </div>
+    ${body?`<div class="m-card-body">${body}</div>`:''}
+    <div class="m-card-footer">
+      <span class="m-card-num">#${vi}</span>
+      <button class="m-btn" onclick="addChild('${row.id}');renderMobileCards()">⤵ 子项</button>
+      <button class="m-btn" onclick="duplicateRow('${row.id}');renderMobileCards()">⎘</button>
+      <button class="m-btn del" onclick="if(confirm('删除这条吗？'))deleteRow('${row.id}')">删除</button>
+    </div>
+  </div>`;
+}
+
+/* renderMobileCards is called at end of renderTable via direct call below */
+
+/* sync desktop search → mobile and vice versa */
+document.getElementById('searchInp').addEventListener('input',function(){
+  const ms=document.getElementById('mobileSearchInp');
+  if(ms)ms.value=this.value;
+});
+
+/* ═══ PWA: MANIFEST + SERVICE WORKER ═══ */
+(function(){
+  // Inline web manifest
+  const mf={
+    name:'27的Todo清单',short_name:'Todo清单',
+    start_url:'.',display:'standalone',
+    background_color:'#f5f6fa',theme_color:'#4caf82',
+    icons:[{
+      src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%234caf82'/%3E%3Ctext y='.9em' font-size='68' x='50%25' text-anchor='middle'%3E%E2%9C%85%3C/text%3E%3C/svg%3E",
+      sizes:'any',type:'image/svg+xml'
+    }]
+  };
+  const mfBlob=new Blob([JSON.stringify(mf)],{type:'application/manifest+json'});
+  const mfLink=document.createElement('link');
+  mfLink.rel='manifest';mfLink.href=URL.createObjectURL(mfBlob);
+  document.head.appendChild(mfLink);
+
+  // Service Worker for offline
+  if('serviceWorker' in navigator){
+    const sw=`
+      const C='todo-v2';
+      self.addEventListener('install',()=>self.skipWaiting());
+      self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));
+      self.addEventListener('fetch',e=>{
+        e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)));
+      });
+    `;
+    const swBlob=new Blob([sw],{type:'application/javascript'});
+    navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
+  }
+})();
+
+/* ═══ INIT ═══ */
+// Single call — renderTable() internally calls renderMobileCards()
+renderTable();
+</script>
+</body>
+</html>
