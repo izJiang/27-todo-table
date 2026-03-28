@@ -347,6 +347,116 @@ body.resizing-row * { cursor:row-resize !important; user-select:none !important;
 .row-sel-cb{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
 tr.row-selected td{background:rgba(76,175,130,.07) !important}
 
+/* ── Theme A: Nature ── */
+body.theme-nature {
+  --bg: #f0faf5; --white: #ffffff; --border: #d4ece1; --border2: #b8ddd0;
+  --header-bg: #edf7f2; --row-hover: #e8f7f0;
+  --accent: #2d9e6b; --accent2: #237a54;
+  --text: #1a3328; --text2: #3d6b57; --text3: #7aaa93;
+}
+body.theme-nature .topbar,
+body.theme-nature .hp-bar {
+  background: linear-gradient(135deg, #4caf82 0%, #3bc4a0 100%);
+  border-bottom: none;
+  box-shadow: 0 2px 12px rgba(76,175,130,.25);
+}
+body.theme-nature .topbar *,
+body.theme-nature .hp-bar * { color: #fff !important; }
+body.theme-nature .topbar .tb-btn,
+body.theme-nature .hp-bar .hp-new-btn {
+  background: rgba(255,255,255,.2) !important;
+  border-color: rgba(255,255,255,.3) !important;
+  color: #fff !important;
+}
+body.theme-nature .topbar .tb-btn:hover,
+body.theme-nature .hp-bar .hp-new-btn:hover {
+  background: rgba(255,255,255,.35) !important;
+}
+body.theme-nature .topbar .tb-btn.active { background: rgba(255,255,255,.4) !important; }
+body.theme-nature .grid-table thead tr { background: #edf7f2; }
+body.theme-nature .table-wrap { border-color: #d4ece1; }
+body.theme-nature .board-card { border-left: 3px solid #4caf82; }
+
+/* ── Theme B: Magazine ── */
+body.theme-magazine {
+  --bg: #f8f9fc; --white: #ffffff; --border: #e8eaf0; --border2: #d0d4e0;
+  --header-bg: #f1f3f8; --row-hover: #f5f6fb;
+  --accent: #3b5bdb; --accent2: #2f4abf;
+  --text: #1a1d2e; --text2: #4a5080; --text3: #8890b0;
+}
+body.theme-magazine .topbar,
+body.theme-magazine .hp-bar {
+  border-bottom: 2px solid #3b5bdb;
+}
+body.theme-magazine .chip {
+  background: #eef1ff;
+  color: #3b5bdb;
+}
+body.theme-magazine .grid-table tbody tr:nth-child(even) td { background: #fafbff; }
+body.theme-magazine .grid-table tbody td { height: 48px; }
+body.theme-magazine th { height: 44px !important; }
+body.theme-magazine tr[data-overdue] td {
+  background: linear-gradient(90deg, #fff5f5 0%, #fff 40%) !important;
+}
+body.theme-magazine .board-card { border-top: 3px solid #3b5bdb; }
+body.theme-magazine .hp-new-btn { background: #3b5bdb; }
+body.theme-magazine .btn { background: #3b5bdb; }
+
+/* ── Theme C: 27 Special ── */
+body.theme-27 {
+  --bg: #fdf6ff; --white: #ffffff; --border: #ead4f5; --border2: #d4b0ea;
+  --header-bg: #f8eeff; --row-hover: #f5eaff;
+  --accent: #9b59d0; --accent2: #7d3fb0;
+  --text: #2d1a3d; --text2: #6b4a80; --text3: #b08cc0;
+}
+body.theme-27 .topbar,
+body.theme-27 .hp-bar {
+  background: linear-gradient(135deg, #c084fc 0%, #e879a0 100%);
+  border-bottom: none;
+  box-shadow: 0 2px 16px rgba(192,132,252,.3);
+}
+body.theme-27 .topbar *,
+body.theme-27 .hp-bar * { color: #fff !important; }
+body.theme-27 .topbar .tb-btn,
+body.theme-27 .hp-bar .hp-new-btn {
+  background: rgba(255,255,255,.2) !important;
+  border-color: rgba(255,255,255,.3) !important;
+  color: #fff !important;
+}
+body.theme-27 .topbar .tb-btn:hover,
+body.theme-27 .hp-bar .hp-new-btn:hover {
+  background: rgba(255,255,255,.35) !important;
+}
+body.theme-27 .grid-table thead tr { background: #f8eeff; }
+body.theme-27 .table-wrap { border-color: #ead4f5; }
+body.theme-27 .board-card {
+  border-image: linear-gradient(135deg, #c084fc, #e879a0) 1;
+  border-left: 3px solid #c084fc;
+}
+body.theme-27 .grid-table tbody tr.row-done td { opacity: .6; }
+body.theme-27 .hp-quote { display: block !important; }
+body.theme-27 .board-card.all-done {
+  box-shadow: 0 0 0 2px #f59e0b, 0 4px 20px rgba(245,158,11,.2);
+}
+body.theme-27 .board-card.all-done::after {
+  content: '🏆';
+  position: absolute;
+  top: -10px;
+  right: 12px;
+  font-size: 20px;
+}
+
+/* ── Daily Quote ── */
+.hp-quote {
+  display: none;
+  text-align: center;
+  padding: 16px 20px 0;
+  font-size: 13px;
+  color: #9b59d0;
+  font-style: italic;
+  opacity: .8;
+}
+
 /* ── Dark mode ── */
 body.dark-mode{
   --bg:#0f1117;--white:#1a1e2a;--border:#2a2f3d;--border2:#363c4d;
@@ -567,10 +677,12 @@ body.dark-mode .kb-card-title{color:#e8eaed}
     <span class="hp-title">📋 我的清单</span>
     <div style="flex:1"></div>
     <button class="tb-btn btn-icon" id="darkModeBtnHome" onclick="toggleDarkMode()" title="深色模式">🌙</button>
+    <button class="tb-btn btn-icon" id="themeBtnHome" onclick="cycleTheme()" title="切换主题" style="font-size:16px">🎨</button>
     <button class="hp-new-btn" onclick="showCreateModal()" style="margin-left:8px">＋ 新建</button>
   </div>
   <div class="hp-body">
     <div class="hp-grid" id="boardsGrid"></div>
+    <div class="hp-quote" id="dailyQuote"></div>
   </div>
 </div>
 
@@ -588,6 +700,7 @@ body.dark-mode .kb-card-title{color:#e8eaed}
   <span class="sync-badge sync-ok" id="syncBadge">🟢 已同步</span>
   <div class="spacer"></div>
   <button class="tb-btn btn-icon" id="darkModeBtn" onclick="toggleDarkMode()" title="深色模式">🌙</button>
+  <button class="tb-btn btn-icon" id="themeBtn" onclick="cycleTheme()" title="切换主题" style="font-size:16px">🎨</button>
 
   <!-- Search -->
   <div style="position:relative;display:flex;align-items:center">
@@ -1011,7 +1124,8 @@ function renderHome() {
     const done = rows.filter(r => r.done).length;
     const progress = total > 0 ? (done / total * 100) : 0;
     const timeStr = b.updated_at ? new Date(b.updated_at).toLocaleDateString('zh-CN',{month:'short',day:'numeric'}) : '';
-    return `<div class="board-card" onclick="openBoard('${b.id}')">
+    const allDoneClass = (done === total && total > 0) ? 'all-done' : '';
+    return `<div class="board-card ${allDoneClass}" onclick="openBoard('${b.id}')">
       <button class="board-card-menu-btn" onclick="event.stopPropagation();showBoardMenu(event,'${b.id}')">⋯</button>
       <div class="board-card-emoji">${b.emoji||'📋'}</div>
       <div class="board-card-title">${b.title||'无标题'}</div>
@@ -2813,6 +2927,62 @@ const dmBtn = document.getElementById('darkModeBtn');
 const dmBtnHome = document.getElementById('darkModeBtnHome');
 if(dmBtn) dmBtn.textContent = isDark ? '☀️' : '🌙';
 if(dmBtnHome) dmBtnHome.textContent = isDark ? '☀️' : '🌙';
+
+/* ══════════════════════════════════════
+   THEME SWITCHER
+══════════════════════════════════════ */
+const THEMES = ['', 'theme-nature', 'theme-magazine', 'theme-27'];
+const THEME_NAMES = ['☀️ 默认', '🌿 清新', '📰 杂志', '🌸 27专属'];
+let currentTheme = localStorage.getItem('appTheme') || '';
+
+function applyTheme(t) {
+  THEMES.forEach(th => { if(th) document.body.classList.remove(th); });
+  if (t) document.body.classList.add(t);
+  currentTheme = t;
+  localStorage.setItem('appTheme', t);
+  updateThemeBtn();
+}
+
+function updateThemeBtn() {
+  const idx = THEMES.indexOf(currentTheme);
+  const next = THEME_NAMES[(idx + 1) % THEMES.length];
+  document.querySelectorAll('#themeBtn,#themeBtnHome').forEach(b => {
+    if (b) b.title = '当前：' + THEME_NAMES[idx] + ' → 点击切换';
+  });
+}
+
+function cycleTheme() {
+  const idx = THEMES.indexOf(currentTheme);
+  const nextTheme = THEMES[(idx + 1) % THEMES.length];
+  applyTheme(nextTheme);
+  const idx2 = THEMES.indexOf(nextTheme);
+  toast('主题已切换：' + THEME_NAMES[idx2]);
+}
+
+// Init theme
+applyTheme(currentTheme);
+
+/* ══════════════════════════════════════
+   DAILY QUOTE FOR THEME-27
+══════════════════════════════════════ */
+const QUOTES = [
+  '你比你想象的更强大 ✦',
+  '每完成一件事，就离梦想近一步 🌸',
+  '慢慢来，一切都来得及 🌿',
+  '你正在做的事情，值得被认真对待 ✨',
+  '不是每天都容易，但每天都值得 💫',
+  '港大在等你，继续加油 🎓',
+  '今天的小完成，是明天的大自由 🦋',
+  '你已经很厉害了，只是还不知道 🌟',
+];
+function updateDailyQuote() {
+  const el = document.getElementById('dailyQuote');
+  if (el) {
+    const idx = new Date().getDate() % QUOTES.length;
+    el.textContent = '✦ ' + QUOTES[idx];
+  }
+}
+document.addEventListener('DOMContentLoaded', updateDailyQuote);
 
 /* ══════════════════════════════════════
    COLUMN WIDTH RESIZE (drag right edge)
