@@ -430,11 +430,11 @@ body.theme-27 .hp-bar .hp-new-btn:hover {
 body.theme-27 .grid-table thead tr { background: #f8eeff; }
 body.theme-27 .table-wrap { border-color: #ead4f5; }
 body.theme-27 .board-card {
-  border-image: linear-gradient(135deg, #c084fc, #e879a0) 1;
-  border-left: 3px solid #c084fc;
+  border: none;
+  box-shadow: 0 2px 12px rgba(192,132,252,.15);
 }
 body.theme-27 .grid-table tbody tr.row-done td { opacity: .6; }
-body.theme-27 .hp-quote { display: block !important; }
+body.theme-27 .hp-quote { display: flex !important; }
 body.theme-27 .board-card.all-done {
   box-shadow: 0 0 0 2px #f59e0b, 0 4px 20px rgba(245,158,11,.2);
 }
@@ -450,12 +450,18 @@ body.theme-27 .board-card.all-done::after {
 .hp-quote {
   display: none;
   text-align: center;
-  padding: 16px 20px 0;
-  font-size: 13px;
+  padding: 20px 40px 8px;
+  font-size: 13.5px;
   color: #9b59d0;
-  font-style: italic;
-  opacity: .8;
+  opacity: .85;
+  line-height: 1.8;
+  display: none;
+  flex-direction: column;
+  gap: 2px;
 }
+.hp-quote-date { font-size: 11px; color: #b08cc0; letter-spacing: .05em; margin-bottom: 4px; }
+.hp-quote-text { font-style: italic; font-weight: 500; color: #7d3fb0; font-size: 14px; }
+.hp-quote-author { font-size: 12px; color: #b08cc0; margin-top: 2px; }
 
 /* ── Dark mode ── */
 body.dark-mode{
@@ -2966,21 +2972,46 @@ applyTheme(currentTheme);
    DAILY QUOTE FOR THEME-27
 ══════════════════════════════════════ */
 const QUOTES = [
-  '你比你想象的更强大 ✦',
-  '每完成一件事，就离梦想近一步 🌸',
-  '慢慢来，一切都来得及 🌿',
-  '你正在做的事情，值得被认真对待 ✨',
-  '不是每天都容易，但每天都值得 💫',
-  '港大在等你，继续加油 🎓',
-  '今天的小完成，是明天的大自由 🦋',
-  '你已经很厉害了，只是还不知道 🌟',
+  { q: '你未来的样子，藏在你今天的选择里。', a: '——无名' },
+  { q: 'The secret of getting ahead is getting started.', a: '——Mark Twain' },
+  { q: '不积跬步，无以至千里；不积小流，无以成江海。', a: '——荀子《劝学》' },
+  { q: 'It always seems impossible until it\'s done.', a: '——Nelson Mandela' },
+  { q: '你所浪费的今天，是昨天死去的人奢望的明天。', a: '——无名' },
+  { q: 'The only way to do great work is to love what you do.', a: '——Steve Jobs' },
+  { q: '千里之行，始于足下。', a: '——老子《道德经》' },
+  { q: 'In the middle of every difficulty lies opportunity.', a: '——Albert Einstein' },
+  { q: '要么出众，要么出局。', a: '——Jack Welch' },
+  { q: 'You are braver than you believe, stronger than you seem.', a: '——A.A. Milne' },
+  { q: '种一棵树最好的时间是十年前，其次是现在。', a: '——中国谚语' },
+  { q: 'Done is better than perfect.', a: '——Sheryl Sandberg' },
+  { q: '吾日三省吾身。', a: '——曾子《论语》' },
+  { q: 'The future belongs to those who believe in the beauty of their dreams.', a: '——Eleanor Roosevelt' },
+  { q: '不要等待机会，而要创造机会。', a: '——林肯' },
+  { q: 'Stay hungry, stay foolish.', a: '——Steve Jobs' },
+  { q: '志不立，天下无可成之事。', a: '——王阳明' },
+  { q: 'Believe you can and you\'re halfway there.', a: '——Theodore Roosevelt' },
+  { q: '每一个不曾起舞的日子，都是对生命的辜负。', a: '——尼采' },
+  { q: 'Life is what happens when you\'re busy making other plans.', a: '——John Lennon' },
+  { q: '自胜者强，自强者胜。', a: '——老子' },
+  { q: 'The harder I work, the luckier I get.', a: '——Samuel Goldwyn' },
+  { q: '读书破万卷，下笔如有神。', a: '——杜甫' },
+  { q: 'You miss 100% of the shots you don\'t take.', a: '——Wayne Gretzky' },
+  { q: '路漫漫其修远兮，吾将上下而求索。', a: '——屈原《离骚》' },
+  { q: 'The best time to plant a tree was 20 years ago. The second best time is now.', a: '——中国谚语' },
+  { q: '成大事者，不拘小节。', a: '——《后汉书》' },
+  { q: 'Simplicity is the ultimate sophistication.', a: '——Leonardo da Vinci' },
+  { q: '有志者事竟成。', a: '——《后汉书》' },
+  { q: 'It does not matter how slowly you go as long as you do not stop.', a: '——Confucius' },
+  { q: '宝剑锋从磨砺出，梅花香自苦寒来。', a: '——古训' },
 ];
 function updateDailyQuote() {
   const el = document.getElementById('dailyQuote');
-  if (el) {
-    const idx = new Date().getDate() % QUOTES.length;
-    el.textContent = '✦ ' + QUOTES[idx];
-  }
+  if (!el) return;
+  const now = new Date();
+  const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
+  const item = QUOTES[dayOfYear % QUOTES.length];
+  const dateStr = `${now.getMonth()+1}月${now.getDate()}日`;
+  el.innerHTML = `<span class="hp-quote-date">${dateStr}</span><span class="hp-quote-text">「${item.q}」</span><span class="hp-quote-author">${item.a}</span>`;
 }
 document.addEventListener('DOMContentLoaded', updateDailyQuote);
 
