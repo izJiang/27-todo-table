@@ -323,6 +323,32 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
 .row-sel-cb{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
 tr.row-selected td{background:rgba(76,175,130,.07) !important}
 
+/* ── Dark mode ── */
+body.dark-mode{--bg:#1a1d23;--white:#252931;--border:#363b45;--border2:#454c59;--text:#e8eaed;--text2:#9aa0ac;--text3:#636b78;--header-bg:#2a2f38;--row-hover:#2d3240;--accent:#4caf82;--shadow:0 2px 12px rgba(0,0,0,.3)}
+
+/* ── Kanban ── */
+.kb-col{background:#f7f8fa;border-radius:12px;padding:10px;min-width:220px;max-width:260px}
+.kb-col-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:0 4px}
+.kb-col-title{font-size:13px;font-weight:600;color:#1f2329}
+.kb-col-count{font-size:12px;color:#9fa8b5;background:#fff;border-radius:100px;padding:1px 8px}
+.kb-card{background:#fff;border-radius:10px;padding:10px 12px;margin-bottom:8px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.08);border:1px solid #f0f1f3;transition:box-shadow .15s}
+.kb-card:hover{box-shadow:0 3px 10px rgba(0,0,0,.12)}
+.kb-card-title{font-size:13px;font-weight:500;color:#1f2329;margin-bottom:6px}
+.kb-card-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
+.kb-card-date{font-size:11px;color:#9fa8b5}
+.kb-add-btn{width:100%;padding:8px;background:none;border:none;color:#9fa8b5;font-size:13px;cursor:pointer;border-radius:8px;text-align:left}
+.kb-add-btn:hover{background:#eee;color:#646a73}
+body.dark-mode .kb-col{background:#1f262f}
+body.dark-mode .kb-col-title{color:#e8eaed}
+body.dark-mode .kb-card{background:#252931;border-color:#363b45}
+body.dark-mode .kb-card-title{color:#e8eaed}
+
+/* ── Deadline badges ── */
+.cell-date-badge{display:inline-block;font-size:11px;padding:1px 6px;border-radius:100px;margin-top:2px;font-weight:500}
+
+/* ── Topbar btn icon ── */
+.tb-btn.btn-icon{padding:5px 9px}
+
 /* ═══ HOMEPAGE ═══ */
 #homePage { display:flex; flex-direction:column; min-height:100vh; }
 #boardPage { display:none; }
@@ -404,7 +430,9 @@ tr.row-selected td{background:rgba(76,175,130,.07) !important}
 <div id="homePage">
   <div class="hp-bar">
     <span class="hp-title">📋 我的清单</span>
-    <button class="hp-new-btn" onclick="showCreateModal()">＋ 新建</button>
+    <div style="flex:1"></div>
+    <button class="tb-btn btn-icon" id="darkModeBtnHome" onclick="toggleDarkMode()" title="深色模式">🌙</button>
+    <button class="hp-new-btn" onclick="showCreateModal()" style="margin-left:8px">＋ 新建</button>
   </div>
   <div class="hp-body">
     <div class="hp-grid" id="boardsGrid"></div>
@@ -424,6 +452,7 @@ tr.row-selected td{background:rgba(76,175,130,.07) !important}
   <button class="tb-btn" onclick="goHome()" style="margin-right:4px">← 返回</button>
   <span class="sync-badge sync-ok" id="syncBadge">🟢 已同步</span>
   <div class="spacer"></div>
+  <button class="tb-btn btn-icon" id="darkModeBtn" onclick="toggleDarkMode()" title="深色模式">🌙</button>
 
   <!-- Search -->
   <div style="position:relative;display:flex;align-items:center">
@@ -436,6 +465,7 @@ tr.row-selected td{background:rgba(76,175,130,.07) !important}
   <button class="tb-btn tb-btn-desktop" id="filterBtn" onclick="togglePanel('filter')">🔽 筛选</button>
   <button class="tb-btn tb-btn-desktop" id="sortBtn" onclick="togglePanel('sort')">↕ 排序</button>
   <button class="tb-btn tb-btn-desktop" id="groupBtn" onclick="togglePanel('group')">⊞ 分组</button>
+  <button class="tb-btn tb-btn-desktop" id="kanbanBtn" onclick="toggleKanban()">⊞ 看板</button>
   <div class="tb-sep tb-btn-desktop"></div>
   <button class="tb-btn green tb-btn-desktop" onclick="exportCSV()">⬇ 导出</button>
   <button class="tb-btn tb-btn-desktop" id="selectModeBtn" onclick="toggleSelectMode()">☑ 选择</button>
@@ -455,6 +485,11 @@ tr.row-selected td{background:rgba(76,175,130,.07) !important}
 
 <!-- Mobile card view -->
 <div class="mobile-view" id="mobileView"></div>
+
+<!-- Kanban View -->
+<div id="kanbanView" style="display:none; padding:16px; overflow-x:auto;">
+  <div id="kanbanContainer" style="display:flex; gap:16px; min-width:max-content;"></div>
+</div>
 
 <!-- Table -->
 <div class="wrapper">
@@ -1618,7 +1653,7 @@ function renderRowHtml(row,vi,depth,totalCols){
       <input type="checkbox" class="row-sel-cb" ${isSel?'checked':''} onclick="event.stopPropagation();toggleRowSelect('${row.id}',event.shiftKey)">
     </td>`;
   } else {
-    h+=`<td class="check-cell"><div class="custom-check ${row.done?'checked':''}" onclick="toggleDone('${row.id}')"></div></td>`;
+    h+=`<td class="check-cell"><div class="custom-check ${row.done?'checked':''}" onclick="toggleDone('${row.id}',event)"></div></td>`;
   }
   h+=`<td class="num-cell"><span class="row-drag-handle">⠿</span>${vi}</td>`;
   S.columns.forEach((col,ci)=>{
@@ -1666,7 +1701,8 @@ function renderCellHtml(row,col){
     return `<div class="cell-select-wrap" onclick="openCellSel('${row.id}','${col.id}',this)">${pills}<span class="cell-add-hint">+</span></div>`;
   }
   if(col.type==='date'){
-    return `<input type="date" class="cell-date" value="${esc(val||'')}" onchange="updCell('${row.id}','${col.id}',this.value)">`;
+    const badge = renderDeadlineBadge(val);
+    return `<div><input type="date" class="cell-date" value="${esc(val||'')}" onchange="updCell('${row.id}','${col.id}',this.value)">${badge ? `<div>${badge}</div>` : ''}</div>`;
   }
   if(col.type==='url'){
     const urls=Array.isArray(val)?val:[];
@@ -1696,8 +1732,24 @@ function renderCellHtml(row,col){
   const displayText=searchQ?hlText(text):esc(text);
   let exp='';
   if(isLong)exp=`<button class="cell-expand-btn" onclick="event.stopPropagation();toggleExp('${row.id}','${col.id}')">${isExp?'↑ 收起':'↓ 展开'}</button>`;
-  return `<div class="cell-text-wrap" onclick="startEdit('${row.id}','${col.id}',this)">
+  let result = `<div class="cell-text-wrap" onclick="startEdit('${row.id}','${col.id}',this)">
     <div class="cell-text-view ${isLong&&!isExp?'clamped':''}">${displayText||'<span style="color:var(--text3)">—</span>'}</div>${exp}</div>`;
+  // Child progress for first column
+  const colIdx = S.columns.findIndex(c => c.id === col.id);
+  if (colIdx === 0) {
+    const children = S.rows.filter(r => r.p === row.id);
+    if (children.length > 0) {
+      const done = children.filter(r => r.done).length;
+      const pct = Math.round(done / children.length * 100);
+      result += `<div style="margin-top:4px;display:flex;align-items:center;gap:6px">
+        <div style="flex:1;height:3px;background:#f0f1f3;border-radius:100px">
+          <div style="width:${pct}%;height:100%;background:#4caf82;border-radius:100px"></div>
+        </div>
+        <span style="font-size:11px;color:#9fa8b5">${done}/${children.length}</span>
+      </div>`;
+    }
+  }
+  return result;
 }
 
 /* ═══ TEXT EDITING ═══ */
@@ -1769,11 +1821,17 @@ function deleteRow(rowId){
   S.rows=S.rows.filter(r=>!toDelete.has(r.id));
   save();renderTable();
 }
-function toggleDone(rowId){
+function toggleDone(rowId,event){
   const row=S.rows.find(r=>r.id===rowId);if(!row)return;
+  const wasDone = row.done;
   row.done=!row.done;
   S.rows.forEach(r=>{if(r.p===rowId)r.done=row.done;});
   save();renderTable();
+  // Confetti animation when completing
+  if(row.done && !wasDone){
+    const el = event ? event.target : document.querySelector(`tr[data-row="${rowId}"] .custom-check`);
+    if(el){const r=el.getBoundingClientRect();confetti(r.left+r.width/2,r.top+r.height/2);}
+  }
   // cross-board sync
   if(row.syncId) syncCellAcrossBoards(row.syncId, {done: row.done});
 }
@@ -2305,7 +2363,7 @@ function mCard(row,vi,depth){
   });
   return`<div class="m-card ${row.done?'done':''} ${depth>0?'child':''}">
     <div class="m-card-top">
-      <div class="custom-check m-card-check ${row.done?'checked':''}" onclick="toggleDone('${row.id}');renderMobileCards()"></div>
+      <div class="custom-check m-card-check ${row.done?'checked':''}" onclick="toggleDone('${row.id}',event);renderMobileCards()"></div>
       ${hasChildren?`<button class="m-toggle" onclick="event.stopPropagation();toggleChildren('${row.id}');renderMobileCards()">${row.col?'▶':'▼'}</button>`:''}
       <div class="m-card-title ${row.done?'struck':''}">${searchQ?hlText(title):esc(title)}</div>
     </div>
@@ -2364,6 +2422,197 @@ document.getElementById('searchInp').addEventListener('input',function(){
 
 /* ═══ INIT ═══ */
 // App is initialized by DOMContentLoaded above
+
+/* ═══ FEATURE 1: Deadline countdown display ═══ */
+function dateDiff(dateStr) {
+  if (!dateStr) return null;
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const d = new Date(dateStr);
+  d.setHours(0,0,0,0);
+  return Math.round((d - today) / 86400000);
+}
+function renderDeadlineBadge(dateStr) {
+  const diff = dateDiff(dateStr);
+  if (diff === null) return '';
+  if (diff < 0) return `<span class="cell-date-badge" style="background:#fff0f0;color:#e35454">已逾期 ${Math.abs(diff)}d</span>`;
+  if (diff === 0) return `<span class="cell-date-badge" style="background:#fff3e0;color:#f57c00">今天截止</span>`;
+  if (diff <= 3) return `<span class="cell-date-badge" style="background:#fffde7;color:#f9a825">还剩 ${diff}d</span>`;
+  if (diff <= 7) return `<span class="cell-date-badge" style="background:#e8f4fd;color:#1976d2">还剩 ${diff}d</span>`;
+  return '';
+}
+
+/* ═══ FEATURE 2: Kanban view ═══ */
+let kanbanMode = false;
+function toggleKanban() {
+  kanbanMode = !kanbanMode;
+  document.getElementById('kanbanBtn').classList.toggle('active', kanbanMode);
+  document.querySelector('.wrapper').style.display = kanbanMode ? 'none' : '';
+  document.getElementById('mobileView').style.display = kanbanMode ? 'none' : '';
+  document.getElementById('kanbanView').style.display = kanbanMode ? 'block' : 'none';
+  document.getElementById('statsBar').style.display = kanbanMode ? 'none' : '';
+  if (kanbanMode) renderKanban();
+}
+function getKanbanGroupCol() {
+  // Prefer "距离截止日" or "状态" column
+  const statusCol = S.columns.find(c => c.label === '距离截止日' || c.label === '状态');
+  if (statusCol) return statusCol;
+  // Fallback to first select column
+  return S.columns.find(c => c.type === 'select');
+}
+function renderKanban() {
+  const col = getKanbanGroupCol();
+  const container = document.getElementById('kanbanContainer');
+  if (!col || !container) return;
+  
+  const options = col.options || [];
+  const rowsByStatus = {};
+  const noStatusRows = [];
+  
+  // Filter and group rows
+  const visibleRows = S.rows.filter(r => {
+    if (!r.p && !rowPassesFilters(r)) return false;
+    if (!r.p && !rowMatchesSearch(r)) return false;
+    return true;
+  });
+  
+  visibleRows.forEach(r => {
+    if (r.p) return; // Only top-level in kanban
+    const vals = r.cells[col.id] || [];
+    if (!vals.length) {
+      noStatusRows.push(r);
+      return;
+    }
+    vals.forEach(vid => {
+      if (!rowsByStatus[vid]) rowsByStatus[vid] = [];
+      rowsByStatus[vid].push(r);
+    });
+  });
+  
+  let html = '';
+  
+  // Create column for each option
+  options.forEach(opt => {
+    const rows = rowsByStatus[opt.id] || [];
+    html += renderKanbanColumn(opt.label, rows, opt.id, col);
+  });
+  
+  // "No status" column
+  if (noStatusRows.length) {
+    html += renderKanbanColumn('无状态', noStatusRows, null, col);
+  }
+  
+  container.innerHTML = html;
+}
+function renderKanbanColumn(title, rows, optId, groupCol) {
+  const count = rows.length;
+  const done = rows.filter(r => r.done).length;
+  
+  let cardsHtml = '';
+  rows.forEach(row => {
+    cardsHtml += renderKanbanCard(row, groupCol);
+  });
+  
+  return `<div class="kb-col">
+    <div class="kb-col-header">
+      <span class="kb-col-title">${esc(title)}</span>
+      <span class="kb-col-count">${count}</span>
+    </div>
+    <div class="kb-cards" data-status="${optId || 'none'}">
+      ${cardsHtml}
+    </div>
+    <button class="kb-add-btn" onclick="addRowWithStatus('${optId || ''}', '${groupCol.id}')">+ 添加</button>
+  </div>`;
+}
+function renderKanbanCard(row, groupCol) {
+  const title = row.cells[S.columns[0].id] || '（无标题）';
+  
+  // Get tags from other select columns
+  let tagsHtml = '';
+  S.columns.forEach(c => {
+    if (c.id === groupCol.id || c.type !== 'select') return;
+    const vals = row.cells[c.id] || [];
+    vals.forEach(vid => {
+      const opt = (c.options || []).find(o => o.id === vid);
+      if (opt) {
+        const color = TAG_COLORS[opt.colorIdx % TAG_COLORS.length];
+        tagsHtml += `<span class="tag-pill" style="background:${color.bg};color:${color.fg};font-size:11px;padding:1px 6px">${esc(opt.label)}</span>`;
+      }
+    });
+  });
+  
+  // Find date column for due date
+  const dateCol = S.columns.find(c => c.type === 'date');
+  let dateHtml = '';
+  if (dateCol && row.cells[dateCol.id]) {
+    const dateVal = row.cells[dateCol.id];
+    const badge = renderDeadlineBadge(dateVal);
+    dateHtml = `<div class="kb-card-date">📅 ${esc(dateVal)} ${badge}</div>`;
+  }
+  
+  return `<div class="kb-card" onclick="editRowInline('${row.id}')">
+    <div class="kb-card-title">${esc(title)}</div>
+    ${tagsHtml ? `<div class="kb-card-tags">${tagsHtml}</div>` : ''}
+    ${dateHtml}
+  </div>`;
+}
+function addRowWithStatus(statusVal, colId) {
+  addRow();
+  setTimeout(() => {
+    const newRows = S.rows.filter(r => !r.p);
+    const newRow = newRows[newRows.length - 1];
+    if (newRow && statusVal) {
+      newRow.cells[colId] = [statusVal];
+      save(); renderKanban();
+    }
+  }, 50);
+}
+function editRowInline(rowId) {
+  // Switch to table view and start editing
+  if (kanbanMode) toggleKanban();
+  setTimeout(() => {
+    const el = document.querySelector(`tr[data-row="${rowId}"] .cell-text-wrap`);
+    if (el) el.click();
+  }, 50);
+}
+
+/* ═══ FEATURE 4: Completion confetti animation ═══ */
+function confetti(x, y) {
+  const colors = ['#4caf82','#ff9800','#2196f3','#e91e63','#9c27b0','#ffeb3b'];
+  for (let i = 0; i < 12; i++) {
+    const el = document.createElement('div');
+    el.style.cssText = `position:fixed;left:${x}px;top:${y}px;width:7px;height:7px;border-radius:${Math.random()>0.5?'50%':'2px'};background:${colors[i%colors.length]};pointer-events:none;z-index:9999;transition:all .6s cubic-bezier(.25,.46,.45,.94)`;
+    document.body.appendChild(el);
+    const angle = (i / 12) * 360;
+    const dist = 40 + Math.random() * 60;
+    const rad = angle * Math.PI / 180;
+    setTimeout(() => {
+      el.style.transform = `translate(${Math.cos(rad)*dist}px,${Math.sin(rad)*dist-30}px) rotate(${Math.random()*360}deg)`;
+      el.style.opacity = '0';
+    }, 10);
+    setTimeout(() => el.remove(), 700);
+  }
+}
+
+/* ═══ FEATURE 5: Dark mode ═══ */
+function toggleDarkMode() {
+  document.body.classList.toggle('dark-mode');
+  localStorage.setItem('darkMode', document.body.classList.contains('dark-mode') ? '1' : '0');
+  const btn = document.getElementById('darkModeBtn');
+  if (btn) btn.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+  const hbtn = document.getElementById('darkModeBtnHome');
+  if (hbtn) hbtn.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+}
+// Initialize dark mode on load
+if (localStorage.getItem('darkMode') === '1') {
+  document.body.classList.add('dark-mode');
+}
+// Update button icons based on current state
+const isDark = document.body.classList.contains('dark-mode');
+const dmBtn = document.getElementById('darkModeBtn');
+const dmBtnHome = document.getElementById('darkModeBtnHome');
+if(dmBtn) dmBtn.textContent = isDark ? '☀️' : '🌙';
+if(dmBtnHome) dmBtnHome.textContent = isDark ? '☀️' : '🌙';
 </script>
 </body>
 </html>
