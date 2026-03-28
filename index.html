@@ -378,16 +378,18 @@ body.dark-mode .tb-btn.active{background:#1e3a2f;color:var(--accent);border-colo
 body.dark-mode .row-actions{background:var(--white);border-color:var(--border)}
 body.dark-mode .grp-hdr-row td{background:#161b27 !important}
 /* ── DARK MODE: nuclear override for ALL table content ── */
-body.dark-mode table,
-body.dark-mode table * { color:#e2e6f0 !important; }
+body.dark-mode table { color:#e2e6f0 !important; }
+body.dark-mode table *:not(.tag-chip):not(.tag-chip *):not(.tag-pill):not(.tag-pill *) { color:#e2e6f0 !important; }
 body.dark-mode tr td { background:#1a1e2a !important; }
 body.dark-mode tr:hover td { background:#1e2334 !important; }
 body.dark-mode tr.row-done td { background:#1a1e2a !important; opacity:.55; }
 body.dark-mode tr.row-selected td { background:rgba(76,175,130,.18) !important; }
 body.dark-mode .add-row-tr td { background:transparent !important; }
-/* tags — darken bg, restore contrast */
+/* tags — completely exempt from dark mode, stay exactly as day mode */
 body.dark-mode .tag-chip,
-body.dark-mode .tag-pill { filter:brightness(.5) saturate(1.2) !important; color:unset !important; }
+body.dark-mode .tag-pill,
+body.dark-mode .tag-chip *,
+body.dark-mode .tag-pill * { filter:none !important; color:unset !important; background:unset !important; }
 /* table borders → subtle dark lines */
 body.dark-mode .grid-table tbody td { border-right-color:#2a2f3d !important; }
 body.dark-mode .grid-table tbody tr { border-bottom-color:#2a2f3d !important; }
