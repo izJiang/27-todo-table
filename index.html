@@ -303,20 +303,120 @@
     `;
     navigator.serviceWorker?.register(URL.createObjectURL(new Blob([swCode], {type:'application/javascript'}))).catch(() => {});
     
+    // ==================== SEED DATA (飞书截图待办) ====================
+    async function seedXueshengBoard() {
+      const SEED_KEY = 'seed_xuesheng_v1';
+      if (loadLocal(SEED_KEY, false)) return; // already seeded
+
+      const boardId = 'seed-board-xuesheng-2026';
+      const cols = [
+        {id:'c0',type:'text',  name:'事项',    width:260},
+        {id:'c1',type:'select',name:'类别',    width:110, options:[
+          {value:'升学',color:'#ff9800'},{value:'毕业',color:'#4caf82'},{value:'香港',color:'#2196f3'}
+        ]},
+        {id:'c2',type:'select',name:'状态',    width:110, options:[
+          {value:'未开始',color:'#9e9e9e'},{value:'进行中',color:'#ff9800'},
+          {value:'已完成',color:'#4caf82'},{value:'已延期',color:'#f44336'}
+        ]},
+        {id:'c3',type:'date',  name:'截止日期',width:140},
+        {id:'c4',type:'text',  name:'备注',    width:200},
+      ];
+
+      const board = {
+        id: boardId,
+        title: '升学毕业待办清单',
+        emoji: '🎓',
+        visibility: 'public',
+        password_hash: null,
+        columns: cols,
+        sorts: [], filters: [], group_by: null,
+        created_at: now(), updated_at: now()
+      };
+
+      // rows from 飞书截图
+      const rowDefs = [
+        // 3月
+        {id:'r1', p:null, c0:'准备学校签证材料', c1:'升学', c2:'进行中', c3:'2026-03-31', c4:'护照、照片、表格等', vis:'public'},
+        {id:'r1a',p:'r1', c0:'身份证/户口本/港澳通行证复印件', c1:'升学', c2:'已延期', c3:'2026-03-31', c4:'', vis:'public'},
+        {id:'r1b',p:'r1', c0:'表格填写', c1:'升学', c2:'已延期', c3:'2026-03-31', c4:'', vis:'public'},
+        {id:'r1c',p:'r1', c0:'申请表打印签名', c1:'升学', c2:'已延期', c3:'2026-03-31', c4:'', vis:'public'},
+        {id:'r1d',p:'r1', c0:'存款时点证明', c1:'升学', c2:'已延期', c3:'2026-03-31', c4:'', vis:'public'},
+        {id:'r1e',p:'r1', c0:'证件照', c1:'升学', c2:'已延期', c3:'2026-03-31', c4:'', vis:'public'},
+        {id:'r2', p:null, c0:'查看香港租房事项', c1:'香港', c2:'未开始', c3:'2026-03-31', c4:'', vis:'public'},
+        {id:'r3', p:null, c0:'完成论文初稿并提交', c1:'毕业', c2:'进行中', c3:'2026-03-25', c4:'初稿截止3月25日', vis:'public'},
+        // 4月
+        {id:'r4', p:null, c0:'跟进学签evisa进度', c1:'升学', c2:'未开始', c3:'2026-04-30', c4:'', vis:'public'},
+        {id:'r5', p:null, c0:'论文修改', c1:'毕业', c2:'未开始', c3:'2026-04-20', c4:'', vis:'public'},
+        {id:'r6', p:null, c0:'毕业答辩', c1:'毕业', c2:'未开始', c3:'2026-04-30', c4:'4月底', vis:'public'},
+        {id:'r7', p:null, c0:'毕业体检', c1:'毕业', c2:'未开始', c3:'2026-04-30', c4:'', vis:'public'},
+        {id:'r8', p:null, c0:'毕业证、学位证、成绩单催促', c1:'升学', c2:'未开始', c3:'2026-04-30', c4:'', vis:'public'},
+        {id:'r9', p:null, c0:'确定香港租房', c1:'香港', c2:'未开始', c3:'2026-04-30', c4:'', vis:'public'},
+        // 5月
+        {id:'r10',p:null, c0:'本科毕业证、学位证', c1:'升学', c2:'未开始', c3:'2026-05-20', c4:'', vis:'public'},
+        {id:'r11',p:null, c0:'办理学信网认证报告', c1:'升学', c2:'未开始', c3:'2026-05-25', c4:'', vis:'public'},
+        {id:'r12',p:null, c0:'换取无条件offer', c1:'升学', c2:'未开始', c3:'2026-05-31', c4:'', vis:'public'},
+        {id:'r13',p:null, c0:'深圳租房开始看房', c1:'香港', c2:'未开始', c3:'2026-05-31', c4:'', vis:'public'},
+        {id:'r14',p:null, c0:'收到学签并打印备份', c1:'升学', c2:'未开始', c3:'2026-05-31', c4:'', vis:'public'},
+        // 6月
+        {id:'r15',p:null, c0:'毕业典礼', c1:'毕业', c2:'未开始', c3:'2026-06-15', c4:'', vis:'public'},
+        {id:'r16',p:null, c0:'筹备香港/深圳租房', c1:'香港', c2:'未开始', c3:'2026-06-30', c4:'', vis:'public'},
+        // 7月
+        {id:'r17',p:null, c0:'宿舍清宿，解决住所', c1:'香港', c2:'未开始', c3:'2026-07-15', c4:'', vis:'public'},
+        {id:'r18',p:null, c0:'驾照科三+科四', c1:'升学', c2:'未开始', c3:'2026-07-31', c4:'', vis:'public'},
+      ];
+
+      const rows = rowDefs.map((r, i) => ({
+        id: r.id,
+        board_id: boardId,
+        parent_id: r.p,
+        done: false,
+        collapsed: false,
+        position: i * 1000,
+        visibility: r.vis || 'public',
+        sync_id: null,
+        cells: { c0: r.c0, c1: r.c1, c2: r.c2, c3: r.c3, c4: r.c4 },
+        created_at: now(),
+        updated_at: now()
+      }));
+
+      // Save locally
+      if (!state.boards.find(b => b.id === boardId)) {
+        state.boards.unshift(board);
+        saveLocal('boards', state.boards);
+      }
+      saveLocal('rows_' + boardId, rows);
+      saveLocal(SEED_KEY, true);
+
+      // Push to Supabase
+      if (state.isOnline) {
+        try {
+          await sb.from('boards').upsert(board);
+          await sb.from('rows').upsert(rows);
+        } catch(e) {}
+      }
+    }
+
     // ==================== SUPABASE ====================
     async function loadBoards() {
       const cached = loadLocal('boards', null);
       if (cached) state.boards = cached;
-      
-      if (!state.isOnline) return;
+
+      if (!state.isOnline) { render(); return; }
       state.syncStatus = 'syncing'; render();
-      
+
       const { data, error } = await sb.from('boards').select('*').order('updated_at', { ascending: false });
       if (!error && data) {
-        state.boards = data;
-        saveLocal('boards', data);
+        // Merge: keep local boards that aren't yet in Supabase (just created, pending sync)
+        const remoteIds = new Set(data.map(b => b.id));
+        const localOnly = (cached || []).filter(b => !remoteIds.has(b.id));
+        state.boards = [...localOnly, ...data];
+        saveLocal('boards', state.boards);
         state.syncStatus = 'ok';
-      } else if (!cached) {
+        // Push any local-only boards to Supabase now
+        for (const b of localOnly) {
+          try { await sb.from('boards').insert(b); } catch(e) {}
+        }
+      } else {
         state.syncStatus = 'offline';
       }
       render();
@@ -778,10 +878,13 @@
       
       state.boards.unshift(board);
       saveLocal('boards', state.boards);
-      if (state.isOnline) await sb.from('boards').insert(board);
+      if (state.isOnline) {
+        const { error } = await sb.from('boards').insert(board);
+        if (error) toast('⚠️ 云端保存失败，已存本地：' + error.message);
+      }
       closeModal();
       render();
-      toast('清单创建成功');
+      toast('清单创建成功 ✅');
     }
     
     async function duplicateBoard(id) {
@@ -1554,8 +1657,10 @@
     window.addEventListener('online', () => { state.isOnline = true; state.syncStatus = 'ok'; loadBoards(); });
     window.addEventListener('offline', () => { state.isOnline = false; state.syncStatus = 'offline'; });
     
-    document.addEventListener('DOMContentLoaded', () => {
-      loadBoards();
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadBoards();
+      await seedXueshengBoard();
+      render(); // re-render after seed
       route();
     });
   </script>
