@@ -312,6 +312,20 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
 .sheet-icon{font-size:18px;width:24px;text-align:center}
 
 
+/* ═══ COLUMN / ROW RESIZE ═══ */
+.col-resizer {
+  position:absolute; right:0; top:0; bottom:0; width:5px;
+  cursor:col-resize; z-index:10;
+}
+.col-resizer:hover, .col-resizer.active { background:var(--accent); opacity:.5; }
+.row-resizer {
+  position:absolute; left:0; right:0; bottom:0; height:5px;
+  cursor:row-resize; z-index:10;
+}
+.row-resizer:hover, .row-resizer.active { background:var(--accent); opacity:.4; }
+body.resizing-col { cursor:col-resize !important; user-select:none !important; }
+body.resizing-row { cursor:row-resize !important; user-select:none !important; }
+
 /* ═══ BATCH BAR ═══ */
 .batch-act{background:rgba(255,255,255,.12);border:none;color:#fff;padding:5px 11px;border-radius:7px;cursor:pointer;font-size:12px;transition:background .15s}
 .batch-act:hover{background:rgba(255,255,255,.22)}
@@ -1700,7 +1714,9 @@ function renderTable(){
         <span class="th-label">${esc(col.label)}</span>
         ${sortInfo?`<span class="th-sort-icon">${sortInfo.dir==='asc'?'↑':'↓'}</span>`:''}
         <button class="th-menu-btn" onclick="event.stopPropagation();openColMenu('${col.id}',this)">⋯</button>
-      </div></th>`;
+      </div>
+      <div class="col-resizer" onmousedown="startColResize(event,'${col.id}')"></div>
+      </th>`;
   });
   hh+=`<th class="add-col-th"><button class="add-col-btn" onclick="openAddCol(this)">＋</button></th>`;
   hh+='</tr>';
@@ -1749,7 +1765,8 @@ function renderRowHtml(row,vi,depth,totalCols){
   const children=S.rows.filter(r=>r.p===row.id);
   const hasChildren=children.length>0;
   const isSel = selectedIds.has(row.id);
-  let h=`<tr class="${row.done?'row-done':''} ${isSel?'row-selected':''}" data-row="${row.id}"
+  const rowH = row.h ? `height:${row.h}px;` : '';
+  let h=`<tr class="${row.done?'row-done':''} ${isSel?'row-selected':''}" data-row="${row.id}" style="${rowH}"
     draggable="${selectMode?'false':'true'}"
     ondragstart="rowDragStart(event,'${row.id}')"
     ondragover="rowDragOver(event,'${row.id}')"
@@ -1787,7 +1804,9 @@ function renderRowHtml(row,vi,depth,totalCols){
       <button class="row-act" onclick="addChild('${row.id}')" title="添加子项">⤵</button>
       <button class="row-act" onclick="duplicateRow('${row.id}')" title="复制行">⎘</button>
       <button class="row-act del" onclick="deleteRow('${row.id}')" title="删除">✕</button>
-    </div></td>`;
+    </div>
+    <div class="row-resizer" onmousedown="startRowResize(event,'${row.id}')"></div>
+    </td>`;
   h+='</tr>';
   return h;
 }
@@ -2782,6 +2801,72 @@ const dmBtn = document.getElementById('darkModeBtn');
 const dmBtnHome = document.getElementById('darkModeBtnHome');
 if(dmBtn) dmBtn.textContent = isDark ? '☀️' : '🌙';
 if(dmBtnHome) dmBtnHome.textContent = isDark ? '☀️' : '🌙';
+
+/* ══════════════════════════════════════
+   COLUMN WIDTH RESIZE (drag right edge)
+══════════════════════════════════════ */
+let _colResizing = null;
+function startColResize(e, colId) {
+  e.preventDefault(); e.stopPropagation();
+  const col = S.columns.find(c => c.id === colId);
+  if (!col) return;
+  const startX = e.clientX;
+  const startW = col.width || 140;
+  _colResizing = colId;
+  document.body.classList.add('resizing-col');
+  e.target.classList.add('active');
+  const onMove = ev => {
+    const newW = Math.max(60, startW + ev.clientX - startX);
+    col.width = newW;
+    const th = document.querySelector(`th[data-col="${colId}"]`);
+    if (th) { th.style.minWidth = newW+'px'; th.style.width = newW+'px'; }
+    // also update all tds in this column live
+    document.querySelectorAll(`td[data-col="${colId}"]`).forEach(td => {
+      td.style.minWidth = newW+'px'; td.style.maxWidth = newW+'px';
+    });
+  };
+  const onUp = () => {
+    document.body.classList.remove('resizing-col');
+    e.target.classList.remove('active');
+    _colResizing = null;
+    save();
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+  };
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+}
+
+/* ══════════════════════════════════════
+   ROW HEIGHT RESIZE (drag bottom edge)
+══════════════════════════════════════ */
+let _rowResizing = null;
+function startRowResize(e, rowId) {
+  e.preventDefault(); e.stopPropagation();
+  const row = S.rows.find(r => r.id === rowId);
+  if (!row) return;
+  const tr = document.querySelector(`tr[data-row="${rowId}"]`);
+  const startY = e.clientY;
+  const startH = tr ? tr.getBoundingClientRect().height : (row.h || 40);
+  _rowResizing = rowId;
+  document.body.classList.add('resizing-row');
+  e.target.classList.add('active');
+  const onMove = ev => {
+    const newH = Math.max(36, startH + ev.clientY - startY);
+    row.h = newH;
+    if (tr) tr.style.height = newH + 'px';
+  };
+  const onUp = () => {
+    document.body.classList.remove('resizing-row');
+    e.target.classList.remove('active');
+    _rowResizing = null;
+    save();
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+  };
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+}
 </script>
 </body>
 </html>
