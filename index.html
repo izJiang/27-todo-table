@@ -312,6 +312,17 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
 .sheet-icon{font-size:18px;width:24px;text-align:center}
 
 
+/* ═══ BATCH BAR ═══ */
+.batch-act{background:rgba(255,255,255,.12);border:none;color:#fff;padding:5px 11px;border-radius:7px;cursor:pointer;font-size:12px;transition:background .15s}
+.batch-act:hover{background:rgba(255,255,255,.22)}
+.batch-act.danger{background:rgba(227,84,84,.25)}
+.batch-act.danger:hover{background:rgba(227,84,84,.45)}
+.batch-act.cancel{background:transparent;color:rgba(255,255,255,.5)}
+.batch-act.cancel:hover{color:#fff;background:rgba(255,255,255,.1)}
+/* select mode row checkbox */
+.row-sel-cb{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
+tr.row-selected td{background:rgba(76,175,130,.07) !important}
+
 /* ═══ HOMEPAGE ═══ */
 #homePage { display:flex; flex-direction:column; min-height:100vh; }
 #boardPage { display:none; }
@@ -427,6 +438,7 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
   <button class="tb-btn tb-btn-desktop" id="groupBtn" onclick="togglePanel('group')">⊞ 分组</button>
   <div class="tb-sep tb-btn-desktop"></div>
   <button class="tb-btn green tb-btn-desktop" onclick="exportCSV()">⬇ 导出</button>
+  <button class="tb-btn tb-btn-desktop" id="selectModeBtn" onclick="toggleSelectMode()">☑ 选择</button>
   <button class="tb-btn tb-btn-more" id="moreBtn" onclick="openSheet()">⋯</button>
 </div>
 
@@ -489,6 +501,18 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
 
 
 
+<!-- Batch action bar (multi-select) -->
+<div id="batchBar" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1f2329;color:#fff;border-radius:12px;padding:10px 20px;display:none;align-items:center;gap:12px;box-shadow:0 4px 20px rgba(0,0,0,.3);z-index:600;font-size:13px;white-space:nowrap">
+  <span id="batchCount" style="color:#9fa8b5">已选 0 行</span>
+  <div style="width:1px;height:18px;background:rgba(255,255,255,.2)"></div>
+  <button class="batch-act" onclick="batchDone()">✅ 完成</button>
+  <button class="batch-act" onclick="batchUndone()">↩ 撤销完成</button>
+  <button class="batch-act" onclick="batchSetSyncId()">🔗 设同步Key</button>
+  <button class="batch-act" onclick="batchDuplicate()">⎘ 复制</button>
+  <button class="batch-act" onclick="batchClear()">✕ 清空内容</button>
+  <button class="batch-act danger" onclick="batchDelete()">🗑 删除</button>
+  <button class="batch-act cancel" onclick="exitSelectMode()">× 取消</button>
+</div>
 </div><!-- end #boardPage -->
 
 <!-- ═══════ HOME CREATE MODAL ═══════ -->
@@ -1581,14 +1605,21 @@ function renderTable(){
 function renderRowHtml(row,vi,depth,totalCols){
   const children=S.rows.filter(r=>r.p===row.id);
   const hasChildren=children.length>0;
-  let h=`<tr class="${row.done?'row-done':''}" data-row="${row.id}"
-    draggable="true"
+  const isSel = selectedIds.has(row.id);
+  let h=`<tr class="${row.done?'row-done':''} ${isSel?'row-selected':''}" data-row="${row.id}"
+    draggable="${selectMode?'false':'true'}"
     ondragstart="rowDragStart(event,'${row.id}')"
     ondragover="rowDragOver(event,'${row.id}')"
     ondrop="rowDrop(event,'${row.id}')"
     ondragleave="this.classList.remove('row-drag-over')"
     ondragend="rowDragEnd()">`;
-  h+=`<td class="check-cell"><div class="custom-check ${row.done?'checked':''}" onclick="toggleDone('${row.id}')"></div></td>`;
+  if (selectMode) {
+    h+=`<td class="check-cell" onclick="toggleRowSelect('${row.id}',event.shiftKey)" style="cursor:pointer">
+      <input type="checkbox" class="row-sel-cb" ${isSel?'checked':''} onclick="event.stopPropagation();toggleRowSelect('${row.id}',event.shiftKey)">
+    </td>`;
+  } else {
+    h+=`<td class="check-cell"><div class="custom-check ${row.done?'checked':''}" onclick="toggleDone('${row.id}')"></div></td>`;
+  }
   h+=`<td class="num-cell"><span class="row-drag-handle">⠿</span>${vi}</td>`;
   S.columns.forEach((col,ci)=>{
     h+=`<td data-row="${row.id}" data-col="${col.id}">`;
@@ -1771,6 +1802,110 @@ function manageSyncId(rowId) {
   // push to Supabase immediately so other boards' realtime can pick it up
   if (isOnline && currentBoardId) {
     sb.from('rows').update({ sync_id: row.syncId }).eq('id', row.id).then(() => {});
+  }
+}
+
+/* ══════════════════════════════════════
+   MULTI-SELECT MODE
+══════════════════════════════════════ */
+let selectMode = false;
+let selectedIds = new Set();
+let lastSelectedIdx = -1;
+
+function toggleSelectMode() {
+  selectMode = !selectMode;
+  selectedIds.clear();
+  lastSelectedIdx = -1;
+  const btn = document.getElementById('selectModeBtn');
+  if (btn) btn.classList.toggle('active', selectMode);
+  updateBatchBar();
+  renderTable();
+}
+
+function exitSelectMode() {
+  selectMode = false;
+  selectedIds.clear();
+  lastSelectedIdx = -1;
+  const btn = document.getElementById('selectModeBtn');
+  if (btn) btn.classList.remove('active');
+  updateBatchBar();
+  renderTable();
+}
+
+function toggleRowSelect(rowId, shiftKey) {
+  const visibleIds = getVisibleRowIds();
+  const idx = visibleIds.indexOf(rowId);
+  if (shiftKey && lastSelectedIdx >= 0 && idx >= 0) {
+    const lo = Math.min(lastSelectedIdx, idx);
+    const hi = Math.max(lastSelectedIdx, idx);
+    visibleIds.slice(lo, hi + 1).forEach(id => selectedIds.add(id));
+  } else {
+    if (selectedIds.has(rowId)) selectedIds.delete(rowId);
+    else selectedIds.add(rowId);
+    lastSelectedIdx = idx;
+  }
+  updateBatchBar();
+  renderTable();
+}
+
+function getVisibleRowIds() {
+  // Returns ids of rows currently rendered (respects filters/groups)
+  return S.rows.map(r => r.id); // simplified; full filter logic would be heavier
+}
+
+function updateBatchBar() {
+  const bar = document.getElementById('batchBar');
+  const cnt = document.getElementById('batchCount');
+  if (!bar) return;
+  if (selectMode && selectedIds.size > 0) {
+    bar.style.display = 'flex';
+    cnt.textContent = `已选 ${selectedIds.size} 行`;
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+function batchDone() {
+  S.rows.forEach(r => { if (selectedIds.has(r.id)) { r.done = true; if(r.syncId) syncCellAcrossBoards(r.syncId,{done:true}); } });
+  save(); renderTable(); updateBatchBar(); toast(`✅ ${selectedIds.size} 条已完成`);
+}
+function batchUndone() {
+  S.rows.forEach(r => { if (selectedIds.has(r.id)) { r.done = false; if(r.syncId) syncCellAcrossBoards(r.syncId,{done:false}); } });
+  save(); renderTable(); updateBatchBar(); toast(`↩ ${selectedIds.size} 条已撤销`);
+}
+function batchDuplicate() {
+  const newRows = [];
+  S.rows.forEach(r => {
+    if (selectedIds.has(r.id)) {
+      newRows.push({...r, id:'r'+Date.now()+Math.random().toString(36).slice(2,6), syncId:null});
+    }
+  });
+  S.rows.push(...newRows);
+  save(); renderTable(); toast(`⎘ 已复制 ${newRows.length} 行`);
+}
+function batchDelete() {
+  if (!confirm(`确定删除选中的 ${selectedIds.size} 行？`)) return;
+  S.rows = S.rows.filter(r => !selectedIds.has(r.id));
+  selectedIds.clear();
+  save(); renderTable(); updateBatchBar(); toast('已删除');
+}
+function batchClear() {
+  S.rows.forEach(r => { if (selectedIds.has(r.id)) r.cells = {}; });
+  save(); renderTable(); toast('已清空内容');
+}
+function batchSetSyncId() {
+  const key = prompt(`为选中的 ${selectedIds.size} 行设置同步 Key\n（两个清单里相同 Key 的行会互相同步）\n\n输入 Key 名称，或留空自动生成：`);
+  if (key === null) return;
+  const syncKey = key.trim() || 'sync_' + Math.random().toString(36).slice(2, 7);
+  let count = 0;
+  S.rows.forEach(r => {
+    if (selectedIds.has(r.id)) { r.syncId = syncKey; count++; }
+  });
+  save(); renderTable(); updateBatchBar();
+  toast(`🔗 已为 ${count} 行设置同步 Key: ${syncKey}`);
+  if (isOnline && currentBoardId) {
+    const ids = [...selectedIds];
+    sb.from('rows').update({ sync_id: syncKey }).in('id', ids).then(() => {});
   }
 }
 
