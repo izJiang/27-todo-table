@@ -657,9 +657,31 @@ function subscribeBoard(boardId) {
       } else if (payload.eventType === 'DELETE') {
         S.rows = S.rows.filter(r => r.id !== payload.old.id);
       }
-      save();
-      renderTable();
-    }).subscribe();
+      save(); renderTable();
+    })
+    // Also subscribe to sync updates from OTHER boards (same sync_id, different board_id)
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'rows' }, payload => {
+      if (payload.new.board_id === boardId) return; // already handled above
+      const syncId = payload.new.sync_id;
+      if (!syncId) return;
+      // Find local rows with same syncId and apply the patch
+      let changed = false;
+      S.rows.forEach(row => {
+        if (row.syncId === syncId) {
+          if (payload.new.done !== undefined) row.done = payload.new.done;
+          if (payload.new.cells) {
+            // merge cells but skip url columns
+            const urlColIds = new Set(S.columns.filter(c=>c.type==='url').map(c=>c.id));
+            Object.entries(payload.new.cells).forEach(([k,v]) => {
+              if (!urlColIds.has(k)) row.cells[k] = v;
+            });
+          }
+          changed = true;
+        }
+      });
+      if (changed) { save(); renderTable(); }
+    })
+    .subscribe();
 }
 
 /* ══════════════════════════════════════════════
@@ -1481,8 +1503,10 @@ function renderRowHtml(row,vi,depth,totalCols){
     }
     h+='</td>';
   });
-  h+=`<td style="border-right:none;position:relative;min-width:80px">
+  const syncIcon = row.syncId ? `<button class="row-act" onclick="manageSyncId('${row.id}')" title="已同步 · 点击管理" style="color:#4caf82">🔗</button>` : `<button class="row-act" onclick="manageSyncId('${row.id}')" title="设为同步行">⬡</button>`;
+  h+=`<td style="border-right:none;position:relative;min-width:100px">
     <div class="row-actions">
+      ${syncIcon}
       <button class="row-act" onclick="addChild('${row.id}')" title="添加子项">⤵</button>
       <button class="row-act" onclick="duplicateRow('${row.id}')" title="复制行">⎘</button>
       <button class="row-act del" onclick="deleteRow('${row.id}')" title="删除">✕</button>
@@ -1616,12 +1640,71 @@ function toggleDone(rowId){
   row.done=!row.done;
   S.rows.forEach(r=>{if(r.p===rowId)r.done=row.done;});
   save();renderTable();
+  // cross-board sync
+  if(row.syncId) syncCellAcrossBoards(row.syncId, {done: row.done});
+}
+
+/* ─────────────────────────────────────
+   SYNC ID — cross-board row sync
+───────────────────────────────────────
+  Each row can have a syncId (short string).
+  Any cell change on a synced row will update
+  ALL rows with the same syncId across all boards
+  via Supabase. URL cells (type=url) are excluded.
+──────────────────────────────────────── */
+function manageSyncId(rowId) {
+  const row = S.rows.find(r => r.id === rowId);
+  if (!row) return;
+  if (row.syncId) {
+    const action = confirm(`此行已有同步ID：${row.syncId}\n\n点「确定」移除同步，点「取消」保留`);
+    if (action) { row.syncId = null; save(); renderTable(); toast('已移除同步'); }
+    return;
+  }
+  const key = prompt('输入同步 Key（两个清单里要同步的行用同一个 Key，如：visa、thesis）\n留空可自动生成');
+  if (key === null) return;
+  row.syncId = key.trim() || 'sync_' + Math.random().toString(36).slice(2, 7);
+  save(); renderTable();
+  toast(`已设置同步 Key：${row.syncId}`);
+  // push to Supabase immediately so other boards' realtime can pick it up
+  if (isOnline && currentBoardId) {
+    sb.from('rows').update({ sync_id: row.syncId }).eq('id', row.id).then(() => {});
+  }
+}
+
+async function syncCellAcrossBoards(syncId, patch) {
+  // patch = { done?, cells? } — never includes url-type cells
+  if (!isOnline || !syncId) return;
+  try {
+    await sb.from('rows').update({ ...patch, updated_at: nowISO() }).eq('sync_id', syncId);
+  } catch(e) {}
+}
+
+function updCellWithSync(rowId, colId, value) {
+  const row = S.rows.find(r => r.id === rowId);
+  if (!row) return;
+  const col = S.columns.find(c => c.id === colId);
+  row.cells[colId] = value;
+  save();
+  // sync non-url cells
+  if (row.syncId && col && col.type !== 'url') {
+    const cellsPatch = { [`cells`]: row.cells };
+    // Supabase jsonb update: send full cells object (simpler than per-key patch)
+    syncCellAcrossBoards(row.syncId, { cells: row.cells });
+  }
 }
 function toggleChildren(rowId){
   const row=S.rows.find(r=>r.id===rowId);if(row){row.col=!row.col;save();renderTable();}
 }
 function toggleGrp(key){collapsedGroups.has(key)?collapsedGroups.delete(key):collapsedGroups.add(key);renderTable();}
-function updCell(rowId,colId,value){const row=S.rows.find(r=>r.id===rowId);if(row){row.cells[colId]=value;save();}}
+function updCell(rowId,colId,value){
+  const row=S.rows.find(r=>r.id===rowId);if(!row)return;
+  const col=S.columns.find(c=>c.id===colId);
+  row.cells[colId]=value;save();
+  // cross-board sync (exclude url cells)
+  if(row.syncId && col && col.type!=='url'){
+    syncCellAcrossBoards(row.syncId, {cells: row.cells});
+  }
+}
 
 /* ═══ TAGS ═══ */
 function rmTag(rowId,colId,optId){
