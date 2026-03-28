@@ -363,24 +363,26 @@ body.dark-mode .tb-btn:hover{background:var(--row-hover);color:var(--text)}
 body.dark-mode .tb-btn.active{background:#1e3a2f;color:var(--accent);border-color:var(--accent)}
 body.dark-mode .row-actions{background:var(--white);border-color:var(--border)}
 body.dark-mode .grp-hdr-row td{background:#161b27 !important}
-/* force ALL td text white in dark mode, including hover/selected states */
-body.dark-mode td,
-body.dark-mode tr:hover td,
-body.dark-mode tr.row-selected td,
-body.dark-mode tr.row-done td,
-body.dark-mode .cell-text,
-body.dark-mode .cell-expand-text,
-body.dark-mode .row-num,
-body.dark-mode .num-cell,
-body.dark-mode .check-cell { color:var(--text) !important; }
-body.dark-mode tr:hover td { background:var(--row-hover) !important; }
-body.dark-mode tr td { background:var(--white) !important; }
-body.dark-mode tr.row-done td { background:var(--white) !important; opacity:.6; }
-body.dark-mode tr.row-selected td { background:rgba(76,175,130,.15) !important; }
-/* add-row button */
+/* ── DARK MODE: nuclear override for ALL table content ── */
+body.dark-mode table,
+body.dark-mode table * { color:#e2e6f0 !important; }
+body.dark-mode tr td { background:#1a1e2a !important; }
+body.dark-mode tr:hover td { background:#1e2334 !important; }
+body.dark-mode tr.row-done td { background:#1a1e2a !important; opacity:.55; }
+body.dark-mode tr.row-selected td { background:rgba(76,175,130,.18) !important; }
 body.dark-mode .add-row-tr td { background:transparent !important; }
-/* drag handle + row number */
-body.dark-mode .row-drag-handle { color:var(--text3) !important; }
+/* tags — darken bg, keep text readable */
+body.dark-mode .tag-chip { filter:brightness(.7) saturate(.8); color:#e2e6f0 !important; }
+/* textarea + input inside cells */
+body.dark-mode td textarea,
+body.dark-mode td input { background:#252a36 !important; color:#e2e6f0 !important; border-color:#363c4d !important; }
+/* group header rows */
+body.dark-mode .grp-hdr-row td { background:#161b27 !important; color:#8b94a8 !important; }
+body.dark-mode .grp-hdr-row td * { color:#8b94a8 !important; }
+/* row actions icons */
+body.dark-mode .row-act { color:#555e72 !important; }
+body.dark-mode .row-act:hover { color:#e2e6f0 !important; background:#2a2f3d !important; }
+body.dark-mode .row-actions { background:#1f2535 !important; border-color:#363c4d !important; }
 body.dark-mode .ctx-menu{background:var(--white);border-color:var(--border)}
 body.dark-mode .ctx-menu-item{color:var(--text)}
 body.dark-mode .ctx-menu-item:hover{background:var(--row-hover)}
