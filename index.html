@@ -591,6 +591,73 @@ body.dark-mode .kb-col-title{color:#e8eaed}
 body.dark-mode .kb-card{background:#252931;border-color:#363b45}
 body.dark-mode .kb-card-title{color:#e8eaed}
 
+/* ── Calendar ── */
+.cal-header { display:flex; align-items:center; justify-content:center; gap:16px; padding:16px 20px 8px; }
+.cal-title { font-size:17px; font-weight:700; color:var(--text); }
+.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:1px; background:var(--border); border-radius:8px; overflow:hidden; margin:0 16px 16px; }
+.cal-dow { background:var(--header-bg); text-align:center; padding:8px 4px; font-size:12px; font-weight:600; color:var(--text2); }
+.cal-cell { background:var(--white); min-height:80px; padding:6px; position:relative; }
+.cal-cell.cal-empty { background:var(--bg); }
+.cal-cell.cal-today { box-shadow:inset 0 0 0 2px var(--accent); }
+.cal-day-num { font-size:12px; font-weight:600; color:var(--text3); margin-bottom:4px; }
+.cal-cell.cal-today .cal-day-num { color:var(--accent); font-weight:800; }
+.cal-chip { font-size:11px; padding:2px 6px; border-radius:4px; background:var(--accent); color:#fff; margin-bottom:2px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; opacity:.9; }
+.cal-chip:hover { opacity:1; }
+.cal-chip.cal-chip-done { background:var(--text3); text-decoration:line-through; opacity:.6; }
+.cal-more { font-size:10px; color:var(--text3); padding:1px 4px; }
+body.dark-mode .cal-cell { background:var(--white); }
+body.dark-mode .cal-dow { background:var(--header-bg); }
+
+/* ── Stats Panel ── */
+.stats-panel-inner { padding:20px; }
+.stats-panel-hdr { display:flex; justify-content:space-between; align-items:center; font-size:16px; font-weight:700; color:var(--text); margin-bottom:20px; }
+.stats-summary { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:20px; }
+.stats-card { background:var(--header-bg); border-radius:10px; padding:14px 12px; text-align:center; }
+.stats-num { font-size:26px; font-weight:800; color:var(--text); }
+.stats-lbl { font-size:11px; color:var(--text3); margin-top:2px; }
+.stats-sec-title { font-size:13px; font-weight:700; color:var(--text2); margin:16px 0 8px; }
+.heat-grid { display:grid; grid-template-columns:repeat(13,1fr); gap:3px; margin-bottom:8px; }
+.heat-cell { aspect-ratio:1; border-radius:2px; }
+.heat-0 { background:var(--border); }
+.heat-1 { background:#b7dfcc; }
+.heat-2 { background:#5dbf91; }
+.heat-3 { background:#3aaa78; }
+.heat-4 { background:#1d7a52; }
+.stats-bars { display:flex; flex-direction:column; gap:6px; }
+.stats-bar-row { display:flex; align-items:center; gap:8px; font-size:12px; }
+.stats-bar-lbl { width:70px; color:var(--text2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex-shrink:0; }
+.stats-bar-track { flex:1; height:8px; background:var(--border); border-radius:4px; overflow:hidden; }
+.stats-bar-fill { height:100%; background:var(--accent); border-radius:4px; }
+.stats-bar-cnt { width:24px; text-align:right; color:var(--text3); flex-shrink:0; }
+
+/* ── Timeline ── */
+.tl-wrap { display:flex; overflow-x:auto; padding:16px; min-height:calc(100vh - 120px); }
+.tl-labels { flex-shrink:0; width:140px; border-right:1px solid var(--border); }
+.tl-lbl-hdr { height:40px; display:flex; align-items:center; font-size:12px; font-weight:600; color:var(--text3); padding:0 8px; border-bottom:1px solid var(--border); }
+.tl-lbl { height:36px; display:flex; align-items:center; font-size:12px; color:var(--text); padding:0 8px; border-bottom:1px solid var(--border); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.tl-lbl.tl-done { opacity:.5; text-decoration:line-through; }
+.tl-grid-wrap { flex:1; overflow-x:auto; }
+.tl-dates { display:flex; border-bottom:1px solid var(--border); }
+.tl-date-cell { min-width:36px; height:40px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:11px; color:var(--text3); border-right:1px solid var(--border); flex-shrink:0; }
+.tl-weekend { background:var(--bg); }
+.tl-today-col { color:var(--accent); font-weight:800; }
+.tl-row-cells { display:flex; }
+.tl-cell { min-width:36px; height:36px; border-right:1px solid var(--border); border-bottom:1px solid var(--border); flex-shrink:0; }
+.tl-bar { background:rgba(76,175,130,.25); }
+.tl-bar-end { background:var(--accent) !important; border-radius:0 4px 4px 0; }
+.tl-overdue .tl-bar { background:rgba(244,67,54,.15) !important; }
+.tl-overdue .tl-bar-end { background:#f44336 !important; }
+.tl-done-row .tl-bar, .tl-done-row .tl-bar-end { background:var(--border) !important; opacity:.5; }
+
+/* ── Priority Matrix ── */
+.matrix-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:16px; height:calc(100vh - 120px); box-sizing:border-box; }
+.matrix-quadrant { border-radius:12px; border:2px solid; padding:12px; overflow-y:auto; }
+.matrix-q-title { font-size:13px; font-weight:700; margin-bottom:2px; }
+.matrix-q-count { font-size:11px; color:var(--text3); margin-bottom:8px; }
+.matrix-card { background:var(--white); border-radius:8px; padding:8px 10px; margin-bottom:6px; font-size:12px; color:var(--text); cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,.06); border:1px solid var(--border); transition:transform .1s; }
+.matrix-card:hover { transform:translateY(-1px); }
+body.dark-mode .matrix-card { background:var(--white); }
+
 /* ── Deadline badges ── */
 .cell-date-badge{display:inline-block;font-size:11px;padding:1px 6px;border-radius:100px;margin-top:2px;font-weight:500}
 
@@ -720,6 +787,11 @@ body.dark-mode .kb-card-title{color:#e8eaed}
   <button class="tb-btn tb-btn-desktop" id="sortBtn" onclick="togglePanel('sort')">↕ 排序</button>
   <button class="tb-btn tb-btn-desktop" id="groupBtn" onclick="togglePanel('group')">⊞ 分组</button>
   <button class="tb-btn tb-btn-desktop" id="kanbanBtn" onclick="toggleKanban()">⊞ 看板</button>
+  <button class="tb-btn tb-btn-desktop" id="calBtn" onclick="toggleCalendar()">📅 日历</button>
+  <button class="tb-btn tb-btn-desktop" id="tlBtn" onclick="toggleTimeline()">🗓️ 时间轴</button>
+  <button class="tb-btn tb-btn-desktop" id="mtxBtn" onclick="toggleMatrix()">🎯 四象限</button>
+  <div class="tb-sep tb-btn-desktop"></div>
+  <button class="tb-btn tb-btn-desktop" onclick="toggleStatsPanel()">📊 统计</button>
   <div class="tb-sep tb-btn-desktop"></div>
   <button class="tb-btn green tb-btn-desktop" onclick="exportCSV()">⬇ 导出</button>
   <button class="tb-btn tb-btn-desktop" id="selectModeBtn" onclick="toggleSelectMode()">☑ 选择</button>
@@ -744,6 +816,15 @@ body.dark-mode .kb-card-title{color:#e8eaed}
 <div id="kanbanView" style="display:none; padding:16px; overflow-x:auto;">
   <div id="kanbanContainer" style="display:flex; gap:16px; min-width:max-content;"></div>
 </div>
+
+<!-- Calendar View -->
+<div id="calendarView" style="display:none;"></div>
+
+<!-- Timeline View -->
+<div id="timelineView" style="display:none;"></div>
+
+<!-- Matrix View -->
+<div id="matrixView" style="display:none;"></div>
 
 <!-- Table -->
 <div class="wrapper">
@@ -1931,9 +2012,15 @@ function renderRowHtml(row,vi,depth,totalCols){
     h+='</td>';
   });
   const syncIcon = row.syncId ? `<button class="row-act" onclick="manageSyncId('${row.id}')" title="已同步 · 点击管理" style="color:#4caf82">🔗</button>` : `<button class="row-act" onclick="manageSyncId('${row.id}')" title="设为同步行">⬡</button>`;
+  const recurIcon = row.recurring ? `<button class="row-act" onclick="setRecurring('${row.id}')" title="重复:${row.recurring}" style="color:var(--accent)">🔁</button>` : `<button class="row-act" onclick="setRecurring('${row.id}')" title="设置重复">🔁</button>`;
+  const reminderIcon = row.reminder ? `<button class="row-act" onclick="setReminder('${row.id}')" title="提醒已设" style="color:#ff9800">⏰</button>` : `<button class="row-act" onclick="setReminder('${row.id}')" title="设置提醒">⏰</button>`;
+  const aiIcon = `<button class="row-act" onclick="aiDecompose('${row.id}')" title="AI拆解任务">🤖</button>`;
   h+=`<td style="border-right:none;position:relative;min-width:100px">
     <div class="row-actions">
       ${syncIcon}
+      ${recurIcon}
+      ${reminderIcon}
+      ${aiIcon}
       <button class="row-act" onclick="addChild('${row.id}')" title="添加子项">⤵</button>
       <button class="row-act" onclick="duplicateRow('${row.id}')" title="复制行">⎘</button>
       <button class="row-act del" onclick="deleteRow('${row.id}')" title="删除">✕</button>
@@ -2084,6 +2171,7 @@ function toggleDone(rowId,event){
   const row=S.rows.find(r=>r.id===rowId);if(!row)return;
   const wasDone = row.done;
   row.done=!row.done;
+  if (row.done) { row.doneDate = new Date().toISOString().split('T')[0]; if(row.recurring) createNextRecurrence(row); }
   S.rows.forEach(r=>{if(r.p===rowId)r.done=row.done;});
   save();renderTable();
   // Confetti animation when completing
@@ -3080,6 +3168,405 @@ function startRowResize(e, rowId) {
   document.addEventListener('mousemove', onMove);
   document.addEventListener('mouseup', onUp);
 }
+
+/* ══════════════════════════════════════
+   BATCH 2 FEATURES
+══════════════════════════════════════ */
+
+/* ─── Feature 1: Calendar View ─── */
+let calendarYear = new Date().getFullYear();
+let calendarMonth = new Date().getMonth();
+let calendarView = false;
+
+function toggleCalendar() {
+  calendarView = !calendarView;
+  if (calendarView) {
+    kanbanMode = false; document.getElementById('kanbanBtn').classList.remove('active');
+    document.getElementById('kanbanView').style.display = 'none';
+    timelineView = false; document.getElementById('timelineView').style.display = 'none';
+    document.getElementById('tlBtn')?.classList.remove('active');
+    matrixView = false; document.getElementById('matrixView').style.display = 'none';
+    document.getElementById('mtxBtn')?.classList.remove('active');
+    document.querySelector('.wrapper').style.display = 'none';
+    document.getElementById('mobileView').style.display = 'none';
+    document.getElementById('calendarView').style.display = 'block';
+    document.getElementById('calBtn')?.classList.add('active');
+    renderCalendar();
+  } else {
+    document.getElementById('calendarView').style.display = 'none';
+    document.querySelector('.wrapper').style.display = '';
+    document.getElementById('mobileView').style.display = '';
+    document.getElementById('calBtn')?.classList.remove('active');
+  }
+}
+
+function renderCalendar() {
+  const dateCol = S.columns.find(c => c.type === 'date');
+  const today = new Date();
+  const year = calendarYear, month = calendarMonth;
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const byDate = {};
+  S.rows.filter(r => !r.p).forEach(r => {
+    if (!dateCol) return;
+    const d = r.cells[dateCol.id];
+    if (d) byDate[d] = (byDate[d] || []).concat(r);
+  });
+  const monthNames = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+  let h = `<div class="cal-header">
+    <button class="tb-btn" onclick="calPrev()">‹</button>
+    <span class="cal-title">${year}年 ${monthNames[month]}</span>
+    <button class="tb-btn" onclick="calNext()">›</button>
+  </div>
+  <div class="cal-grid">
+    <div class="cal-dow">日</div><div class="cal-dow">一</div><div class="cal-dow">二</div>
+    <div class="cal-dow">三</div><div class="cal-dow">四</div><div class="cal-dow">五</div><div class="cal-dow">六</div>`;
+  for (let i = 0; i < firstDay; i++) h += `<div class="cal-cell cal-empty"></div>`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = today.getFullYear()===year && today.getMonth()===month && today.getDate()===d;
+    const rows = byDate[dateStr] || [];
+    h += `<div class="cal-cell ${isToday?'cal-today':''}">
+      <div class="cal-day-num">${d}</div>`;
+    rows.slice(0,3).forEach(r => {
+      const title = r.cells[S.columns[0]?.id] || '无标题';
+      h += `<div class="cal-chip ${r.done?'cal-chip-done':''}" onclick="focusRow('${r.id}')" title="${title}">${title.slice(0,10)}</div>`;
+    });
+    if (rows.length > 3) h += `<div class="cal-more">+${rows.length-3}</div>`;
+    h += `</div>`;
+  }
+  h += `</div>`;
+  document.getElementById('calendarView').innerHTML = h;
+}
+
+function calPrev() { calendarMonth--; if(calendarMonth<0){calendarMonth=11;calendarYear--;} renderCalendar(); }
+function calNext() { calendarMonth++; if(calendarMonth>11){calendarMonth=0;calendarYear++;} renderCalendar(); }
+function focusRow(rowId) {
+  toggleCalendar();
+  if(kanbanMode) toggleKanban();
+  if(timelineView) toggleTimeline();
+  if(matrixView) toggleMatrix();
+  setTimeout(()=>{
+    const el=document.querySelector(`tr[data-row="${rowId}"]`);
+    if(el){el.scrollIntoView({block:'center'});el.style.outline='2px solid var(--accent)';setTimeout(()=>el.style.outline='',1500);}
+  },100);
+}
+
+/* ─── Feature 2: Recurring Tasks ─── */
+function createNextRecurrence(row) {
+  const dateCol = S.columns.find(c => c.type === 'date');
+  if (!dateCol || !row.cells[dateCol.id]) return;
+  const d = new Date(row.cells[dateCol.id]);
+  switch(row.recurring) {
+    case 'daily': d.setDate(d.getDate() + 1); break;
+    case 'weekly': d.setDate(d.getDate() + 7); break;
+    case 'biweekly': d.setDate(d.getDate() + 14); break;
+    case 'monthly': d.setMonth(d.getMonth() + 1); break;
+    default: return;
+  }
+  S.rows.push({
+    id:gid(), p:row.p, done:false, cells:{...row.cells,[dateCol.id]:d.toISOString().split('T')[0]}, pos:row.pos+0.5, recurring:row.recurring
+  });
+  save(); renderTable(); toast('🔁 已创建下次重复任务');
+}
+
+function setRecurring(rowId) {
+  const row = S.rows.find(r => r.id === rowId);
+  if (!row) return;
+  const opts = [{v:'',l:'✕ 不重复'},{v:'daily',l:'📅 每天'},{v:'weekly',l:'📅 每周'},{v:'biweekly',l:'📅 每两周'},{v:'monthly',l:'📅 每月'}];
+  document.getElementById('recurPop')?.remove();
+  const pop = document.createElement('div');
+  pop.id = 'recurPop'; pop.className = 'popover';
+  pop.style.cssText = 'position:fixed;z-index:3000;min-width:140px';
+  pop.innerHTML = opts.map(o=>`<div class="pop-item ${row.recurring===o.v?'pop-item-active':''}" onclick="applyRecurring('${rowId}','${o.v}')">${o.l}</div>`).join('');
+  document.body.appendChild(pop);
+  const rect = event.target.closest('.row-act').getBoundingClientRect();
+  pop.style.top=(rect.bottom+4)+'px'; pop.style.left=rect.left+'px';
+  setTimeout(()=>document.addEventListener('click',function h(){pop.remove();document.removeEventListener('click',h);},{once:true}),10);
+}
+
+function applyRecurring(rowId, val) {
+  const row = S.rows.find(r=>r.id===rowId);
+  if (row) { row.recurring = val||undefined; save(); renderTable(); }
+  const labels={daily:'每天',weekly:'每周',biweekly:'每两周',monthly:'每月'};
+  if(val) toast('🔁 重复：'+labels[val]);
+  document.getElementById('recurPop')?.remove();
+}
+
+/* ─── Feature 3: Reminders ─── */
+setInterval(function checkReminders() {
+  if (!S || !S.rows) return;
+  const now = new Date();
+  S.rows.forEach(row => {
+    if (!row.reminder || row.done || row.reminderFired) return;
+    if (now >= new Date(row.reminder)) {
+      row.reminderFired = true;
+      const title = row.cells[S.columns[0]?.id] || '任务';
+      if (Notification?.permission === 'granted') new Notification('⏰ 任务提醒', {body: title});
+      toast('⏰ 提醒：'+title);
+      const banner = document.createElement('div');
+      banner.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#ff9800;color:#fff;padding:12px 20px;border-radius:10px;z-index:9999;font-weight:600;box-shadow:0 4px 20px rgba(255,152,0,.4);cursor:pointer;max-width:80vw;text-align:center';
+      banner.textContent = '⏰ '+title+' — 点击查看';
+      banner.onclick = () => { banner.remove(); focusRow(row.id); };
+      document.body.appendChild(banner);
+      setTimeout(()=>banner.remove(), 10000);
+      save();
+    }
+  });
+}, 60000);
+
+function setReminder(rowId) {
+  const row = S.rows.find(r=>r.id===rowId);
+  if (!row) return;
+  const dateStr = row.reminder ? new Date(row.reminder).toISOString().slice(0,16) : new Date(Date.now()+3600000).toISOString().slice(0,16);
+  document.querySelectorAll('#reminderPop').forEach(e=>e.remove());
+  const pop = document.createElement('div');
+  pop.id='reminderPop'; pop.className='popover';
+  pop.style.cssText='position:fixed;z-index:3000;padding:12px;min-width:220px';
+  pop.innerHTML=`<div style="font-size:12px;color:var(--text2);margin-bottom:6px">设置提醒时间</div>
+    <input type="datetime-local" id="remInput" value="${dateStr}" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:13px;color:var(--text);background:var(--white)">
+    <div style="display:flex;gap:6px;margin-top:8px">
+      <button onclick="applyReminder('${rowId}')" style="flex:1;padding:6px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px">确定</button>
+      <button onclick="clearReminder('${rowId}')" style="flex:1;padding:6px;background:var(--header-bg);color:var(--text2);border:none;border-radius:6px;cursor:pointer;font-size:13px">清除</button>
+    </div>`;
+  document.body.appendChild(pop);
+  const rect = event.target.closest('.row-act').getBoundingClientRect();
+  pop.style.top=(rect.bottom+4)+'px'; pop.style.left=rect.left+'px';
+  setTimeout(()=>document.addEventListener('click',function h(e){if(!pop.contains(e.target)){pop.remove();document.removeEventListener('click',h);}},{once:true}),10);
+}
+
+function applyReminder(rowId) {
+  const row=S.rows.find(r=>r.id===rowId), val=document.getElementById('remInput')?.value;
+  if(row&&val){row.reminder=new Date(val).toISOString();row.reminderFired=false;save();renderTable();toast('⏰ 提醒已设置');}
+  document.getElementById('reminderPop')?.remove();
+  if(Notification?.permission==='default') Notification.requestPermission();
+}
+
+function clearReminder(rowId) {
+  const row=S.rows.find(r=>r.id===rowId);
+  if(row){delete row.reminder;delete row.reminderFired;save();renderTable();}
+  document.getElementById('reminderPop')?.remove();
+}
+
+/* ─── Feature 4: Stats Panel ─── */
+function toggleStatsPanel() {
+  const panel = document.getElementById('statsPanel');
+  if (!panel) return;
+  const showing = panel.style.display !== 'none';
+  panel.style.display = showing ? 'none' : 'block';
+  if (!showing) renderStatsPanel();
+}
+
+function renderStatsPanel() {
+  const panel = document.getElementById('statsPanel');
+  if (!panel) return;
+  const allRows = S.rows.filter(r => !r.p);
+  const total = allRows.length;
+  const done = allRows.filter(r => r.done).length;
+  const pending = total - done;
+  const today = new Date().toISOString().split('T')[0];
+  const dateCol = S.columns.find(c => c.type === 'date');
+  const overdue = allRows.filter(r => !r.done && dateCol && r.cells[dateCol.id] && r.cells[dateCol.id] < today).length;
+  const rate = total ? Math.round(done/total*100) : 0;
+
+  const doneDates = {};
+  allRows.filter(r => r.done && r.doneDate).forEach(r => { doneDates[r.doneDate] = (doneDates[r.doneDate]||0)+1; });
+  const maxVal = Math.max(1, ...Object.values(doneDates).concat([0]));
+  let heatmapHtml = '<div class="heat-grid">';
+  for (let i = 90; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate()-i);
+    const ds = d.toISOString().split('T')[0];
+    const cnt = doneDates[ds]||0;
+    const intensity = cnt===0?0:Math.min(4,Math.ceil(cnt/maxVal*4));
+    heatmapHtml += `<div class="heat-cell heat-${intensity}" title="${ds}: ${cnt}个完成"></div>`;
+  }
+  heatmapHtml += '</div>';
+
+  const tagCol = S.columns.find(c => c.type==='select'||c.type==='multiselect');
+  let tagBreakdown = '';
+  if (tagCol?.options) {
+    const counts = {};
+    allRows.forEach(r => { const v=r.cells[tagCol.id]; if(v)(Array.isArray(v)?v:[v]).forEach(t=>{counts[t]=(counts[t]||0)+1;}); });
+    const maxCnt = Math.max(1,...Object.values(counts).concat([0]));
+    if (Object.keys(counts).length) tagBreakdown = `<div class="stats-sec-title">${tagCol.label} 分布</div><div class="stats-bars">`+
+      Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="stats-bar-row"><span class="stats-bar-lbl">${k}</span><div class="stats-bar-track"><div class="stats-bar-fill" style="width:${(v/maxCnt*100).toFixed(0)}%"></div></div><span class="stats-bar-cnt">${v}</span></div>`).join('')+'</div>';
+  }
+
+  panel.innerHTML = `<div class="stats-panel-inner">
+    <div class="stats-panel-hdr"><span>📊 数据统计</span><button onclick="toggleStatsPanel()" style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--text3);line-height:1">✕</button></div>
+    <div class="stats-summary">
+      <div class="stats-card"><div class="stats-num">${total}</div><div class="stats-lbl">总任务</div></div>
+      <div class="stats-card" style="background:#edf7f2"><div class="stats-num" style="color:#2d9e6b">${done}</div><div class="stats-lbl">已完成</div></div>
+      <div class="stats-card" style="background:#fff8e6"><div class="stats-num" style="color:#ff9800">${pending}</div><div class="stats-lbl">进行中</div></div>
+      <div class="stats-card" style="background:#fff0f0"><div class="stats-num" style="color:#f44336">${overdue}</div><div class="stats-lbl">已逾期</div></div>
+    </div>
+    <div style="text-align:center;margin-bottom:16px">
+      <svg width="80" height="80" viewBox="0 0 80 80">
+        <circle cx="40" cy="40" r="32" fill="none" stroke="var(--border)" stroke-width="8"/>
+        <circle cx="40" cy="40" r="32" fill="none" stroke="var(--accent)" stroke-width="8" stroke-dasharray="${rate*2.01} 201" stroke-dashoffset="50.25" stroke-linecap="round"/>
+        <text x="40" y="45" text-anchor="middle" font-size="16" font-weight="800" fill="var(--text)">${rate}%</text>
+      </svg>
+      <div style="font-size:12px;color:var(--text3);margin-top:4px">完成率</div>
+    </div>
+    <div class="stats-sec-title">完成热力图 <span style="font-size:11px;font-weight:400;color:var(--text3)">近90天</span></div>
+    ${heatmapHtml}
+    ${tagBreakdown}
+  </div>`;
+}
+
+/* ─── Feature 5: AI Task Decomposition ─── */
+function aiDecompose(rowId) {
+  const row = S.rows.find(r=>r.id===rowId);
+  if (!row) return;
+  const title = row.cells[S.columns[0]?.id]||'';
+  showDecomposeModal(rowId, title, generateSubtasks(title));
+}
+
+function generateSubtasks(title) {
+  const t = title.toLowerCase();
+  if(t.includes('论文')||t.includes('报告')||t.includes('文章')) return ['📋 收集相关资料和文献','📝 整理提纲和框架','✍️ 撰写初稿','🔍 修改和完善内容','✅ 最终校对提交'];
+  if(t.includes('学习')||t.includes('课程')||t.includes('教程')) return ['📚 了解基础概念','🎯 制定学习计划','💻 实践练习','📖 整理学习笔记','🧪 做综合练习'];
+  if(t.includes('项目')||t.includes('开发')||t.includes('功能')) return ['📐 需求分析和设计','🔧 搭建基础架构','💻 核心功能开发','🧪 测试和调试','🚀 部署和上线'];
+  if(t.includes('面试')||t.includes('求职')||t.includes('简历')) return ['📄 更新简历','🔍 研究目标公司','💼 准备面试问题','🎤 模拟面试练习','📧 跟进反馈'];
+  if(t.includes('搬家')||t.includes('租房')||t.includes('住所')) return ['🔍 确定需求和预算','📍 筛选目标房源','🏠 实地看房','📝 签订合同','📦 搬迁入住'];
+  if(t.includes('签证')||t.includes('学签')||t.includes('证件')) return ['📋 整理所需材料清单','📄 填写申请表格','🏦 准备财务证明','📮 提交申请','🔄 跟踪审批进度'];
+  return ['📋 明确目标和范围','📝 制定执行计划','🚀 开始执行第一步','🔍 检查进度','✅ 完成和收尾'];
+}
+
+function showDecomposeModal(rowId, title, subtasks) {
+  document.getElementById('decomposeModal')?.remove();
+  const modal = document.createElement('div');
+  modal.id='decomposeModal';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:5000;display:flex;align-items:center;justify-content:center;padding:20px';
+  modal.innerHTML=`<div style="background:var(--white);border-radius:14px;padding:24px;width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,.2)">
+    <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px">🤖 AI 任务拆解</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:16px">「${title}」</div>
+    <div id="decomposeList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">
+      ${subtasks.map((s,i)=>`<label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg)">
+        <input type="checkbox" checked data-idx="${i}" style="width:16px;height:16px;accent-color:var(--accent);flex-shrink:0">
+        <input type="text" value="${s}" data-text="${i}" style="flex:1;border:none;background:transparent;font-size:13px;color:var(--text);outline:none">
+      </label>`).join('')}
+    </div>
+    <div style="display:flex;gap:8px">
+      <button onclick="confirmDecompose('${rowId}')" style="flex:1;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600">✅ 添加子任务</button>
+      <button onclick="document.getElementById('decomposeModal').remove()" style="padding:10px 16px;background:var(--header-bg);color:var(--text2);border:none;border-radius:8px;cursor:pointer;font-size:14px">取消</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+}
+
+function confirmDecompose(rowId) {
+  const modal=document.getElementById('decomposeModal');
+  if(!modal) return;
+  const row=S.rows.find(r=>r.id===rowId);
+  if(!row) return;
+  const cbs=modal.querySelectorAll('input[type=checkbox]');
+  const txts=modal.querySelectorAll('input[type=text]');
+  let added=0;
+  cbs.forEach((cb,i)=>{ if(cb.checked&&txts[i]?.value.trim()){ S.rows.push({id:gid(),p:rowId,done:false,cells:{[S.columns[0]?.id]:txts[i].value},pos:Date.now()+i}); added++; } });
+  modal.remove();
+  if(added>0){save();renderTable();toast(`🤖 已添加 ${added} 个子任务`);}
+}
+
+/* ─── Feature 6: Timeline/Gantt ─── */
+let timelineView = false;
+function toggleTimeline() {
+  timelineView = !timelineView;
+  const view = document.getElementById('timelineView');
+  if (timelineView) {
+    document.querySelector('.wrapper').style.display='none';
+    document.getElementById('mobileView').style.display='none';
+    document.getElementById('kanbanView').style.display='none';
+    kanbanMode = false; document.getElementById('kanbanBtn').classList.remove('active');
+    calendarView = false; document.getElementById('calendarView').style.display='none';
+    document.getElementById('calBtn')?.classList.remove('active');
+    matrixView = false; document.getElementById('matrixView').style.display='none';
+    document.getElementById('mtxBtn')?.classList.remove('active');
+    view.style.display='block';
+    document.getElementById('tlBtn')?.classList.add('active');
+    renderTimeline();
+  } else {
+    view.style.display='none';
+    document.querySelector('.wrapper').style.display='';
+    document.getElementById('mobileView').style.display='';
+    document.getElementById('tlBtn')?.classList.remove('active');
+  }
+}
+
+function renderTimeline() {
+  const view=document.getElementById('timelineView');
+  const dateCol=S.columns.find(c=>c.type==='date');
+  if(!dateCol){view.innerHTML='<div style="padding:40px;text-align:center;color:var(--text3)">请先添加一个日期类型的列</div>';return;}
+  const today=new Date();today.setHours(0,0,0,0);
+  const days=30;
+  const rows=S.rows.filter(r=>!r.p&&r.cells[dateCol.id]).sort((a,b)=>(a.cells[dateCol.id]||'').localeCompare(b.cells[dateCol.id]||''));
+  if(!rows.length){view.innerHTML='<div style="padding:40px;text-align:center;color:var(--text3)">没有带截止日期的任务</div>';return;}
+  let labelHtml='<div class="tl-labels"><div class="tl-lbl-hdr">任务</div>';
+  rows.forEach(r=>{const t=(r.cells[S.columns[0]?.id]||'').slice(0,14);labelHtml+=`<div class="tl-lbl ${r.done?'tl-done':''}">${t}</div>`;});
+  labelHtml+='</div>';
+  let dateHtml='<div class="tl-dates">';
+  for(let i=0;i<days;i++){const d=new Date(today);d.setDate(d.getDate()+i);const isWE=d.getDay()===0||d.getDay()===6;dateHtml+=`<div class="tl-date-cell ${isWE?'tl-weekend':''} ${i===0?'tl-today-col':''}">${d.getDate()}<br><span style="font-size:9px">${['日','一','二','三','四','五','六'][d.getDay()]}</span></div>`;}
+  dateHtml+='</div>';
+  let rowsHtml='';
+  rows.forEach(r=>{
+    const deadline=new Date(r.cells[dateCol.id]);
+    const endDay=Math.min(days-1,Math.max(0,Math.ceil((deadline-today)/86400000)));
+    const overdue=deadline<today;
+    rowsHtml+=`<div class="tl-row-cells ${overdue?'tl-overdue':''} ${r.done?'tl-done-row':''}">`;
+    for(let i=0;i<days;i++){const inRange=i<=endDay;const isEnd=i===endDay;rowsHtml+=`<div class="tl-cell ${inRange?'tl-bar':''} ${isEnd?'tl-bar-end':''}"></div>`;}
+    rowsHtml+='</div>';
+  });
+  view.innerHTML=`<div style="padding:12px 16px;font-size:15px;font-weight:700;color:var(--text)">🗓️ 时间轴 <span style="font-size:12px;font-weight:400;color:var(--text3)">未来30天</span></div><div class="tl-wrap">${labelHtml}<div class="tl-grid-wrap">${dateHtml}${rowsHtml}</div></div>`;
+}
+
+/* ─── Feature 7: Priority Matrix ─── */
+let matrixView = false;
+function toggleMatrix() {
+  matrixView = !matrixView;
+  const view = document.getElementById('matrixView');
+  if (matrixView) {
+    document.querySelector('.wrapper').style.display='none';
+    document.getElementById('mobileView').style.display='none';
+    document.getElementById('kanbanView').style.display='none';
+    kanbanMode = false; document.getElementById('kanbanBtn').classList.remove('active');
+    calendarView = false; document.getElementById('calendarView').style.display='none';
+    document.getElementById('calBtn')?.classList.remove('active');
+    timelineView = false; document.getElementById('timelineView').style.display='none';
+    document.getElementById('tlBtn')?.classList.remove('active');
+    view.style.display='block';
+    document.getElementById('mtxBtn')?.classList.add('active');
+    renderMatrix();
+  } else {
+    view.style.display='none';
+    document.querySelector('.wrapper').style.display='';
+    document.getElementById('mobileView').style.display='';
+    document.getElementById('mtxBtn')?.classList.remove('active');
+  }
+}
+
+function getQuadrant(row) {
+  if (row.quadrant) return row.quadrant;
+  const priCol=S.columns.find(c=>c.label.includes('优先')||c.label.toLowerCase().includes('priority'));
+  if(priCol){const v=(row.cells[priCol.id]||'').toString().toLowerCase();if(v.includes('高')||v.includes('紧急')||v.includes('p0'))return 'q1';if(v.includes('中')||v.includes('重要')||v.includes('p1'))return 'q2';if(v.includes('低')||v.includes('p2')||v.includes('p3'))return 'q3';}
+  const dateCol=S.columns.find(c=>c.type==='date');
+  if(dateCol&&row.cells[dateCol.id]){const daysLeft=(new Date(row.cells[dateCol.id])-new Date())/86400000;if(daysLeft<3)return 'q1';if(daysLeft<7)return 'q2';}
+  return 'q4';
+}
+
+function renderMatrix() {
+  const view=document.getElementById('matrixView');
+  const rows=S.rows.filter(r=>!r.p&&!r.done);
+  const Q={q1:{label:'🔴 重要且紧急',rows:[],color:'#fff0f0',border:'#f44336'},q2:{label:'🟡 重要不紧急',rows:[],color:'#fff8e6',border:'#ff9800'},q3:{label:'🔵 紧急不重要',rows:[],color:'#f0f4ff',border:'#3b5bdb'},q4:{label:'⚪ 不紧急不重要',rows:[],color:'#f8f9fa',border:'#9aa0ac'}};
+  rows.forEach(r=>{const q=getQuadrant(r);if(Q[q])Q[q].rows.push(r);});
+  const fc=S.columns[0];
+  view.innerHTML=`<div class="matrix-grid">`+Object.entries(Q).map(([qk,q])=>`<div class="matrix-quadrant" style="background:${q.color};border-color:${q.border}" ondragover="event.preventDefault()" ondrop="dropToQuadrant(event,'${qk}')"><div class="matrix-q-title" style="color:${q.border}">${q.label}</div><div class="matrix-q-count">${q.rows.length} 项</div>${q.rows.map(r=>`<div class="matrix-card" draggable="true" ondragstart="event.dataTransfer.setData('rowId','${r.id}')" onclick="toggleMatrix();setTimeout(()=>focusRow('${r.id}'),100)">${(r.cells[fc?.id]||'').slice(0,28)}</div>`).join('')}</div>`).join('')+'</div>';
+}
+
+function dropToQuadrant(e,quadrant){const rowId=e.dataTransfer.getData('rowId');const row=S.rows.find(r=>r.id===rowId);if(row){row.quadrant=quadrant;save();renderMatrix();}}
 </script>
+
+<!-- Stats Panel -->
+<div id="statsPanel" style="display:none;position:fixed;top:0;right:0;width:360px;height:100vh;background:var(--white);border-left:1px solid var(--border);z-index:1000;overflow-y:auto;box-shadow:-4px 0 20px rgba(0,0,0,.08)"></div>
+
 </body>
 </html>
