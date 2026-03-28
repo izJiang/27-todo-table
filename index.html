@@ -2578,19 +2578,57 @@ function editRowInline(rowId) {
 
 /* ═══ FEATURE 4: Completion confetti animation ═══ */
 function confetti(x, y) {
-  const colors = ['#4caf82','#ff9800','#2196f3','#e91e63','#9c27b0','#ffeb3b'];
-  for (let i = 0; i < 12; i++) {
+  const colors = ['#4caf82','#ff9800','#2196f3','#e91e63','#9c27b0','#ffeb3b','#00bcd4','#ff5722','#8bc34a','#ff4081'];
+
+  // 🎊 Phase 1: big burst from click point — 40 particles
+  for (let i = 0; i < 40; i++) {
+    const size = 6 + Math.random() * 10;
     const el = document.createElement('div');
-    el.style.cssText = `position:fixed;left:${x}px;top:${y}px;width:7px;height:7px;border-radius:${Math.random()>0.5?'50%':'2px'};background:${colors[i%colors.length]};pointer-events:none;z-index:9999;transition:all .6s cubic-bezier(.25,.46,.45,.94)`;
+    const isRect = Math.random() > 0.4;
+    el.style.cssText = `position:fixed;left:${x}px;top:${y}px;width:${size}px;height:${isRect ? size*0.4 : size}px;border-radius:${isRect?'2px':'50%'};background:${colors[Math.floor(Math.random()*colors.length)]};pointer-events:none;z-index:9999;transition:transform .9s cubic-bezier(.15,.5,.4,1),opacity .9s ease`;
     document.body.appendChild(el);
-    const angle = (i / 12) * 360;
-    const dist = 40 + Math.random() * 60;
+    const angle = Math.random() * 360;
+    const dist = 80 + Math.random() * 180;
     const rad = angle * Math.PI / 180;
+    const dx = Math.cos(rad) * dist;
+    const dy = Math.sin(rad) * dist - (60 + Math.random() * 80); // bias upward
     setTimeout(() => {
-      el.style.transform = `translate(${Math.cos(rad)*dist}px,${Math.sin(rad)*dist-30}px) rotate(${Math.random()*360}deg)`;
+      el.style.transform = `translate(${dx}px,${dy}px) rotate(${Math.random()*720}deg)`;
       el.style.opacity = '0';
     }, 10);
-    setTimeout(() => el.remove(), 700);
+    setTimeout(() => el.remove(), 1000);
+  }
+
+  // 🎉 Phase 2: rain from top — 30 particles cascade down
+  for (let i = 0; i < 30; i++) {
+    setTimeout(() => {
+      const size = 5 + Math.random() * 9;
+      const el = document.createElement('div');
+      const startX = Math.random() * window.innerWidth;
+      el.style.cssText = `position:fixed;left:${startX}px;top:-20px;width:${size}px;height:${size * (Math.random()>0.5?0.4:1)}px;border-radius:${Math.random()>0.5?'50%':'2px'};background:${colors[Math.floor(Math.random()*colors.length)]};pointer-events:none;z-index:9999;transition:transform 1.2s cubic-bezier(.2,.8,.4,1),opacity 1.2s ease`;
+      document.body.appendChild(el);
+      setTimeout(() => {
+        el.style.transform = `translate(${(Math.random()-0.5)*120}px,${window.innerHeight * 0.7 + Math.random()*200}px) rotate(${Math.random()*540}deg)`;
+        el.style.opacity = '0';
+      }, 20);
+      setTimeout(() => el.remove(), 1400);
+    }, i * 30);
+  }
+
+  // ✨ Phase 3: emoji burst in center
+  const emojis = ['🎉','✨','🌟','💫','🎊','🥳'];
+  for (let i = 0; i < 6; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.textContent = emojis[i];
+      el.style.cssText = `position:fixed;left:${x + (Math.random()-0.5)*60}px;top:${y + (Math.random()-0.5)*60}px;font-size:${20+Math.random()*16}px;pointer-events:none;z-index:9999;transition:transform .8s ease,opacity .8s ease`;
+      document.body.appendChild(el);
+      setTimeout(() => {
+        el.style.transform = `translate(${(Math.random()-0.5)*160}px,${-80-Math.random()*100}px) scale(1.5)`;
+        el.style.opacity = '0';
+      }, 10);
+      setTimeout(() => el.remove(), 900);
+    }, i * 60);
   }
 }
 
