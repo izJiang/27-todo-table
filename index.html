@@ -324,7 +324,74 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
 tr.row-selected td{background:rgba(76,175,130,.07) !important}
 
 /* ── Dark mode ── */
-body.dark-mode{--bg:#1a1d23;--white:#252931;--border:#363b45;--border2:#454c59;--text:#e8eaed;--text2:#9aa0ac;--text3:#636b78;--header-bg:#2a2f38;--row-hover:#2d3240;--accent:#4caf82;--shadow:0 2px 12px rgba(0,0,0,.3)}
+body.dark-mode{
+  --bg:#0f1117;--white:#1a1e2a;--border:#2a2f3d;--border2:#363c4d;
+  --text:#e2e6f0;--text2:#8b94a8;--text3:#555e72;
+  --header-bg:#161b27;--row-hover:#1e2334;--accent:#4caf82;
+  --shadow:0 2px 16px rgba(0,0,0,.5);
+  background:#0f1117;
+}
+/* 星星背景 */
+body.dark-mode::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    radial-gradient(1px 1px at 10% 15%,rgba(255,255,255,.7) 0%,transparent 100%),
+    radial-gradient(1px 1px at 25% 40%,rgba(255,255,255,.5) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 40% 8%,rgba(255,255,255,.8) 0%,transparent 100%),
+    radial-gradient(1px 1px at 55% 30%,rgba(255,255,255,.4) 0%,transparent 100%),
+    radial-gradient(2px 2px at 70% 12%,rgba(255,255,255,.6) 0%,transparent 100%),
+    radial-gradient(1px 1px at 80% 45%,rgba(255,255,255,.5) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 90% 20%,rgba(255,255,255,.7) 0%,transparent 100%),
+    radial-gradient(1px 1px at 15% 60%,rgba(255,255,255,.3) 0%,transparent 100%),
+    radial-gradient(1px 1px at 35% 75%,rgba(255,255,255,.4) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 60% 65%,rgba(255,255,255,.5) 0%,transparent 100%),
+    radial-gradient(1px 1px at 75% 80%,rgba(255,255,255,.3) 0%,transparent 100%),
+    radial-gradient(1px 1px at 92% 70%,rgba(255,255,255,.4) 0%,transparent 100%),
+    radial-gradient(1px 1px at 5% 88%,rgba(255,255,255,.3) 0%,transparent 100%),
+    radial-gradient(2px 2px at 48% 92%,rgba(255,255,255,.5) 0%,transparent 100%),
+    radial-gradient(1px 1px at 85% 95%,rgba(255,255,255,.3) 0%,transparent 100%);
+}
+/* homepage card dark fix */
+body.dark-mode .board-card{background:var(--white);border-color:var(--border);color:var(--text)}
+body.dark-mode .board-card-title{color:var(--text)}
+body.dark-mode .board-card-meta{color:var(--text2)}
+body.dark-mode .board-card-time{color:var(--text3)}
+body.dark-mode .hp-bar{background:var(--white);border-color:var(--border)}
+body.dark-mode .hp-title{color:var(--text)}
+/* table cell text fix */
+body.dark-mode td{color:var(--text)}
+body.dark-mode th{color:var(--text2);background:var(--header-bg)}
+body.dark-mode .cell-text{color:var(--text);background:transparent}
+body.dark-mode textarea.cell-text{background:var(--white);color:var(--text)}
+body.dark-mode .topbar{background:var(--white);border-color:var(--border)}
+body.dark-mode .title-display{color:var(--text)}
+body.dark-mode .stats-bar{background:var(--white);border-color:var(--border);color:var(--text2)}
+body.dark-mode .panel{background:var(--white);border-color:var(--border)}
+body.dark-mode .panel-title{color:var(--text)}
+body.dark-mode .group-sel,.form-select{background:var(--white);color:var(--text);border-color:var(--border)}
+body.dark-mode .modal-box{background:var(--white);color:var(--text)}
+body.dark-mode .modal-title{color:var(--text)}
+body.dark-mode .popover{background:var(--white);border-color:var(--border)}
+body.dark-mode .pop-item{color:var(--text)}
+body.dark-mode .pop-item:hover{background:var(--row-hover)}
+body.dark-mode .add-row-btn{color:var(--text3)}
+body.dark-mode .add-row-btn:hover{color:var(--accent);background:var(--row-hover)}
+body.dark-mode .chip{background:#1e3a2f;color:#4caf82}
+body.dark-mode .tb-btn{background:var(--header-bg);color:var(--text2);border-color:var(--border)}
+body.dark-mode .tb-btn:hover{background:var(--row-hover);color:var(--text)}
+body.dark-mode .tb-btn.active{background:#1e3a2f;color:var(--accent);border-color:var(--accent)}
+body.dark-mode .row-actions{background:var(--white);border-color:var(--border)}
+body.dark-mode .grp-hdr-row td{background:#161b27 !important}
+body.dark-mode .ctx-menu{background:var(--white);border-color:var(--border)}
+body.dark-mode .ctx-menu-item{color:var(--text)}
+body.dark-mode .ctx-menu-item:hover{background:var(--row-hover)}
+body.dark-mode .hp-modal,.pass-modal{background:var(--white)}
+body.dark-mode .hp-modal h3{color:var(--text)}
+body.dark-mode .hp-form-row label{color:var(--text2)}
+body.dark-mode .hp-form-row input{background:var(--header-bg);color:var(--text);border-color:var(--border)}
+/* twinkle animation */
+@keyframes twinkle{0%,100%{opacity:.7}50%{opacity:.2}}
+body.dark-mode::before{animation:twinkle 3s ease-in-out infinite alternate}
 
 /* ── Kanban ── */
 .kb-col{background:#f7f8fa;border-radius:12px;padding:10px;min-width:220px;max-width:260px}
