@@ -808,8 +808,10 @@ function showBoardMenu(e, boardId) {
   const menu = document.createElement('div');
   menu.className = 'ctx-menu';
   menu.id = 'ctxMenu';
+  const vis = board ? board.visibility : 'public';
   menu.innerHTML = `
     <div class="ctx-menu-item" onclick="closeCtxMenu();renameBoardPrompt('${boardId}')">✏️ 重命名</div>
+    <div class="ctx-menu-item" onclick="closeCtxMenu();toggleBoardVisibility('${boardId}')">${vis==='private'?'🌐 改为公开':'🔒 改为私密'}</div>
     <div class="ctx-menu-item" onclick="closeCtxMenu();duplicateBoard('${boardId}')">⎘ 复制清单</div>
     <div class="ctx-menu-item" onclick="closeCtxMenu();copyShareLink('${boardId}')">🔗 复制分享链接</div>
     <div class="ctx-menu-item danger" onclick="closeCtxMenu();deleteBoardConfirm('${boardId}')">🗑 删除</div>
@@ -831,6 +833,33 @@ async function renameBoardPrompt(boardId) {
   saveHomeBoards();
   if (isOnline) await sb.from('boards').update({title: board.title, updated_at: board.updated_at}).eq('id', boardId);
   renderHome();
+}
+
+async function toggleBoardVisibility(boardId) {
+  const board = homeBoards.find(b => b.id === boardId);
+  if (!board) return;
+  if (board.visibility === 'private') {
+    // private → public: just flip
+    board.visibility = 'public';
+    board.password_hash = null;
+    board.updated_at = nowISO();
+    saveHomeBoards();
+    if (isOnline) await sb.from('boards').update({visibility:'public', password_hash:null, updated_at:board.updated_at}).eq('id', boardId);
+    renderHome();
+    toast('已改为公开 🌐');
+  } else {
+    // public → private: ask for password
+    const pw = prompt('设置访问密码（留空则取消）');
+    if (pw === null) return;
+    if (!pw.trim()) { toast('密码不能为空'); return; }
+    board.visibility = 'private';
+    board.password_hash = await sha256(pw.trim());
+    board.updated_at = nowISO();
+    saveHomeBoards();
+    if (isOnline) await sb.from('boards').update({visibility:'private', password_hash:board.password_hash, updated_at:board.updated_at}).eq('id', boardId);
+    renderHome();
+    toast('已改为私密 🔒');
+  }
 }
 
 async function duplicateBoard(boardId) {
