@@ -833,6 +833,7 @@ function showBoardMenu(e, boardId) {
   const vis = board ? board.visibility : 'public';
   menu.innerHTML = `
     <div class="ctx-menu-item" onclick="closeCtxMenu();renameBoardPrompt('${boardId}')">✏️ 重命名</div>
+    <div class="ctx-menu-item" onclick="closeCtxMenu();changeBoardEmoji('${boardId}')">😊 更换图标</div>
     <div class="ctx-menu-item" onclick="closeCtxMenu();toggleBoardVisibility('${boardId}')">${vis==='private'?'🌐 改为公开':'🔒 改为私密'}</div>
     <div class="ctx-menu-item" onclick="closeCtxMenu();duplicateBoard('${boardId}')">⎘ 复制清单</div>
     <div class="ctx-menu-item" onclick="closeCtxMenu();copyShareLink('${boardId}')">🔗 复制分享链接</div>
@@ -855,6 +856,42 @@ async function renameBoardPrompt(boardId) {
   saveHomeBoards();
   if (isOnline) await sb.from('boards').update({title: board.title, updated_at: board.updated_at}).eq('id', boardId);
   renderHome();
+}
+
+function changeBoardEmoji(boardId) {
+  const board = homeBoards.find(b => b.id === boardId);
+  if (!board) return;
+  // Build a floating emoji picker modal
+  const overlay = document.createElement('div');
+  overlay.className = 'hp-modal-overlay';
+  overlay.style.zIndex = '800';
+  overlay.innerHTML = `
+    <div class="hp-modal" style="max-width:360px">
+      <h3>😊 选择图标</h3>
+      <div class="emoji-grid" id="emojiPickerGrid" style="margin-bottom:16px"></div>
+      <div class="hp-modal-btns">
+        <button class="hp-btn-cancel" onclick="this.closest('.hp-modal-overlay').remove()">取消</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  // Fill emoji grid
+  const grid = overlay.querySelector('#emojiPickerGrid');
+  grid.innerHTML = EMOJIS.map(e =>
+    `<div class="emoji-opt${e===board.emoji?' sel':''}" style="font-size:24px;width:40px;height:40px" data-e="${e}" onclick="applyBoardEmoji('${boardId}','${e}',this.closest('.hp-modal-overlay'))">${e}</div>`
+  ).join('');
+  overlay.addEventListener('click', e => { if(e.target === overlay) overlay.remove(); });
+}
+
+async function applyBoardEmoji(boardId, emoji, overlay) {
+  const board = homeBoards.find(b => b.id === boardId);
+  if (!board) return;
+  board.emoji = emoji;
+  board.updated_at = nowISO();
+  saveHomeBoards();
+  if (isOnline) await sb.from('boards').update({ emoji, updated_at: board.updated_at }).eq('id', boardId);
+  overlay.remove();
+  renderHome();
+  toast('图标已更新 ' + emoji);
 }
 
 async function toggleBoardVisibility(boardId) {
@@ -932,7 +969,24 @@ function copyShareLink(boardId) {
 /* ══════════════════════════════════════════════
    CREATE BOARD MODAL
 ══════════════════════════════════════════════ */
-const EMOJIS = ['📋','✅','🎯','📌','🚀','🌟','💡','🏆','📚','🎓','🏠','💼','❤️','🌸','🧩','🎵','🌈','⚡','🔥','💎','🌿','🎨','📊','🔑','🛠'];
+const EMOJIS = [
+  // 工作学习
+  '📋','✅','🎯','📌','📝','📊','📈','📉','🗂','📁','📂','🗃','📑','📄','🖊','✏️','📐','📏',
+  // 成就目标
+  '🚀','🌟','💡','🏆','🥇','🎖','🏅','⭐','🌠','💫','✨','🎉','🎊','🎗',
+  // 生活
+  '🏠','🏡','🛋','🛁','🧹','🧺','🪴','🌱','🌿','🍃','🌸','🌺','🌻','🌼','🍀',
+  // 人物情感
+  '❤️','🧡','💛','💚','💙','💜','🖤','🤍','💗','💖','💝','😊','🥰','💪','🙌',
+  // 旅行生活
+  '✈️','🚗','🚢','🗺','🧳','🏖','🏔','🗼','🎡','🎢',
+  // 食物
+  '☕','🍵','🧋','🍰','🎂','🍣','🍜','🥗',
+  // 学业
+  '🎓','📚','🔬','🔭','🧪','🧬','💻','⌨️','🖥','📱',
+  // 其他好看的
+  '🌈','⚡','🔥','💎','🎨','🎵','🎮','🧩','🎭','🪄','🔮','🌙','☀️','🌊','🦋','🦄',
+];
 let createModalVis = 'public';
 
 function showCreateModal() {
