@@ -69,14 +69,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue"
 
 /* ── Table wrapper ── */
 .wrapper{padding:12px 18px 80px;overflow-x:auto}
-.table-wrap{background:var(--white);border-radius:12px;border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden}
-.grid-table{width:100%;border-collapse:collapse}
+.table-wrap{background:var(--white);border-radius:12px;border:1px solid #e5e7eb;box-shadow:none;overflow:hidden}
+.grid-table{width:100%;border-collapse:collapse;font-size:14px;color:#1f2329}
 
 /* Head */
-.grid-table thead tr{background:var(--header-bg)}
-.grid-table thead th{padding:0;border-right:1px solid var(--border);border-bottom:2px solid var(--border2);position:relative;user-select:none}
+.grid-table thead tr{background:#f7f8fa}
+.grid-table thead th{padding:0;border-right:1px solid #e4e6ea;border-bottom:1.5px solid #e4e6ea;position:relative;user-select:none;height:40px}
 .grid-table thead th:last-child{border-right:none}
-.th-inner{display:flex;align-items:center;padding:9px 12px;gap:5px;font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;min-height:38px;cursor:default}
+.th-inner{display:flex;align-items:center;padding:0 12px;gap:5px;font-size:13px;font-weight:500;color:#646a73;min-height:40px;cursor:default}
 .th-drag-handle{cursor:col-resize;color:var(--text3);font-size:13px;padding:0 2px;opacity:0;transition:opacity .15s}
 th:hover .th-drag-handle{opacity:1}
 .th-menu-btn{opacity:0;background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:0 2px;line-height:1;margin-left:auto;flex-shrink:0}
@@ -91,51 +91,53 @@ th:hover .th-menu-btn{opacity:1}
 .th-drag-over-right{border-right:2px solid var(--accent) !important}
 
 /* Body */
-.grid-table tbody tr{border-bottom:1px solid var(--border);transition:background .08s}
+.grid-table tbody tr{border-bottom:1px solid #f0f1f3;transition:background .1s}
 .grid-table tbody tr:last-child{border-bottom:none}
-.grid-table tbody tr:hover{background:var(--row-hover)}
-.grid-table tbody tr.row-done{opacity:.5}
+.grid-table tbody tr:hover{background:#f5f7fa}
+.grid-table tbody tr.row-done{}
+.grid-table tbody tr.row-done td .cell-text-wrap,
+.grid-table tbody tr.row-done td .cell-text-view{text-decoration:line-through;color:#c0c4cc}
 .grid-table tbody tr.row-drag-over{box-shadow:inset 0 2px 0 var(--accent)}
 .grid-table tbody tr.row-dragging{opacity:.4}
-.grid-table tbody td{padding:0;border-right:1px solid var(--border);vertical-align:top;position:relative}
+.grid-table tbody td{padding:0;border-right:1px solid #f0f1f3;vertical-align:middle;position:relative;height:40px}
 .grid-table tbody td:last-child{border-right:none}
-.check-cell{width:40px;text-align:center;padding:10px 0;vertical-align:middle !important}
-.num-cell{text-align:center;color:var(--text3);font-size:12px;padding:10px 4px;vertical-align:middle !important;cursor:grab}
+.check-cell{width:48px;text-align:center;padding:0;vertical-align:middle !important}
+.num-cell{text-align:center;color:#9fa8b5;font-size:12px;padding:0 4px;vertical-align:middle !important;cursor:grab}
 .num-cell:active{cursor:grabbing}
-.row-drag-handle{opacity:0;color:var(--text3);font-size:13px}
+.row-drag-handle{opacity:0;color:#9fa8b5;font-size:13px}
 tr:hover .row-drag-handle{opacity:1}
-.custom-check{width:18px;height:18px;border:2px solid var(--border2);border-radius:5px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;background:#fff}
+.custom-check{width:16px;height:16px;border:2px solid #c9cdd4;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;background:#fff;flex-shrink:0}
 .custom-check.checked{background:var(--accent);border-color:var(--accent)}
-.custom-check.checked::after{content:'';width:4px;height:8px;border:2px solid #fff;border-top:none;border-left:none;transform:rotate(45deg) translateY(-1px)}
+.custom-check.checked::after{content:'';width:3px;height:6px;border:2px solid #fff;border-top:none;border-left:none;transform:rotate(45deg) translateY(-1px)}
 
 /* Indent */
-.indent-wrap{display:flex;align-items:flex-start}
+.indent-wrap{display:flex;align-items:center;height:40px}
 .indent-spacer{flex-shrink:0}
-.toggle-btn{background:none;border:none;cursor:pointer;color:var(--text3);font-size:11px;padding:11px 3px 0 0;line-height:1;flex-shrink:0;transition:color .1s}
+.toggle-btn{background:none;border:none;cursor:pointer;color:#9fa8b5;font-size:11px;padding:0 4px 0 0;line-height:1;flex-shrink:0;transition:color .1s}
 .toggle-btn.no-children{opacity:0;pointer-events:none}
-.toggle-btn:hover{color:var(--text)}
+.toggle-btn:hover{color:#646a73}
 .cell-inner{flex:1;min-width:0}
-.add-child-btn{display:none;background:none;border:none;cursor:pointer;color:var(--text3);font-size:11px;padding:2px 5px;border-radius:4px;margin-top:2px}
+.add-child-btn{display:none;background:none;border:none;cursor:pointer;color:#9fa8b5;font-size:11px;padding:2px 5px;border-radius:4px}
 tr:hover .add-child-btn{display:inline-flex;align-items:center;gap:3px}
 .add-child-btn:hover{color:var(--accent);background:#eaf7f0}
 
 /* Text cell */
-.cell-text-wrap{padding:9px 12px;min-height:38px;cursor:text}
-.cell-text-view{font-size:14px;color:var(--text);line-height:1.5;word-break:break-all;white-space:pre-wrap}
+.cell-text-wrap{padding:0 12px;min-height:40px;display:flex;align-items:center;cursor:text}
+.cell-text-view{font-size:14px;color:#1f2329;line-height:1.5;word-break:break-all;white-space:pre-wrap}
 .cell-text-view.clamped{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;white-space:normal}
 .cell-expand-btn{font-size:11px;color:var(--accent);background:none;border:none;cursor:pointer;padding:2px 0;display:block;margin-top:2px}
 .cell-expand-btn:hover{text-decoration:underline}
-.cell-edit-ta{display:none;width:100%;border:none;outline:none;background:transparent;font-size:14px;color:var(--text);resize:none;overflow:hidden;line-height:1.5;min-height:20px;padding:0;font-family:inherit}
+.cell-edit-ta{display:none;width:100%;border:none;outline:none;background:transparent;font-size:14px;color:#1f2329;resize:none;overflow:hidden;line-height:1.5;min-height:20px;padding:8px 12px;font-family:inherit}
 .cell-text-wrap.editing .cell-text-view,.cell-text-wrap.editing .cell-expand-btn{display:none}
 .cell-text-wrap.editing .cell-edit-ta{display:block}
-td.cell-focus{box-shadow:inset 0 0 0 2px var(--accent);background:#fafffd !important}
+td.cell-focus{box-shadow:inset 0 0 0 2px #366ef4;background:#f5f7fa !important}
 
 /* Select cell */
-.cell-select-wrap{padding:6px 8px;min-height:38px;display:flex;align-items:center;flex-wrap:wrap;gap:4px;cursor:pointer}
-.tag-pill{display:inline-flex;align-items:center;gap:3px;font-size:12px;font-weight:600;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.cell-select-wrap{padding:4px 12px;min-height:40px;display:flex;align-items:center;flex-wrap:wrap;gap:4px;cursor:pointer}
+.tag-pill{display:inline-flex;align-items:center;gap:3px;font-size:12px;font-weight:500;padding:2px 8px;border-radius:100px;white-space:nowrap}
 .tag-rm{cursor:pointer;opacity:.5;font-size:11px;line-height:1}
 .tag-rm:hover{opacity:1}
-.cell-add-hint{color:var(--text3);font-size:16px;line-height:1}
+.cell-add-hint{color:#9fa8b5;font-size:16px;line-height:1}
 
 /* URL cell */
 .cell-url-wrap{padding:6px 10px;min-height:38px;display:flex;flex-direction:column;gap:4px}
@@ -150,76 +152,77 @@ td:hover .url-add-btn{display:block}
 .url-add-btn:hover{text-decoration:underline}
 
 /* Date */
-.cell-date{width:100%;border:none;outline:none;background:transparent;font-size:13px;color:var(--text);padding:10px 12px;cursor:pointer;min-height:38px;display:block}
+.cell-date{width:100%;border:none;outline:none;background:transparent;font-size:14px;color:#1f2329;padding:0 12px;cursor:pointer;height:40px;display:block}
 .cell-date::-webkit-calendar-picker-indicator{opacity:.4;cursor:pointer}
 
 /* Number */
-.cell-num-wrap{padding:9px 12px;min-height:38px;cursor:text;text-align:right;font-size:14px;color:var(--text)}
+.cell-num-wrap{padding:0 12px;height:40px;cursor:text;display:flex;align-items:center;justify-content:flex-end;font-size:14px;color:#1f2329}
 
 /* Checkbox col type */
-.cell-bool-wrap{padding:10px 12px;min-height:38px;display:flex;align-items:center}
+.cell-bool-wrap{padding:0 12px;height:40px;display:flex;align-items:center}
 
 /* Row actions */
-.row-actions{position:absolute;right:6px;top:6px;display:none;gap:2px;background:var(--white);border:1px solid var(--border);border-radius:6px;padding:2px 3px;box-shadow:0 2px 8px rgba(0,0,0,.08);z-index:20}
+.row-actions{position:absolute;right:6px;top:4px;display:none;gap:2px;background:#fff;border:1px solid #e4e6ea;border-radius:6px;padding:2px 3px;box-shadow:0 2px 8px rgba(0,0,0,.08);z-index:20}
 tr:hover .row-actions{display:flex}
-.row-act{background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;padding:2px 5px;border-radius:4px;transition:all .1s}
-.row-act:hover{color:var(--text);background:var(--header-bg)}
+.row-act{background:none;border:none;cursor:pointer;color:#9fa8b5;font-size:13px;padding:2px 5px;border-radius:4px;transition:all .1s}
+.row-act:hover{color:#646a73;background:#f5f7fa}
 .row-act.del:hover{color:#e35454;background:#fff0f0}
 
 /* Add row */
 .add-row-tr td{padding:0;border-right:none !important;border-bottom:none !important}
-.add-row-btn{display:flex;align-items:center;gap:7px;padding:10px 16px;color:var(--text3);font-size:13px;cursor:pointer;transition:color .15s,background .15s;width:100%;background:none;border:none;text-align:left;border-top:1px solid var(--border)}
-.add-row-btn:hover{color:var(--accent);background:#f4fdf8}
-.add-col-th{background:var(--header-bg);border-left:1px solid var(--border);width:46px !important;min-width:46px}
-.add-col-btn{width:100%;height:38px;display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;color:var(--text3);font-size:20px}
+.add-row-btn{display:flex;align-items:center;gap:7px;padding:10px 16px;color:#646a73;font-size:13px;cursor:pointer;transition:color .15s,background .15s;width:100%;background:none;border:none;text-align:left;border-top:1px dashed #e4e6ea}
+.add-row-btn:hover{color:var(--accent);background:#f5f7fa}
+.add-col-th{background:#f7f8fa;border-left:1px solid #e4e6ea;width:46px !important;min-width:46px}
+.add-col-btn{width:100%;height:40px;display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;color:#9fa8b5;font-size:20px}
 .add-col-btn:hover{color:var(--accent)}
 
 /* Group header */
-.group-hdr-tr td{padding:0;background:var(--header-bg);border-bottom:1px solid var(--border)}
-.group-hdr-inner{display:flex;align-items:center;gap:8px;padding:7px 14px;font-size:13px;font-weight:700;color:var(--text2);cursor:pointer;user-select:none}
-.group-hdr-inner:hover{color:var(--text)}
-.gtoggle{font-size:11px;transition:transform .2s;display:inline-block}
+.group-hdr-tr td{padding:0;background:#f7f8fa;border-bottom:1px solid #f0f1f3}
+.group-hdr-inner{display:flex;align-items:center;gap:10px;padding:7px 14px;font-size:13px;font-weight:500;color:#646a73;cursor:pointer;user-select:none}
+.group-hdr-inner:hover{color:#1f2329}
+.gtoggle{font-size:11px;transition:transform .2s;display:inline-block;color:#9fa8b5}
 .gtoggle.col{transform:rotate(-90deg)}
-.gcnt{font-size:11px;background:rgba(0,0,0,.06);padding:1px 7px;border-radius:10px;color:var(--text3);font-weight:500}
-.gdone{font-size:11px;background:#eaf7f0;padding:1px 7px;border-radius:10px;color:var(--accent2);font-weight:500}
+.gbadge{font-size:12px;font-weight:500;padding:2px 10px;border-radius:100px;background:#dee0e3;color:#1f2329}
+.gcnt{font-size:12px;color:#9fa8b5;font-weight:400}
+.gdone{font-size:11px;background:#eaf7f0;padding:2px 8px;border-radius:100px;color:var(--accent2);font-weight:500}
 
 /* Popover */
 .popover-mask{position:fixed;inset:0;z-index:999}
-.popover{position:fixed;z-index:1000;background:var(--white);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.14);min-width:220px;overflow:hidden;animation:fadeIn .12s ease;max-height:80vh;overflow-y:auto}
+.popover{position:fixed;z-index:1000;background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);min-width:220px;overflow:hidden;animation:fadeIn .12s ease;max-height:80vh;overflow-y:auto}
 @keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
-.pop-title{font-size:11px;font-weight:700;color:var(--text3);padding:10px 14px 5px;text-transform:uppercase;letter-spacing:.4px;background:var(--white);border-bottom:1px solid var(--border)}
-.pop-item{display:flex;align-items:center;gap:9px;padding:8px 14px;cursor:pointer;transition:background .1s;font-size:13px}
-.pop-item:hover{background:var(--row-hover)}
+.pop-title{font-size:12px;font-weight:500;color:#9fa8b5;padding:10px 14px 6px;background:#fff;border-bottom:1px solid #f0f1f3}
+.pop-item{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;transition:background .1s;font-size:13px;color:#1f2329}
+.pop-item:hover{background:#f5f7fa}
 .pop-item.danger:hover{background:#fff0f0;color:#e35454}
 .pop-icon{width:20px;text-align:center;font-size:14px}
-.pop-div{height:1px;background:var(--border);margin:4px 0}
-.pop-search{padding:8px 12px;border-bottom:1px solid var(--border)}
-.pop-search input{width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 9px;font-size:13px;outline:none}
-.pop-search input:focus{border-color:var(--accent)}
-.tag-opt-item{display:flex;align-items:center;gap:8px;padding:6px 14px;cursor:pointer;transition:background .1s}
-.tag-opt-item:hover{background:var(--row-hover)}
+.pop-div{height:1px;background:#f0f1f3;margin:4px 0}
+.pop-search{padding:8px 12px;border-bottom:1px solid #f0f1f3}
+.pop-search input{width:100%;border:1px solid #e5e7eb;border-radius:6px;padding:6px 10px;font-size:13px;outline:none;color:#1f2329}
+.pop-search input:focus{border-color:#366ef4}
+.tag-opt-item{display:flex;align-items:center;gap:8px;padding:7px 14px;cursor:pointer;transition:background .1s}
+.tag-opt-item:hover{background:#f5f7fa}
 .tag-opt-item.sel::after{content:'✓';margin-left:auto;color:var(--accent);font-weight:700}
 .color-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
-.add-opt-row{display:flex;align-items:center;gap:7px;padding:8px 14px;border-top:1px solid var(--border)}
-.add-opt-row input{flex:1;border:1.5px solid var(--border);border-radius:6px;padding:5px 9px;font-size:13px;outline:none}
-.add-opt-row input:focus{border-color:var(--accent)}
+.add-opt-row{display:flex;align-items:center;gap:7px;padding:8px 14px;border-top:1px solid #f0f1f3}
+.add-opt-row input{flex:1;border:1px solid #e5e7eb;border-radius:6px;padding:6px 10px;font-size:13px;outline:none;color:#1f2329}
+.add-opt-row input:focus{border-color:#366ef4}
 .add-opt-row button{background:var(--accent);color:#fff;border:none;border-radius:6px;padding:5px 11px;font-size:12px;font-weight:600;cursor:pointer}
 
 /* Col editor */
-.col-editor{padding:12px 14px;display:flex;flex-direction:column;gap:9px;min-width:240px}
-.col-editor label{font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.4px}
-.col-editor input,.col-editor select{border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;width:100%}
-.col-editor input:focus,.col-editor select:focus{border-color:var(--accent)}
+.col-editor{padding:12px 14px;display:flex;flex-direction:column;gap:10px;min-width:240px}
+.col-editor label{font-size:11px;color:#646a73;font-weight:500;text-transform:uppercase;letter-spacing:.4px}
+.col-editor input,.col-editor select{border:1px solid #e5e7eb;border-radius:7px;padding:8px 11px;font-size:13px;color:#1f2329;outline:none;width:100%;background:#fff}
+.col-editor input:focus,.col-editor select:focus{border-color:#366ef4}
 .col-type-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px}
-.ctype-btn{background:var(--header-bg);border:1.5px solid var(--border);border-radius:7px;padding:6px 4px;font-size:12px;cursor:pointer;text-align:center;transition:all .15s;display:flex;align-items:center;gap:4px;justify-content:center;white-space:nowrap}
+.ctype-btn{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:7px;padding:7px 5px;font-size:12px;cursor:pointer;text-align:center;transition:all .15s;display:flex;align-items:center;gap:4px;justify-content:center;white-space:nowrap;color:#646a73}
 .ctype-btn:hover{border-color:var(--accent);color:var(--accent)}
-.ctype-btn.active{border-color:var(--accent);background:#eaf7f0;color:var(--accent);font-weight:700}
-.col-editor-btns{display:flex;gap:7px;justify-content:flex-end}
-.btn-sm{border:none;border-radius:6px;padding:6px 13px;font-size:12px;font-weight:600;cursor:pointer}
+.ctype-btn.active{border-color:var(--accent);background:#eaf7f0;color:var(--accent);font-weight:600}
+.col-editor-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
+.btn-sm{border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
 .btn-sm.primary{background:var(--accent);color:#fff}
 .btn-sm.primary:hover{background:var(--accent2)}
-.btn-sm.ghost{background:var(--header-bg);color:var(--text2)}
-.btn-sm.ghost:hover{background:var(--border)}
+.btn-sm.ghost{background:#f5f7fa;color:#646a73}
+.btn-sm.ghost:hover{background:#e5e7eb;color:#1f2329}
 
 /* Modal */
 .modal-mask{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:2000;display:flex;align-items:center;justify-content:center}
@@ -271,25 +274,25 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
 }
 
 /* ── Cards ── */
-.m-card{background:#fff;border-radius:12px;border:1px solid var(--border);box-shadow:0 1px 6px rgba(0,0,0,.06);padding:13px 14px;margin-bottom:8px;transition:opacity .2s;position:relative}
-.m-card.done{opacity:.45}
+.m-card{background:#fff;border-radius:12px;border:1px solid #e5e7eb;box-shadow:0 1px 3px rgba(0,0,0,.04);padding:13px 14px;margin-bottom:8px;transition:opacity .2s;position:relative}
+.m-card.done{opacity:.5}
 .m-card.child{margin-left:18px;border-left:3px solid var(--accent);border-radius:0 12px 12px 0}
 .m-card-top{display:flex;align-items:flex-start;gap:10px}
 .m-card-check{flex-shrink:0;margin-top:2px}
-.m-card-title{flex:1;font-size:15px;font-weight:600;line-height:1.45;color:var(--text);word-break:break-all}
-.m-card-title.struck{text-decoration:line-through;color:var(--text3)}
-.m-toggle{background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer;padding:2px 4px;flex-shrink:0;margin-top:1px}
+.m-card-title{flex:1;font-size:15px;font-weight:500;line-height:1.45;color:#1f2329;word-break:break-all}
+.m-card-title.struck{text-decoration:line-through;color:#c0c4cc}
+.m-toggle{background:none;border:none;color:#9fa8b5;font-size:11px;cursor:pointer;padding:2px 4px;flex-shrink:0;margin-top:1px}
 .m-card-body{margin-top:8px;display:flex;flex-direction:column;gap:5px}
 .m-field{display:flex;align-items:center;flex-wrap:wrap;gap:4px;font-size:12px}
-.m-field-lbl{color:var(--text3);flex-shrink:0;margin-right:2px}
-.m-card-footer{display:flex;align-items:center;gap:6px;margin-top:10px;padding-top:8px;border-top:1px solid var(--border)}
-.m-card-num{font-size:11px;color:var(--text3);margin-right:auto}
-.m-btn{background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:12px;color:var(--text2);cursor:pointer;-webkit-tap-highlight-color:transparent}
-.m-btn:active{background:var(--header-bg)}
+.m-field-lbl{color:#9fa8b5;flex-shrink:0;margin-right:2px}
+.m-card-footer{display:flex;align-items:center;gap:6px;margin-top:10px;padding-top:8px;border-top:1px solid #f0f1f3}
+.m-card-num{font-size:11px;color:#9fa8b5;margin-right:auto}
+.m-btn{background:none;border:1px solid #e5e7eb;border-radius:6px;padding:4px 10px;font-size:12px;color:#646a73;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .1s}
+.m-btn:active{background:#f5f7fa}
 .m-btn.del:active{color:#e35454;border-color:#e35454}
-.m-grp-hdr{font-size:13px;font-weight:700;color:var(--text2);padding:12px 4px 6px;display:flex;align-items:center;gap:8px;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.m-gcnt{font-size:11px;background:rgba(0,0,0,.06);padding:1px 7px;border-radius:10px}
-.m-gdone{font-size:11px;background:#eaf7f0;padding:1px 7px;border-radius:10px;color:var(--accent2)}
+.m-grp-hdr{font-size:13px;font-weight:600;color:#646a73;padding:12px 4px 6px;display:flex;align-items:center;gap:8px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.m-gcnt{font-size:11px;background:#f5f7fa;padding:2px 8px;border-radius:100px;color:#9fa8b5}
+.m-gdone{font-size:11px;background:#eaf7f0;padding:2px 8px;border-radius:100px;color:var(--accent2)}
 
 /* ── FAB ── */
 .fab{position:fixed;bottom:calc(28px + env(safe-area-inset-bottom,0px));right:20px;width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;font-size:28px;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(76,175,130,.5);display:none;align-items:center;justify-content:center;z-index:500;-webkit-tap-highlight-color:transparent;transition:transform .12s}
@@ -312,27 +315,29 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
 /* ═══ HOMEPAGE ═══ */
 #homePage { display:flex; flex-direction:column; min-height:100vh; }
 #boardPage { display:none; }
-.hp-bar { background:#fff; border-bottom:1px solid var(--border); padding:0 20px; height:54px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:300; box-shadow:0 1px 6px rgba(0,0,0,.06); }
-.hp-title { font-size:18px; font-weight:700; }
-.hp-new-btn { background:var(--accent); color:#fff; border:none; padding:8px 16px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; }
+.hp-bar { background:#fff; border-bottom:1px solid #e5e7eb; padding:0 20px; height:54px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:300; box-shadow:0 1px 6px rgba(0,0,0,.04); }
+.hp-title { font-size:18px; font-weight:700; color:#1f2329; }
+.hp-new-btn { background:var(--accent); color:#fff; border:none; padding:8px 16px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; transition:background .15s; }
 .hp-new-btn:hover { background:var(--accent2); }
 .hp-body { padding:20px; max-width:1100px; margin:0 auto; width:100%; }
 .hp-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-top:8px; }
 @media(min-width:640px){ .hp-grid { grid-template-columns:repeat(3,1fr); } }
 @media(min-width:960px){ .hp-grid { grid-template-columns:repeat(4,1fr); } }
-.board-card { background:#fff; border-radius:14px; border:1px solid var(--border); padding:18px; cursor:pointer; transition:all .2s; box-shadow:0 1px 4px rgba(0,0,0,.06); position:relative; min-height:130px; }
-.board-card:hover { box-shadow:0 6px 20px rgba(0,0,0,.1); transform:translateY(-2px); }
+.board-card { background:#fff; border-radius:12px; border:1px solid #e5e7eb; padding:18px; cursor:pointer; transition:all .15s; box-shadow:0 1px 2px rgba(0,0,0,.04); position:relative; min-height:130px; overflow:hidden; }
+.board-card:hover { box-shadow:0 4px 12px rgba(0,0,0,.08); transform:translateY(-1px); border-color:#d0d4dc; }
+.board-card-progress { position:absolute; bottom:0; left:0; right:0; height:4px; background:#f0f1f3; }
+.board-card-progress-bar { height:100%; background:var(--accent); border-radius:0 2px 2px 0; transition:width .3s ease; }
 .board-card-emoji { font-size:30px; margin-bottom:8px; line-height:1; }
-.board-card-title { font-size:15px; font-weight:700; margin-bottom:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.board-card-meta { font-size:12px; color:var(--text3); display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-.vis-badge { font-size:11px; padding:2px 6px; border-radius:4px; }
+.board-card-title { font-size:15px; font-weight:600; margin-bottom:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#1f2329; }
+.board-card-meta { font-size:12px; color:#646a73; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.vis-badge { font-size:11px; padding:2px 8px; border-radius:100px; font-weight:500; }
 .vis-badge.public { background:#eaf7f0; color:#2d7a4f; }
 .vis-badge.private { background:#fff0f0; color:#c0476e; }
-.board-card-time { font-size:11px; color:var(--text3); margin-top:8px; }
-.board-card-menu-btn { position:absolute; top:10px; right:10px; background:transparent; border:none; cursor:pointer; font-size:18px; color:var(--text3); width:30px; height:30px; border-radius:6px; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .15s; }
+.board-card-time { font-size:11px; color:#9fa8b5; margin-top:8px; }
+.board-card-menu-btn { position:absolute; top:10px; right:10px; background:transparent; border:none; cursor:pointer; font-size:18px; color:#9fa8b5; width:30px; height:30px; border-radius:6px; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .15s; }
 .board-card:hover .board-card-menu-btn { opacity:1; }
-.board-card-menu-btn:hover { background:var(--header-bg); color:var(--text); }
-.hp-empty { text-align:center; padding:60px 20px; color:var(--text3); }
+.board-card-menu-btn:hover { background:#f5f7fa; color:#646a73; }
+.hp-empty { text-align:center; padding:60px 20px; color:#9fa8b5; }
 .hp-empty-icon { font-size:48px; margin-bottom:12px; }
 
 /* ═══ HOMEPAGE MODAL ═══ */
@@ -810,6 +815,7 @@ function renderHome() {
     const rows = rowsLocal ? rowsLocal.rows || [] : [];
     const total = rows.length;
     const done = rows.filter(r => r.done).length;
+    const progress = total > 0 ? (done / total * 100) : 0;
     const timeStr = b.updated_at ? new Date(b.updated_at).toLocaleDateString('zh-CN',{month:'short',day:'numeric'}) : '';
     return `<div class="board-card" onclick="openBoard('${b.id}')">
       <button class="board-card-menu-btn" onclick="event.stopPropagation();showBoardMenu(event,'${b.id}')">⋯</button>
@@ -820,6 +826,7 @@ function renderHome() {
         <span class="vis-badge ${b.visibility||'public'}">${b.visibility==='private'?'🔒 私密':'🌐 公开'}</span>
       </div>
       <div class="board-card-time">${timeStr ? '更新于 '+timeStr : ''}</div>
+      <div class="board-card-progress"><div class="board-card-progress-bar" style="width:${progress}%"></div></div>
     </div>`;
   }).join('');
 }
@@ -1051,11 +1058,38 @@ async function confirmCreateBoard() {
    SEED DATA (飞书截图)
 ══════════════════════════════════════════════ */
 async function seedIfNeeded() {
-  if (localStorage.getItem('seed_done_v1')) return;
-  const SEED_ID = 'seed-board-xuesheng-v1';
-  if (homeBoards.find(b => b.id === SEED_ID)) { localStorage.setItem('seed_done_v1','1'); return; }
+  if (localStorage.getItem('seed_done_v3')) return;
+  const SEED_ID = 'seed-board-xuesheng-v3';
+  if (homeBoards.find(b => b.id === SEED_ID)) { localStorage.setItem('seed_done_v3','1'); return; }
 
-  const cols = DEF.columns.map(c => ({...c}));
+  const cols = [
+    {id:'c0', type:'text',   label:'待办事项',   width:280},
+    {id:'c1', type:'select', label:'处理时间',   width:100, options:[
+      {id:'m3',label:'3月',colorIdx:6},
+      {id:'m4',label:'4月',colorIdx:5},
+      {id:'m5',label:'5月',colorIdx:4},
+      {id:'m6',label:'6月',colorIdx:1},
+      {id:'m7',label:'7月',colorIdx:3},
+    ]},
+    {id:'c2', type:'select', label:'tag',        width:110, options:[
+      {id:'o1',label:'升学',colorIdx:0},
+      {id:'o2',label:'毕业',colorIdx:1},
+      {id:'o3',label:'香港',colorIdx:2},
+    ]},
+    {id:'c3', type:'date',   label:'截止日期',   width:130},
+    {id:'c4', type:'select', label:'距离截止日', width:120, options:[
+      {id:'d1',label:'已延期',colorIdx:7},
+      {id:'d2',label:'进行中',colorIdx:5},
+      {id:'d3',label:'未开始',colorIdx:6},
+    ]},
+    {id:'c5', type:'bool',   label:'是否已完成', width:110},
+    {id:'c6', type:'select', label:'优先级',     width:110, options:[
+      {id:'p1',label:'P0-紧急',colorIdx:7},
+      {id:'p2',label:'P1-一般',colorIdx:5},
+      {id:'p3',label:'P2-低',  colorIdx:1},
+    ]},
+    {id:'c7', type:'text',   label:'执行人',     width:100},
+  ];
   const board = {
     id: SEED_ID, title: '升学毕业待办清单', emoji: '🎓', visibility: 'public',
     password_hash: null, columns: cols, sorts: [], filters: [], group_by: [],
@@ -1069,33 +1103,33 @@ async function seedIfNeeded() {
     columns: cols,
     groupBy: [], filters: [], sorts: [],
     rows: [
-      {id:'r1', p:null,col:false,done:false,cells:{c0:'准备学校签证材料',c1:['o1'],c2:['s2'],c3:'2026-03-31',c4:[],c5:'护照、照片、表格等'}},
-      {id:'r1a',p:'r1', col:false,done:false,cells:{c0:'身份证/户口本/港澳通行证复印件',c1:['o1'],c2:['s4'],c3:'2026-03-31',c4:[],c5:''}},
-      {id:'r1b',p:'r1', col:false,done:false,cells:{c0:'表格填写',c1:['o1'],c2:['s4'],c3:'2026-03-31',c4:[],c5:''}},
-      {id:'r1c',p:'r1', col:false,done:false,cells:{c0:'申请表打印签名',c1:['o1'],c2:['s4'],c3:'2026-03-31',c4:[],c5:''}},
-      {id:'r1d',p:'r1', col:false,done:false,cells:{c0:'存款时点证明',c1:['o1'],c2:['s4'],c3:'2026-03-31',c4:[],c5:''}},
-      {id:'r1e',p:'r1', col:false,done:false,cells:{c0:'证件照',c1:['o1'],c2:['s4'],c3:'2026-03-31',c4:[],c5:''}},
-      {id:'r2', p:null,col:false,done:false,cells:{c0:'查看香港租房事项',c1:['o3'],c2:['s1'],c3:'2026-03-31',c4:[],c5:''}},
-      {id:'r3', p:null,col:false,done:false,cells:{c0:'完成论文初稿并提交',c1:['o2'],c2:['s2'],c3:'2026-03-25',c4:[],c5:'初稿截止3月25日'}},
-      {id:'r4', p:null,col:false,done:false,cells:{c0:'跟进学签evisa进度',c1:['o1'],c2:['s1'],c3:'2026-04-30',c4:[],c5:''}},
-      {id:'r5', p:null,col:false,done:false,cells:{c0:'论文修改',c1:['o2'],c2:['s1'],c3:'2026-04-20',c4:[],c5:''}},
-      {id:'r6', p:null,col:false,done:false,cells:{c0:'毕业答辩',c1:['o2'],c2:['s1'],c3:'2026-04-30',c4:[],c5:'4月底'}},
-      {id:'r7', p:null,col:false,done:false,cells:{c0:'毕业体检',c1:['o2'],c2:['s1'],c3:'2026-04-30',c4:[],c5:''}},
-      {id:'r8', p:null,col:false,done:false,cells:{c0:'毕业证、学位证、成绩单',c1:['o1','o2'],c2:['s1'],c3:'2026-04-30',c4:[],c5:''}},
-      {id:'r9', p:null,col:false,done:false,cells:{c0:'确定香港租房',c1:['o3'],c2:['s1'],c3:'2026-04-30',c4:[],c5:''}},
-      {id:'r10',p:null,col:false,done:false,cells:{c0:'本科毕业证、学位证',c1:['o1'],c2:['s1'],c3:'2026-05-20',c4:[],c5:''}},
-      {id:'r11',p:null,col:false,done:false,cells:{c0:'办理学信网认证报告',c1:['o1'],c2:['s1'],c3:'2026-05-25',c4:[],c5:''}},
-      {id:'r12',p:null,col:false,done:false,cells:{c0:'换取无条件offer',c1:['o1'],c2:['s1'],c3:'2026-05-31',c4:[],c5:''}},
-      {id:'r13',p:null,col:false,done:false,cells:{c0:'深圳租房开始看房',c1:['o3'],c2:['s1'],c3:'2026-05-31',c4:[],c5:''}},
-      {id:'r14',p:null,col:false,done:false,cells:{c0:'收到学签并打印备份',c1:['o1'],c2:['s1'],c3:'2026-05-31',c4:[],c5:''}},
-      {id:'r15',p:null,col:false,done:false,cells:{c0:'毕业典礼',c1:['o2'],c2:['s1'],c3:'2026-06-15',c4:[],c5:''}},
-      {id:'r16',p:null,col:false,done:false,cells:{c0:'筹备香港/深圳租房',c1:['o3'],c2:['s1'],c3:'2026-06-30',c4:[],c5:''}},
-      {id:'r17',p:null,col:false,done:false,cells:{c0:'宿舍清宿，解决住所',c1:['o3'],c2:['s1'],c3:'2026-07-15',c4:[],c5:''}},
-      {id:'r18',p:null,col:false,done:false,cells:{c0:'驾照科三+科四',c1:[],c2:['s1'],c3:'2026-07-31',c4:[],c5:''}},
+      {id:'r1', p:null,col:false,done:false,cells:{c0:'准备学校签证材料(护照、照片等)',c1:['m3'],c2:['o1'],c4:['d1'],c5:false,c6:['p2'],c7:''}},
+      {id:'r1a',p:'r1', col:false,done:false,cells:{c0:'身份证/户口本/港澳通行证复印件+资料包',c1:['m3'],c2:['o1'],c4:['d1'],c5:false,c7:''}},
+      {id:'r1b',p:'r1', col:false,done:false,cells:{c0:'表格填写',c1:['m3'],c2:['o1'],c4:['d1'],c5:false,c7:''}},
+      {id:'r1c',p:'r1', col:false,done:false,cells:{c0:'申请表打印签名',c1:['m3'],c2:['o1'],c4:['d1'],c5:false,c7:''}},
+      {id:'r1d',p:'r1', col:false,done:false,cells:{c0:'存款时点证明',c1:['m3'],c2:['o1'],c4:['d1'],c5:false,c7:''}},
+      {id:'r1e',p:'r1', col:false,done:false,cells:{c0:'证件照',c1:['m3'],c2:['o1'],c4:['d1'],c5:false,c7:''}},
+      {id:'r2', p:null,col:false,done:false,cells:{c0:'查看香港租房事项',c1:['m3'],c2:['o3'],c4:['d1'],c5:false,c7:''}},
+      {id:'r3', p:null,col:false,done:false,cells:{c0:'完成论文初稿并提交',c1:['m3'],c2:['o2'],c4:['d1'],c5:false,c7:''}},
+      {id:'r4', p:null,col:false,done:false,cells:{c0:'跟进学签evisa进度',c1:['m4'],c2:['o1'],c4:['d1'],c5:false,c7:''}},
+      {id:'r5', p:null,col:false,done:false,cells:{c0:'论文修改',c1:['m4'],c2:['o2'],c4:['d1'],c5:false,c7:''}},
+      {id:'r6', p:null,col:false,done:false,cells:{c0:'毕业答辩',c1:['m4'],c2:['o2'],c4:['d1'],c5:false,c7:''}},
+      {id:'r7', p:null,col:false,done:false,cells:{c0:'毕业体检',c1:['m4'],c2:['o2'],c4:['d1'],c5:false,c7:''}},
+      {id:'r8', p:null,col:false,done:false,cells:{c0:'毕业证、学位证、成绩单催促',c1:['m4'],c2:['o1','o2'],c4:['d1'],c5:false,c7:''}},
+      {id:'r9', p:null,col:false,done:false,cells:{c0:'若香港租房要敲定',c1:['m4'],c2:['o3'],c4:['d1'],c5:false,c7:''}},
+      {id:'r10',p:null,col:false,done:false,cells:{c0:'本科毕业证、学位证',c1:['m5'],c2:['o1'],c4:['d1'],c5:false,c6:['p2'],c7:''}},
+      {id:'r11',p:null,col:false,done:false,cells:{c0:'办理学信网认证报告',c1:['m5'],c2:['o1'],c4:['d1'],c5:false,c7:''}},
+      {id:'r12',p:null,col:false,done:false,cells:{c0:'换取无条件offer',c1:['m5'],c2:['o1'],c4:['d1'],c5:false,c7:''}},
+      {id:'r13',p:null,col:false,done:false,cells:{c0:'深圳租房开始看房',c1:['m5'],c2:['o3'],c4:['d1'],c5:false,c7:''}},
+      {id:'r14',p:null,col:false,done:false,cells:{c0:'收到学签并打印备份',c1:['m5'],c2:['o1'],c4:['d1'],c5:false,c7:''}},
+      {id:'r15',p:null,col:false,done:false,cells:{c0:'毕业典礼',c1:['m6'],c2:['o2'],c4:['d3'],c3:'2026-06-15',c5:false,c7:''}},
+      {id:'r16',p:null,col:false,done:false,cells:{c0:'筹备香港/深圳租房',c1:['m6'],c2:['o3'],c4:['d3'],c5:false,c7:''}},
+      {id:'r17',p:null,col:false,done:false,cells:{c0:'宿舍清宿，解决住所',c1:['m7'],c2:['o3'],c4:['d3'],c5:false,c7:''}},
+      {id:'r18',p:null,col:false,done:false,cells:{c0:'驾照科三+科四',c1:['m7'],c4:['d3'],c5:false,c7:''}},
     ]
   };
   localStorage.setItem(STORE_PREFIX + SEED_ID, JSON.stringify(seedState));
-  localStorage.setItem('seed_done_v1', '1');
+  localStorage.setItem('seed_done_v3', '1');
 
   if (isOnline) {
     try {
@@ -1142,42 +1176,57 @@ const DEF={
   title:'27的升学毕业待办清单',
   groupBy:[],filters:[],sorts:[],
   columns:[
-    {id:'c0',type:'text',  label:'事项',    width:260},
-    {id:'c1',type:'select',label:'类别',    width:110,options:[
-      {id:'o1',label:'升学',colorIdx:0},{id:'o2',label:'毕业',colorIdx:1},{id:'o3',label:'香港',colorIdx:2}
+    {id:'c0', type:'text',   label:'待办事项',   width:280},
+    {id:'c1', type:'select', label:'处理时间',   width:100, options:[
+      {id:'m3',label:'3月',colorIdx:6},
+      {id:'m4',label:'4月',colorIdx:5},
+      {id:'m5',label:'5月',colorIdx:4},
+      {id:'m6',label:'6月',colorIdx:1},
+      {id:'m7',label:'7月',colorIdx:3},
     ]},
-    {id:'c2',type:'select',label:'状态',    width:110,options:[
-      {id:'s1',label:'未开始',colorIdx:7},{id:'s2',label:'进行中',colorIdx:5},
-      {id:'s3',label:'已完成',colorIdx:1},{id:'s4',label:'已延期',colorIdx:0}
+    {id:'c2', type:'select', label:'tag',        width:110, options:[
+      {id:'o1',label:'升学',colorIdx:0},
+      {id:'o2',label:'毕业',colorIdx:1},
+      {id:'o3',label:'香港',colorIdx:2},
     ]},
-    {id:'c3',type:'date',  label:'截止日期',width:140},
-    {id:'c4',type:'url',   label:'参考链接',width:200},
-    {id:'c5',type:'text',  label:'备注',    width:180},
+    {id:'c3', type:'date',   label:'截止日期',   width:130},
+    {id:'c4', type:'select', label:'距离截止日', width:120, options:[
+      {id:'d1',label:'已延期',colorIdx:7},
+      {id:'d2',label:'进行中',colorIdx:5},
+      {id:'d3',label:'未开始',colorIdx:6},
+    ]},
+    {id:'c5', type:'bool',   label:'是否已完成', width:110},
+    {id:'c6', type:'select', label:'优先级',     width:110, options:[
+      {id:'p1',label:'P0-紧急',colorIdx:7},
+      {id:'p2',label:'P1-一般',colorIdx:5},
+      {id:'p3',label:'P2-低',  colorIdx:1},
+    ]},
+    {id:'c7', type:'text',   label:'执行人',     width:100},
   ],
   rows:[
-    {id:'r1', p:null,col:false,done:false,cells:{c0:'准备学校签证材料',     c1:['o1'],c2:['s2'],c3:'2026-03-31',c4:[],c5:'护照、照片、表格等'}},
-    {id:'r1a',p:'r1', col:false,done:false,cells:{c0:'身份证/户口本/港澳通行证复印件',c1:['o1'],c2:['s4'],c3:'2026-03-31',c4:[],c5:''}},
-    {id:'r1b',p:'r1', col:false,done:false,cells:{c0:'表格填写',             c1:['o1'],c2:['s4'],c3:'2026-03-31',c4:[],c5:''}},
-    {id:'r1c',p:'r1', col:false,done:false,cells:{c0:'申请表打印签名',       c1:['o1'],c2:['s4'],c3:'2026-03-31',c4:[],c5:''}},
-    {id:'r1d',p:'r1', col:false,done:false,cells:{c0:'存款时点证明',         c1:['o1'],c2:['s4'],c3:'2026-03-31',c4:[],c5:''}},
-    {id:'r1e',p:'r1', col:false,done:false,cells:{c0:'证件照',               c1:['o1'],c2:['s4'],c3:'2026-03-31',c4:[],c5:''}},
-    {id:'r2', p:null, col:false,done:false,cells:{c0:'查看香港租房事项',     c1:['o3'],c2:['s1'],c3:'2026-03-31',c4:[],c5:''}},
-    {id:'r3', p:null, col:false,done:false,cells:{c0:'完成论文初稿并提交',   c1:['o2'],c2:['s2'],c3:'2026-03-25',c4:[],c5:'初稿截止3月25日'}},
-    {id:'r4', p:null, col:false,done:false,cells:{c0:'跟进学签evisa进度',    c1:['o1'],c2:['s1'],c3:'2026-04-30',c4:[],c5:''}},
-    {id:'r5', p:null, col:false,done:false,cells:{c0:'论文修改',             c1:['o2'],c2:['s1'],c3:'2026-04-20',c4:[],c5:''}},
-    {id:'r6', p:null, col:false,done:false,cells:{c0:'毕业答辩',             c1:['o2'],c2:['s1'],c3:'2026-04-30',c4:[],c5:'4月底'}},
-    {id:'r7', p:null, col:false,done:false,cells:{c0:'毕业体检',             c1:['o2'],c2:['s1'],c3:'2026-04-30',c4:[],c5:''}},
-    {id:'r8', p:null, col:false,done:false,cells:{c0:'毕业证、学位证、成绩单',c1:['o1','o2'],c2:['s1'],c3:'2026-04-30',c4:[],c5:''}},
-    {id:'r9', p:null, col:false,done:false,cells:{c0:'确定香港租房',         c1:['o3'],c2:['s1'],c3:'2026-04-30',c4:[],c5:''}},
-    {id:'r10',p:null, col:false,done:false,cells:{c0:'本科毕业证、学位证',   c1:['o1'],c2:['s1'],c3:'2026-05-20',c4:[],c5:''}},
-    {id:'r11',p:null, col:false,done:false,cells:{c0:'办理学信网认证报告',   c1:['o1'],c2:['s1'],c3:'2026-05-25',c4:[],c5:''}},
-    {id:'r12',p:null, col:false,done:false,cells:{c0:'换取无条件offer',      c1:['o1'],c2:['s1'],c3:'2026-05-31',c4:[],c5:''}},
-    {id:'r13',p:null, col:false,done:false,cells:{c0:'深圳租房开始看房',     c1:['o3'],c2:['s1'],c3:'2026-05-31',c4:[],c5:''}},
-    {id:'r14',p:null, col:false,done:false,cells:{c0:'收到学签并打印备份',   c1:['o1'],c2:['s1'],c3:'2026-05-31',c4:[],c5:''}},
-    {id:'r15',p:null, col:false,done:false,cells:{c0:'毕业典礼',             c1:['o2'],c2:['s1'],c3:'2026-06-15',c4:[],c5:''}},
-    {id:'r16',p:null, col:false,done:false,cells:{c0:'筹备香港/深圳租房',    c1:['o3'],c2:['s1'],c3:'2026-06-30',c4:[],c5:''}},
-    {id:'r17',p:null, col:false,done:false,cells:{c0:'宿舍清宿，解决住所',   c1:['o3'],c2:['s1'],c3:'2026-07-15',c4:[],c5:''}},
-    {id:'r18',p:null, col:false,done:false,cells:{c0:'驾照科三+科四',        c1:[],    c2:['s1'],c3:'2026-07-31',c4:[],c5:''}},
+    {id:'r1', p:null,col:false,done:false,cells:{c0:'准备学校签证材料(护照、照片等)',c1:['m3'],c2:['o1'],c4:['d1'],c5:false,c6:['p2'],c7:''}},
+    {id:'r1a',p:'r1', col:false,done:false,cells:{c0:'身份证/户口本/港澳通行证复印件+资料包',c1:['m3'],c2:['o1'],c4:['d1'],c5:false,c7:''}},
+    {id:'r1b',p:'r1', col:false,done:false,cells:{c0:'表格填写',c1:['m3'],c2:['o1'],c4:['d1'],c5:false,c7:''}},
+    {id:'r1c',p:'r1', col:false,done:false,cells:{c0:'申请表打印签名',c1:['m3'],c2:['o1'],c4:['d1'],c5:false,c7:''}},
+    {id:'r1d',p:'r1', col:false,done:false,cells:{c0:'存款时点证明',c1:['m3'],c2:['o1'],c4:['d1'],c5:false,c7:''}},
+    {id:'r1e',p:'r1', col:false,done:false,cells:{c0:'证件照',c1:['m3'],c2:['o1'],c4:['d1'],c5:false,c7:''}},
+    {id:'r2', p:null,col:false,done:false,cells:{c0:'查看香港租房事项',c1:['m3'],c2:['o3'],c4:['d1'],c5:false,c7:''}},
+    {id:'r3', p:null,col:false,done:false,cells:{c0:'完成论文初稿并提交',c1:['m3'],c2:['o2'],c4:['d1'],c5:false,c7:''}},
+    {id:'r4', p:null,col:false,done:false,cells:{c0:'跟进学签evisa进度',c1:['m4'],c2:['o1'],c4:['d1'],c5:false,c7:''}},
+    {id:'r5', p:null,col:false,done:false,cells:{c0:'论文修改',c1:['m4'],c2:['o2'],c4:['d1'],c5:false,c7:''}},
+    {id:'r6', p:null,col:false,done:false,cells:{c0:'毕业答辩',c1:['m4'],c2:['o2'],c4:['d1'],c5:false,c7:''}},
+    {id:'r7', p:null,col:false,done:false,cells:{c0:'毕业体检',c1:['m4'],c2:['o2'],c4:['d1'],c5:false,c7:''}},
+    {id:'r8', p:null,col:false,done:false,cells:{c0:'毕业证、学位证、成绩单催促',c1:['m4'],c2:['o1','o2'],c4:['d1'],c5:false,c7:''}},
+    {id:'r9', p:null,col:false,done:false,cells:{c0:'若香港租房要敲定',c1:['m4'],c2:['o3'],c4:['d1'],c5:false,c7:''}},
+    {id:'r10',p:null,col:false,done:false,cells:{c0:'本科毕业证、学位证',c1:['m5'],c2:['o1'],c4:['d1'],c5:false,c6:['p2'],c7:''}},
+    {id:'r11',p:null,col:false,done:false,cells:{c0:'办理学信网认证报告',c1:['m5'],c2:['o1'],c4:['d1'],c5:false,c7:''}},
+    {id:'r12',p:null,col:false,done:false,cells:{c0:'换取无条件offer',c1:['m5'],c2:['o1'],c4:['d1'],c5:false,c7:''}},
+    {id:'r13',p:null,col:false,done:false,cells:{c0:'深圳租房开始看房',c1:['m5'],c2:['o3'],c4:['d1'],c5:false,c7:''}},
+    {id:'r14',p:null,col:false,done:false,cells:{c0:'收到学签并打印备份',c1:['m5'],c2:['o1'],c4:['d1'],c5:false,c7:''}},
+    {id:'r15',p:null,col:false,done:false,cells:{c0:'毕业典礼',c1:['m6'],c2:['o2'],c4:['d3'],c3:'2026-06-15',c5:false,c7:''}},
+    {id:'r16',p:null,col:false,done:false,cells:{c0:'筹备香港/深圳租房',c1:['m6'],c2:['o3'],c4:['d3'],c5:false,c7:''}},
+    {id:'r17',p:null,col:false,done:false,cells:{c0:'宿舍清宿，解决住所',c1:['m7'],c2:['o3'],c4:['d3'],c5:false,c7:''}},
+    {id:'r18',p:null,col:false,done:false,cells:{c0:'驾照科三+科四',c1:['m7'],c4:['d3'],c5:false,c7:''}},
   ]
 };
 
@@ -1505,9 +1554,9 @@ function renderTable(){
       bh+=`<tr class="group-hdr-tr"><td colspan="${totalCols}">
         <div class="group-hdr-inner" onclick="toggleGrp('${esc(key)}')">
           <span class="gtoggle ${isColl?'col':''}">▼</span>
-          <span>${esc(key)}</span>
-          <span class="gcnt">${total} 项</span>
-          <span class="gdone">✓ ${done}</span>
+          <span class="gbadge">${esc(key)}</span>
+          <span class="gcnt">${total}条记录</span>
+          <span class="gdone">${done}已完成</span>
         </div></td></tr>`;
       if(!isColl){
         gr.forEach(row=>{
