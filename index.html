@@ -331,26 +331,7 @@ body.dark-mode{
   --shadow:0 2px 16px rgba(0,0,0,.5);
   background:#0f1117;
 }
-/* 星星背景 */
-body.dark-mode::before{
-  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
-  background-image:
-    radial-gradient(1px 1px at 10% 15%,rgba(255,255,255,.7) 0%,transparent 100%),
-    radial-gradient(1px 1px at 25% 40%,rgba(255,255,255,.5) 0%,transparent 100%),
-    radial-gradient(1.5px 1.5px at 40% 8%,rgba(255,255,255,.8) 0%,transparent 100%),
-    radial-gradient(1px 1px at 55% 30%,rgba(255,255,255,.4) 0%,transparent 100%),
-    radial-gradient(2px 2px at 70% 12%,rgba(255,255,255,.6) 0%,transparent 100%),
-    radial-gradient(1px 1px at 80% 45%,rgba(255,255,255,.5) 0%,transparent 100%),
-    radial-gradient(1.5px 1.5px at 90% 20%,rgba(255,255,255,.7) 0%,transparent 100%),
-    radial-gradient(1px 1px at 15% 60%,rgba(255,255,255,.3) 0%,transparent 100%),
-    radial-gradient(1px 1px at 35% 75%,rgba(255,255,255,.4) 0%,transparent 100%),
-    radial-gradient(1.5px 1.5px at 60% 65%,rgba(255,255,255,.5) 0%,transparent 100%),
-    radial-gradient(1px 1px at 75% 80%,rgba(255,255,255,.3) 0%,transparent 100%),
-    radial-gradient(1px 1px at 92% 70%,rgba(255,255,255,.4) 0%,transparent 100%),
-    radial-gradient(1px 1px at 5% 88%,rgba(255,255,255,.3) 0%,transparent 100%),
-    radial-gradient(2px 2px at 48% 92%,rgba(255,255,255,.5) 0%,transparent 100%),
-    radial-gradient(1px 1px at 85% 95%,rgba(255,255,255,.3) 0%,transparent 100%);
-}
+/* stars handled via JS #starsBg element */
 /* homepage card dark fix */
 body.dark-mode .board-card{background:var(--white);border-color:var(--border);color:var(--text)}
 body.dark-mode .board-card-title{color:var(--text)}
@@ -389,9 +370,40 @@ body.dark-mode .hp-modal,.pass-modal{background:var(--white)}
 body.dark-mode .hp-modal h3{color:var(--text)}
 body.dark-mode .hp-form-row label{color:var(--text2)}
 body.dark-mode .hp-form-row input{background:var(--header-bg);color:var(--text);border-color:var(--border)}
+/* cell text dark fix — covers all inline text including contenteditable */
+body.dark-mode .cell-text,
+body.dark-mode textarea,
+body.dark-mode input[type=text],
+body.dark-mode input[type=date],
+body.dark-mode input[type=number],
+body.dark-mode input[type=password],
+body.dark-mode select,
+body.dark-mode .title-display,
+body.dark-mode .title-input,
+body.dark-mode .cell-expand-text,
+body.dark-mode .stats-item { color:var(--text) !important; }
+body.dark-mode textarea,
+body.dark-mode input[type=text],
+body.dark-mode input[type=date],
+body.dark-mode input[type=number],
+body.dark-mode input[type=password],
+body.dark-mode select { background:var(--header-bg) !important; border-color:var(--border) !important; }
+
+/* stars — separate element so it's never blocked */
+#starsBg { display:none; }
+body.dark-mode #starsBg {
+  display:block;
+  position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
+}
+body.dark-mode #homePage,
+body.dark-mode #boardPage { position:relative; z-index:1; }
+
 /* twinkle animation */
-@keyframes twinkle{0%,100%{opacity:.7}50%{opacity:.2}}
-body.dark-mode::before{animation:twinkle 3s ease-in-out infinite alternate}
+@keyframes twinkle{0%,100%{opacity:.9}50%{opacity:.2}}
+@keyframes twinkle2{0%,100%{opacity:.5}60%{opacity:.9}}
+.star { position:absolute; border-radius:50%; background:#fff; animation:twinkle 2s ease-in-out infinite alternate; }
+.star.t2 { animation-name:twinkle2; }
+.star.t3 { animation-duration:3.5s; }
 
 /* ── Kanban ── */
 .kb-col{background:#f7f8fa;border-radius:12px;padding:10px;min-width:220px;max-width:260px}
@@ -492,6 +504,9 @@ body.dark-mode .kb-card-title{color:#e8eaed}
 </style>
 </head>
 <body>
+
+<!-- Stars background (dark mode) -->
+<div id="starsBg"></div>
 
 <!-- ═══════ HOME PAGE ═══════ -->
 <div id="homePage">
@@ -2700,19 +2715,42 @@ function confetti(x, y) {
 }
 
 /* ═══ FEATURE 5: Dark mode ═══ */
+function generateStars() {
+  const bg = document.getElementById('starsBg');
+  if (!bg || bg.dataset.built) return;
+  bg.dataset.built = '1';
+  let html = '';
+  for (let i = 0; i < 80; i++) {
+    const x = (Math.random()*100).toFixed(1);
+    const y = (Math.random()*100).toFixed(1);
+    const size = Math.random()<.7?1:Math.random()<.85?2:3;
+    const delay = (Math.random()*4).toFixed(1);
+    const cls = ['','t2','t3'][Math.floor(Math.random()*3)];
+    const op = (.3+Math.random()*.7).toFixed(2);
+    html += `<div class="star ${cls}" style="left:${x}%;top:${y}%;width:${size}px;height:${size}px;opacity:${op};animation-delay:${delay}s"></div>`;
+  }
+  for (let i = 0; i < 6; i++) {
+    const x=(Math.random()*100).toFixed(1), y=(Math.random()*50).toFixed(1);
+    html += `<div class="star" style="left:${x}%;top:${y}%;width:3px;height:3px;opacity:.9;box-shadow:0 0 5px 2px rgba(255,255,255,.35);animation-delay:${(Math.random()*3).toFixed(1)}s"></div>`;
+  }
+  bg.innerHTML = html;
+}
+
 function toggleDarkMode() {
   document.body.classList.toggle('dark-mode');
-  localStorage.setItem('darkMode', document.body.classList.contains('dark-mode') ? '1' : '0');
+  const isDark = document.body.classList.contains('dark-mode');
+  localStorage.setItem('darkMode', isDark ? '1' : '0');
   const btn = document.getElementById('darkModeBtn');
-  if (btn) btn.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+  if (btn) btn.textContent = isDark ? '☀️' : '🌙';
   const hbtn = document.getElementById('darkModeBtnHome');
-  if (hbtn) hbtn.textContent = document.body.classList.contains('dark-mode') ? '☀️' : '🌙';
+  if (hbtn) hbtn.textContent = isDark ? '☀️' : '🌙';
+  if (isDark) generateStars();
 }
 // Initialize dark mode on load
 if (localStorage.getItem('darkMode') === '1') {
   document.body.classList.add('dark-mode');
+  document.addEventListener('DOMContentLoaded', generateStars);
 }
-// Update button icons based on current state
 const isDark = document.body.classList.contains('dark-mode');
 const dmBtn = document.getElementById('darkModeBtn');
 const dmBtnHome = document.getElementById('darkModeBtnHome');
