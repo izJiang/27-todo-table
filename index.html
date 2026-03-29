@@ -1010,6 +1010,8 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let homeBoards = [];
 let isOnline = navigator.onLine;
+let _clExpandRowId = null;   // 跨表联动：当前展开的行
+let _clExpandBoardId = null; // 跨表联动：展开条内选中的清单
 window.addEventListener('online',  () => { isOnline = true;  setSyncBadge('ok'); if(currentBoardId) syncBoardFromCloud(currentBoardId); });
 window.addEventListener('offline', () => { isOnline = false; setSyncBadge('off'); });
 
@@ -2434,8 +2436,7 @@ function showSyncInfoPopup(rowId) {
    左侧选清单 → 右侧显示那个清单的行 chip
    点 chip → 配对完成，条带收起
 ══════════════════════════════════════ */
-let _clExpandRowId = null;   // 当前展开的行
-let _clExpandBoardId = null; // 展开条内选中的清单
+// (moved to top of globals)
 
 function openCrossLinkExpand(rowId) {
   // 如果已经展开同一行 → 收起
