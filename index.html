@@ -690,6 +690,15 @@ body.dark-mode .cdp-btn-danger { background:#2a1f1f; color:#e35454; }
 .heat-2 { background:#5dbf91; }
 .heat-3 { background:#3aaa78; }
 .heat-4 { background:#1d7a52; }
+/* ── 单元格右键菜单 ── */
+#cellCtxMenu { position:fixed; background:#fff; border:1px solid var(--border); border-radius:10px; box-shadow:0 4px 20px rgba(0,0,0,.15); padding:5px; z-index:9999; min-width:160px; display:none; }
+#cellCtxMenu.show { display:block; }
+.ctx-item { display:flex; align-items:center; gap:8px; padding:7px 12px; font-size:13px; color:var(--text); border-radius:6px; cursor:pointer; white-space:nowrap; }
+.ctx-item:hover { background:var(--header-bg); color:var(--accent2); }
+.ctx-sep { height:1px; background:var(--border); margin:4px 2px; }
+body.dark-mode #cellCtxMenu { background:#1e2334; border-color:#2e3348; }
+body.dark-mode .ctx-item:hover { background:#262d3f; }
+
 /* stat-item 横向统计条（顶栏） */
 #statsBar { display:flex; align-items:center; flex-wrap:wrap; gap:5px 8px; padding:6px 18px; background:#fff; border-bottom:1px solid var(--border); }
 body.dark-mode #statsBar { background:#161b27; }
@@ -973,11 +982,22 @@ body.dark-mode .matrix-card { background:var(--white); }
 
 
 <!-- Batch action bar (multi-select) -->
+<!-- 单元格右键菜单 -->
+<div id="cellCtxMenu">
+  <div class="ctx-item" id="ctxCopy" onclick="ctxCopyCell()">📋 复制此格子</div>
+  <div class="ctx-item" id="ctxPaste" onclick="ctxPasteCell()">📌 粘贴到此格子</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" id="ctxFillDown" onclick="ctxFillDown()">⬇ 向下填充同列所有行</div>
+  <div class="ctx-item" id="ctxFillSel" onclick="ctxFillSelected()">✅ 填充到已选中的行</div>
+</div>
+
 <div id="batchBar" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1f2329;color:#fff;border-radius:12px;padding:10px 20px;display:none;align-items:center;gap:12px;box-shadow:0 4px 20px rgba(0,0,0,.3);z-index:600;font-size:13px;white-space:nowrap">
   <span id="batchCount" style="color:#9fa8b5">已选 0 行</span>
   <div style="width:1px;height:18px;background:rgba(255,255,255,.2)"></div>
   <button class="batch-act" onclick="batchDone()">✅ 完成</button>
   <button class="batch-act" onclick="batchUndone()">↩ 撤销完成</button>
+  <button class="batch-act" onclick="batchSetDate()">📅 设日期</button>
+  <button class="batch-act" onclick="batchSetTag()">🏷 设标签</button>
   <button class="batch-act" onclick="batchSetSyncId()">🔗 设同步Key</button>
   <button class="batch-act" onclick="batchDuplicate()">⎘ 复制</button>
   <button class="batch-act" onclick="batchClear()">✕ 清空内容</button>
@@ -1722,6 +1742,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await seedIfNeeded();
   renderHome();
   route();
+  initCellCtxMenu();
 });
 
 /* ═══════════════════════════════════════════
@@ -2182,7 +2203,7 @@ function renderRowHtml(row,vi,depth,totalCols){
   }
   h+=`<td class="num-cell" style="position:relative"><span class="row-drag-handle">⠿</span>${vi}<div class="row-resizer" onmousedown="startRowResize(event,'${row.id}')"></div></td>`;
   S.columns.forEach((col,ci)=>{
-    h+=`<td data-row="${row.id}" data-col="${col.id}">`;
+    h+=`<td data-row="${row.id}" data-col="${col.id}" data-cell="${row.id}::${col.id}">`;
     if(ci===0){
       const indent=depth*22;
       h+=`<div class="indent-wrap">
@@ -2609,6 +2630,113 @@ function batchDelete() {
 function batchClear() {
   S.rows.forEach(r => { if (selectedIds.has(r.id)) r.cells = {}; });
   save(); renderTable(); toast('已清空内容');
+}
+
+function batchSetDate() {
+  const dateCols = S.columns.filter(c => c.type === 'date');
+  if (!dateCols.length) { toast('此清单没有日期列'); return; }
+  // 选择目标列
+  let colId = dateCols[0].id;
+  if (dateCols.length > 1) {
+    const names = dateCols.map((c,i) => `${i+1}. ${c.label}`).join('\n');
+    const idx = prompt(`选择要设置的日期列（输入序号）：\n${names}`, '1');
+    if (!idx) return;
+    colId = dateCols[(parseInt(idx)||1)-1]?.id || dateCols[0].id;
+  }
+  const val = prompt('输入日期（格式：2026-04-01）', new Date().toISOString().slice(0,10));
+  if (!val) return;
+  S.rows.forEach(r => { if (selectedIds.has(r.id)) r.cells[colId] = val; });
+  save(); renderTable(); toast(`📅 已为 ${selectedIds.size} 行设置日期 ${val}`);
+}
+
+function batchSetTag() {
+  const tagCols = S.columns.filter(c => c.type === 'select');
+  if (!tagCols.length) { toast('此清单没有标签列'); return; }
+  let col = tagCols[0];
+  if (tagCols.length > 1) {
+    const names = tagCols.map((c,i) => `${i+1}. ${c.label}`).join('\n');
+    const idx = prompt(`选择要设置的标签列（输入序号）：\n${names}`, '1');
+    if (!idx) return;
+    col = tagCols[(parseInt(idx)||1)-1] || tagCols[0];
+  }
+  const opts = (col.options||[]);
+  if (!opts.length) { toast('该列没有标签选项，请先在列设置里添加'); return; }
+  const names = opts.map((o,i) => `${i+1}. ${o.label}`).join('\n');
+  const input = prompt(`选择标签（可多选，用逗号分隔序号，如：1,3）：\n${names}`);
+  if (!input) return;
+  const idxs = input.split(',').map(s => parseInt(s.trim())-1).filter(i => i >= 0 && i < opts.length);
+  if (!idxs.length) return;
+  const tagIds = idxs.map(i => opts[i].id);
+  S.rows.forEach(r => { if (selectedIds.has(r.id)) r.cells[col.id] = tagIds; });
+  save(); renderTable();
+  toast(`🏷 已为 ${selectedIds.size} 行设置标签：${idxs.map(i=>opts[i].label).join('、')}`);
+}
+
+/* ── 单元格右键菜单 ── */
+let _ctxCell = null; // { rowId, colId, value }
+
+function initCellCtxMenu() {
+  document.addEventListener('contextmenu', e => {
+    const td = e.target.closest('td[data-cell]');
+    if (!td) { hideCellCtx(); return; }
+    e.preventDefault();
+    const [rowId, colId] = td.dataset.cell.split('::');
+    const row = S.rows.find(r => r.id === rowId);
+    const col = S.columns.find(c => c.id === colId);
+    if (!row || !col) return;
+    _ctxCell = { rowId, colId, col, value: row.cells[colId] };
+    const hasCopied = _copiedCell !== null;
+    const menu = document.getElementById('cellCtxMenu');
+    document.getElementById('ctxPaste').style.opacity = hasCopied ? '1' : '.4';
+    document.getElementById('ctxFillSel').style.display = selectMode && selectedIds.size ? 'flex' : 'none';
+    // 位置
+    const x = Math.min(e.clientX, window.innerWidth - 180);
+    const y = Math.min(e.clientY, window.innerHeight - 160);
+    menu.style.left = x + 'px'; menu.style.top = y + 'px';
+    menu.classList.add('show');
+  });
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#cellCtxMenu')) hideCellCtx();
+  });
+}
+function hideCellCtx() { document.getElementById('cellCtxMenu')?.classList.remove('show'); }
+
+let _copiedCell = null; // { colId, value }
+
+function ctxCopyCell() {
+  if (!_ctxCell) return;
+  _copiedCell = { colId: _ctxCell.colId, col: _ctxCell.col, value: _ctxCell.value };
+  hideCellCtx();
+  toast(`📋 已复制「${_ctxCell.col.label}」列的值`);
+}
+
+function ctxPasteCell() {
+  if (!_ctxCell || !_copiedCell) return;
+  // 只允许粘贴到同列
+  if (_ctxCell.colId !== _copiedCell.colId) {
+    toast('⚠️ 只能粘贴到同一列');
+    hideCellCtx(); return;
+  }
+  const row = S.rows.find(r => r.id === _ctxCell.rowId);
+  if (row) { row.cells[_ctxCell.colId] = _copiedCell.value; save(); renderTable(); }
+  hideCellCtx();
+  toast('📌 已粘贴');
+}
+
+function ctxFillDown() {
+  if (!_ctxCell || !_copiedCell) { toast('请先右键复制一个格子'); hideCellCtx(); return; }
+  const colId = _copiedCell.colId;
+  S.rows.forEach(r => { r.cells[colId] = _copiedCell.value; });
+  save(); renderTable(); hideCellCtx();
+  toast(`⬇ 已填充到全部 ${S.rows.length} 行`);
+}
+
+function ctxFillSelected() {
+  if (!_ctxCell || !_copiedCell) { toast('请先右键复制一个格子'); hideCellCtx(); return; }
+  const colId = _copiedCell.colId;
+  S.rows.forEach(r => { if (selectedIds.has(r.id)) r.cells[colId] = _copiedCell.value; });
+  save(); renderTable(); hideCellCtx();
+  toast(`✅ 已填充到 ${selectedIds.size} 个选中行`);
 }
 function batchSetSyncId() {
   const key = prompt(`为选中的 ${selectedIds.size} 行设置同步 Key\n（两个清单里相同 Key 的行会互相同步）\n\n输入 Key 名称，或留空自动生成：`);
