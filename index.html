@@ -690,6 +690,17 @@ body.dark-mode .cdp-btn-danger { background:#2a1f1f; color:#e35454; }
 .heat-2 { background:#5dbf91; }
 .heat-3 { background:#3aaa78; }
 .heat-4 { background:#1d7a52; }
+
+/* ── 顶栏「更多」下拉 ── */
+.tb-more-wrap { position:relative; }
+.tb-more-menu { position:absolute; top:calc(100% + 6px); right:0; background:#fff; border:1px solid var(--border); border-radius:10px; box-shadow:0 4px 20px rgba(0,0,0,.12); padding:5px; min-width:130px; z-index:800; display:none; }
+.tb-more-wrap.open .tb-more-menu { display:block; }
+.tb-more-item { padding:8px 14px; font-size:13px; color:var(--text); border-radius:6px; cursor:pointer; white-space:nowrap; }
+.tb-more-item:hover { background:var(--header-bg); color:var(--accent2); }
+.tb-more-sep { height:1px; background:var(--border); margin:4px 2px; }
+body.dark-mode .tb-more-menu { background:#1e2334; border-color:#2e3348; }
+body.dark-mode .tb-more-item:hover { background:#262d3f; }
+
 /* ── 单元格右键菜单 ── */
 #cellCtxMenu { position:fixed; background:#fff; border:1px solid var(--border); border-radius:10px; box-shadow:0 4px 20px rgba(0,0,0,.15); padding:5px; z-index:9999; min-width:160px; display:none; }
 #cellCtxMenu.show { display:block; }
@@ -894,16 +905,22 @@ body.dark-mode .matrix-card { background:var(--white); }
   <div class="tb-sep tb-btn-desktop"></div>
   <div class="chip" id="progressChip">0 / 0 完成</div>
   <button class="tb-btn tb-btn-desktop" id="filterBtn" onclick="togglePanel('filter')">🔽 筛选</button>
-  <button class="tb-btn tb-btn-desktop" id="sortBtn" onclick="togglePanel('sort')">↕ 排序</button>
   <button class="tb-btn tb-btn-desktop" id="groupBtn" onclick="togglePanel('group')">⊞ 分组</button>
   <button class="tb-btn tb-btn-desktop" id="kanbanBtn" onclick="toggleKanban()">⊞ 看板</button>
   <button class="tb-btn tb-btn-desktop" id="calBtn" onclick="toggleCalendar()">📅 日历</button>
-  <button class="tb-btn tb-btn-desktop" id="tlBtn" onclick="toggleTimeline()">🗓️ 时间轴</button>
-  <button class="tb-btn tb-btn-desktop" id="mtxBtn" onclick="toggleMatrix()">🎯 四象限</button>
+  <!-- 更多下拉 -->
+  <div class="tb-more-wrap tb-btn-desktop" id="tbMoreWrap">
+    <button class="tb-btn" id="tbMoreBtn" onclick="toggleTbMore(event)">⋯ 更多</button>
+    <div class="tb-more-menu" id="tbMoreMenu">
+      <div class="tb-more-item" onclick="togglePanel('sort');toggleTbMore()">↕ 排序</div>
+      <div class="tb-more-item" onclick="toggleTimeline();toggleTbMore()">🗓️ 时间轴</div>
+      <div class="tb-more-item" onclick="toggleMatrix();toggleTbMore()">🎯 四象限</div>
+      <div class="tb-more-item" onclick="toggleStatsPanel();toggleTbMore()">📊 统计</div>
+      <div class="tb-more-sep"></div>
+      <div class="tb-more-item" onclick="exportCSV();toggleTbMore()">⬇ 导出</div>
+    </div>
+  </div>
   <div class="tb-sep tb-btn-desktop"></div>
-  <button class="tb-btn tb-btn-desktop" onclick="toggleStatsPanel()">📊 统计</button>
-  <div class="tb-sep tb-btn-desktop"></div>
-  <button class="tb-btn green tb-btn-desktop" onclick="exportCSV()">⬇ 导出</button>
   <button class="tb-btn tb-btn-desktop" id="selectModeBtn" onclick="toggleSelectMode()">☑ 选择</button>
   <button class="tb-btn tb-btn-more" id="moreBtn" onclick="openSheet()">⋯</button>
 </div>
@@ -3248,6 +3265,19 @@ function renderDeadlineBadge(dateStr) {
 
 /* ═══ FEATURE 2: Kanban view ═══ */
 let kanbanMode = false;
+function toggleTbMore(e) {
+  const wrap = document.getElementById('tbMoreWrap');
+  const isOpen = wrap.classList.contains('open');
+  // 点别处关闭
+  if (!e) { wrap.classList.remove('open'); return; }
+  e.stopPropagation();
+  wrap.classList.toggle('open');
+  if (!isOpen) {
+    const close = ev => { if (!wrap.contains(ev.target)) { wrap.classList.remove('open'); document.removeEventListener('click', close); } };
+    setTimeout(() => document.addEventListener('click', close), 0);
+  }
+}
+
 function toggleKanban() {
   kanbanMode = !kanbanMode;
   document.getElementById('kanbanBtn').classList.toggle('active', kanbanMode);
