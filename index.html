@@ -207,6 +207,12 @@ body.dark-mode .popover{background:#1e2334;border-color:#2e3348;}
 body.dark-mode .tag-opt-item:hover{background:#262d3f;}
 body.dark-mode .tag-opt-item.sel{background:#1e3a2f;}
 body.dark-mode .pop-opt-item:hover{background:#262d3f;}
+/* 分组内添加行 */
+.grp-add-row-tr td { padding:2px 0 6px 32px !important; border-bottom:2px solid var(--border) !important; background:transparent !important; }
+.grp-add-btn { background:none; border:1.5px dashed var(--border); border-radius:7px; padding:5px 14px; font-size:12px; color:var(--text3); cursor:pointer; transition:all .15s; }
+.grp-add-btn:hover { border-color:var(--accent); color:var(--accent2); background:#eaf7f0; }
+body.dark-mode .grp-add-btn:hover { background:#1e3a2f; }
+
 .pop-item{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;font-size:13px;color:var(--text);transition:background .12s;white-space:nowrap;}
 .pop-item:hover{background:var(--header-bg);}
 .pop-item.danger{color:#e03;}
@@ -2210,6 +2216,10 @@ function renderTable(){
           const flat=[];flattenTree(row,flat,0);
           flat.forEach(({row:r,depth})=>{vi++;bh+=renderRowHtml(r,vi,depth,totalCols);});
         });
+        // 每组底部加一行「＋ 在此组添加」
+        bh+=`<tr class="grp-add-row-tr"><td colspan="${totalCols}">
+          <button class="grp-add-btn" onclick="addRowInGroup(${JSON.stringify(key)})">＋ 在「${esc(key)}」中添加一行</button>
+        </td></tr>`;
       }
     });
   }
@@ -2395,6 +2405,38 @@ function addRow(){
   S.rows.push({id:gid(),p:null,col:false,done:false,cells});
   save();renderTable();
   setTimeout(()=>{const el=document.querySelector('tbody tr:nth-last-child(2) .cell-text-wrap');if(el)el.click();},60);
+}
+
+function addRowInGroup(groupKey) {
+  const cells = {};
+  S.columns.forEach(c => { cells[c.id] = (c.type==='select'||c.type==='url') ? [] : c.type==='bool' ? false : ''; });
+
+  // 反解 groupKey（可能是多列组合，用 ' › ' 分隔）
+  const keyParts = groupKey.split(' › ');
+  S.groupBy.forEach((colId, i) => {
+    const col = S.columns.find(c => c.id === colId);
+    if (!col) return;
+    const part = keyParts[i] || '';
+    if (col.type === 'select') {
+      const opt = (col.options||[]).find(o => o.label === part);
+      if (opt) cells[col.id] = [opt.id];
+    } else if (col.type === 'date') {
+      // key 是 yyyy-MM，填入当月1号
+      cells[col.id] = part.length === 7 ? part + '-01' : part;
+    } else if (col.type === 'bool') {
+      cells[col.id] = (part === '已完成' || part === 'true');
+    } else if (!part.startsWith('（')) {
+      cells[col.id] = part;
+    }
+  });
+
+  const newRow = { id: gid(), p: null, col: false, done: false, cells };
+  S.rows.push(newRow);
+  save(); renderTable();
+  setTimeout(() => {
+    const el = document.querySelector(`td[data-row="${newRow.id}"] .cell-text-wrap`);
+    if (el) el.click();
+  }, 60);
 }
 function addChild(parentId){
   const cells={};
