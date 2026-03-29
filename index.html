@@ -196,9 +196,11 @@ tr:hover .row-actions{display:flex}
 /* boardPage 默认 flex-column；cl-open 时变 flex-row 分栏 */
 #boardPage { display:flex; flex-direction:column; }
 #boardPage.cl-open { flex-direction:row; overflow:hidden; height:100vh; }
-#boardPage.cl-open .board-main { flex:1; min-width:0; overflow:auto; display:flex; flex-direction:column; }
-#boardPage.cl-open .topbar { min-width:0; overflow-x:auto; flex-wrap:nowrap; }
-#boardPage.cl-open .wrapper { min-width:600px; }
+/* board-main 只纵向滚动，横向留给内部 wrapper 自己处理 */
+#boardPage.cl-open .board-main { flex:1; min-width:0; overflow-y:auto; overflow-x:hidden; display:flex; flex-direction:column; }
+#boardPage.cl-open .topbar { overflow-x:auto; flex-shrink:0; }
+/* wrapper 横向滚动，最小宽度保证表格不被压扁 */
+#boardPage.cl-open .wrapper { overflow-x:auto; min-width:0; }
 .cl-drawer { width:340px; min-width:340px; flex-shrink:0; background:var(--white); border-left:1px solid var(--border); display:none; flex-direction:column; height:100%; overflow:hidden; }
 #boardPage.cl-open .cl-drawer { display:flex; }
 body.dark-mode .cl-drawer { background:#1a1e2a; border-color:#2a2f3d; }
@@ -216,8 +218,9 @@ body.dark-mode .cl-drawer-hint { background:#1e1e10; }
 .cl-board-btn.active { border-color:var(--accent); background:#eaf7f0; color:var(--accent2); font-weight:600; }
 body.dark-mode .cl-board-btn { background:var(--header-bg); }
 body.dark-mode .cl-board-btn.active { background:#1e3a2f; }
-.cl-board-label { font-size:11px; font-weight:600; color:var(--text3); padding:8px 14px 4px; text-transform:uppercase; letter-spacing:.4px; }
-.cl-row-list { flex:1; overflow-y:auto; padding:4px 0 20px; }
+.cl-board-label { font-size:11px; font-weight:600; color:var(--text3); padding:8px 14px 4px; text-transform:uppercase; letter-spacing:.4px; flex-shrink:0; }
+#clOtherBoard { flex-direction:column; flex:1; overflow:hidden; min-height:0; }
+.cl-row-list { flex:1; overflow-y:auto; padding:4px 0 20px; min-height:0; }
 .cl-row-item { display:flex; align-items:center; gap:8px; padding:6px 14px; transition:background .1s; font-size:13px; color:var(--text); }
 .cl-row-item:hover { background:var(--row-hover); }
 .cl-row-done { text-decoration:line-through; opacity:.5; }
@@ -1050,7 +1053,7 @@ body.dark-mode .matrix-card { background:var(--white); }
   </div>
   <div class="cl-drawer-hint" id="clHint">选择另一个清单，然后点两行的 ⬡ 完成联动</div>
   <div class="cl-board-selector" id="clBoardSelector"></div>
-  <div id="clOtherBoard" style="display:none; flex-direction:column; flex:1; overflow:hidden;">
+  <div id="clOtherBoard" style="display:none;">
     <div class="cl-board-label" id="clOtherLabel"></div>
     <div class="cl-row-list" id="clRowList"></div>
   </div>
@@ -2558,7 +2561,9 @@ function clSelectBoard(boardId, btn) {
   document.getElementById('clOtherLabel').textContent = (board?.emoji||'📋') + ' ' + (board?.title||'');
   document.getElementById('clHint').textContent = '先点左边清单行末的 ⬡，再点右边抽屉里的 ⬡ 完成配对';
   renderClRowList(rows, board);
-  document.getElementById('clOtherBoard').style.display = 'flex';
+  const ob = document.getElementById('clOtherBoard');
+  ob.style.display = 'flex';
+  ob.style.flexDirection = 'column';
 }
 
 function renderClRowList(rows, board) {
