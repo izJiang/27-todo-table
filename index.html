@@ -192,30 +192,33 @@ tr:hover .row-actions{display:flex}
 @keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
 
-/* ── 跨表联动抽屉 ── */
-.cl-drawer { position:fixed; right:-380px; top:0; bottom:0; width:360px; background:#fff; border-left:1px solid var(--border); box-shadow:-4px 0 24px rgba(0,0,0,.1); z-index:600; transition:right .28s cubic-bezier(.32,.72,0,1); display:flex; flex-direction:column; }
-.cl-drawer.open { right:0; }
+/* ── 跨表联动：boardPage 变成左右分栏布局 ── */
+#boardPage { display:none; flex-direction:column; }
+#boardPage.cl-open { display:flex !important; flex-direction:row; overflow:hidden; height:100vh; }
+#boardPage.cl-open .board-main { flex:1; min-width:0; overflow-y:auto; display:flex; flex-direction:column; }
+.cl-drawer { width:340px; min-width:340px; flex-shrink:0; background:var(--white); border-left:1px solid var(--border); display:none; flex-direction:column; height:100%; overflow:hidden; }
+#boardPage.cl-open .cl-drawer { display:flex; }
 body.dark-mode .cl-drawer { background:#1a1e2a; border-color:#2a2f3d; }
-.cl-mask { position:fixed; inset:0; background:rgba(0,0,0,.2); z-index:599; }
-.cl-drawer-header { display:flex; align-items:center; justify-content:space-between; padding:16px 18px; border-bottom:1px solid var(--border); flex-shrink:0; }
-.cl-drawer-title { font-size:15px; font-weight:700; color:var(--text); }
-.cl-drawer-close { background:none; border:none; cursor:pointer; color:var(--text3); font-size:18px; padding:0 2px; }
+/* 取消原来的 fixed mask，改为分栏不需要 mask */
+.cl-mask { display:none !important; }
+.cl-drawer-header { display:flex; align-items:center; justify-content:space-between; padding:14px 16px 12px; border-bottom:1px solid var(--border); flex-shrink:0; }
+.cl-drawer-title { font-size:14px; font-weight:700; color:var(--text); }
+.cl-drawer-close { background:none; border:none; cursor:pointer; color:var(--text3); font-size:18px; padding:0 2px; line-height:1; }
 .cl-drawer-close:hover { color:var(--text); }
-.cl-drawer-hint { font-size:12px; color:var(--text2); padding:10px 18px 6px; line-height:1.6; flex-shrink:0; }
-.cl-board-selector { padding:8px 12px; display:flex; flex-direction:column; gap:6px; flex-shrink:0; border-bottom:1px solid var(--border); max-height:180px; overflow-y:auto; }
-.cl-board-btn { display:flex; align-items:center; gap:10px; padding:9px 12px; border:1px solid var(--border); border-radius:10px; background:var(--header-bg); cursor:pointer; font-size:13px; color:var(--text); transition:all .15s; text-align:left; }
+.cl-drawer-hint { font-size:12px; color:var(--text2); padding:8px 14px 6px; line-height:1.6; flex-shrink:0; background:#fffbf0; border-bottom:1px solid var(--border); }
+body.dark-mode .cl-drawer-hint { background:#1e1e10; }
+.cl-board-selector { padding:8px 10px; display:flex; flex-direction:column; gap:5px; flex-shrink:0; border-bottom:1px solid var(--border); max-height:160px; overflow-y:auto; }
+.cl-board-btn { display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--border); border-radius:8px; background:var(--header-bg); cursor:pointer; font-size:13px; color:var(--text); transition:all .15s; text-align:left; }
 .cl-board-btn:hover { border-color:var(--accent); background:#eaf7f0; color:var(--accent2); }
 .cl-board-btn.active { border-color:var(--accent); background:#eaf7f0; color:var(--accent2); font-weight:600; }
 body.dark-mode .cl-board-btn { background:var(--header-bg); }
 body.dark-mode .cl-board-btn.active { background:#1e3a2f; }
-.cl-board-label { font-size:12px; font-weight:600; color:var(--text3); padding:10px 18px 4px; text-transform:uppercase; letter-spacing:.4px; }
+.cl-board-label { font-size:11px; font-weight:600; color:var(--text3); padding:8px 14px 4px; text-transform:uppercase; letter-spacing:.4px; }
 .cl-row-list { flex:1; overflow-y:auto; padding:4px 0 20px; }
-.cl-row-item { display:flex; align-items:center; gap:8px; padding:7px 16px; cursor:pointer; transition:background .1s; font-size:13px; color:var(--text); }
+.cl-row-item { display:flex; align-items:center; gap:8px; padding:6px 14px; transition:background .1s; font-size:13px; color:var(--text); }
 .cl-row-item:hover { background:var(--row-hover); }
-.cl-row-item.linked { color:var(--accent); }
-.cl-row-item.pending { color:#f9a825; }
 .cl-row-done { text-decoration:line-through; opacity:.5; }
-.cl-link-btn { background:none; border:1px solid var(--border); border-radius:5px; padding:2px 7px; font-size:13px; cursor:pointer; color:var(--text3); flex-shrink:0; transition:all .15s; }
+.cl-link-btn { background:none; border:1px solid var(--border); border-radius:5px; padding:2px 7px; font-size:12px; cursor:pointer; color:var(--text3); flex-shrink:0; transition:all .15s; }
 .cl-link-btn:hover { border-color:var(--accent); color:var(--accent); }
 .cl-link-btn.linked { border-color:var(--accent); color:var(--accent); background:#eaf7f0; }
 .cl-link-btn.pending { border-color:#f9a825; color:#f9a825; animation:pulse 1s infinite; }
@@ -910,7 +913,7 @@ body.dark-mode .matrix-card { background:var(--white); }
 
 <!-- ═══════ BOARD PAGE ═══════ -->
 <div id="boardPage">
-
+<div class="board-main" id="boardMain">
 
 <!-- Topbar -->
 <div class="topbar" id="boardTopbar">
@@ -1033,7 +1036,9 @@ body.dark-mode .matrix-card { background:var(--white); }
   <button class="batch-act danger" onclick="batchDelete()">🗑 删除</button>
   <button class="batch-act cancel" onclick="exitSelectMode()">× 取消</button>
 </div>
-<!-- ═══ 跨表联动抽屉 ═══ -->
+</div><!-- end .board-main -->
+
+<!-- ═══ 跨表联动抽屉（分栏，不遮挡表格）═══ -->
 <div id="crossLinkDrawer" class="cl-drawer">
   <div class="cl-drawer-header">
     <span class="cl-drawer-title">🔗 跨表联动</span>
@@ -1041,12 +1046,12 @@ body.dark-mode .matrix-card { background:var(--white); }
   </div>
   <div class="cl-drawer-hint" id="clHint">选择另一个清单，然后点两行的 ⬡ 完成联动</div>
   <div class="cl-board-selector" id="clBoardSelector"></div>
-  <div id="clOtherBoard" style="display:none">
+  <div id="clOtherBoard" style="display:none; flex-direction:column; flex:1; overflow:hidden; display:none">
     <div class="cl-board-label" id="clOtherLabel"></div>
     <div class="cl-row-list" id="clRowList"></div>
   </div>
 </div>
-<div id="crossLinkMask" class="cl-mask" onclick="closeCrossLink()" style="display:none"></div>
+<div id="crossLinkMask" class="cl-mask"></div>
 </div><!-- end #boardPage -->
 
 <!-- ═══════ HOME CREATE MODAL ═══════ -->
@@ -2516,25 +2521,22 @@ let _clPendingRemote = null;  // 另一清单里待配对的行ID
 
 function openCrossLink() {
   _clOtherBoardId = null; _clPendingLocal = null; _clPendingRemote = null;
-  // 渲染可选的其他清单
   const selector = document.getElementById('clBoardSelector');
   const others = homeBoards.filter(b => b.id !== currentBoardId);
   selector.innerHTML = others.length
     ? others.map(b => `<button class="cl-board-btn" onclick="clSelectBoard('${b.id}')">${b.emoji||'📋'} ${b.title}</button>`).join('')
     : '<div style="color:var(--text3);font-size:12px;padding:8px 4px">没有其他清单</div>';
   document.getElementById('clOtherBoard').style.display = 'none';
-  document.getElementById('clHint').textContent = '选择另一个清单，然后点两行的 ⬡ 完成联动';
-  document.getElementById('crossLinkDrawer').classList.add('open');
-  document.getElementById('crossLinkMask').style.display = 'block';
+  document.getElementById('clHint').textContent = '① 先选一个清单  ② 点左边行末 ⬡  ③ 点右边行末 ⬡ 完成配对';
+  // 分栏模式：给 boardPage 加 cl-open，board-main 左缩，抽屉右侧出现
+  document.getElementById('boardPage').classList.add('cl-open');
   document.getElementById('crossLinkBtn').classList.add('active');
-  // 刷新本清单行按钮（加上联动按钮列）
   renderTable();
 }
 
 function closeCrossLink() {
   _clOtherBoardId = null; _clPendingLocal = null; _clPendingRemote = null;
-  document.getElementById('crossLinkDrawer').classList.remove('open');
-  document.getElementById('crossLinkMask').style.display = 'none';
+  document.getElementById('boardPage').classList.remove('cl-open');
   document.getElementById('crossLinkBtn').classList.remove('active');
   renderTable();
 }
@@ -2552,7 +2554,7 @@ function clSelectBoard(boardId) {
   document.getElementById('clOtherLabel').textContent = (board?.emoji||'📋') + ' ' + (board?.title||'');
   document.getElementById('clHint').textContent = '先点左边清单行末的 ⬡，再点右边抽屉里的 ⬡ 完成配对';
   renderClRowList(rows, board);
-  document.getElementById('clOtherBoard').style.display = 'block';
+  document.getElementById('clOtherBoard').style.display = 'flex';
 }
 
 function renderClRowList(rows, board) {
