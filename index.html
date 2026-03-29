@@ -690,6 +690,15 @@ body.dark-mode .cdp-btn-danger { background:#2a1f1f; color:#e35454; }
 .heat-2 { background:#5dbf91; }
 .heat-3 { background:#3aaa78; }
 .heat-4 { background:#1d7a52; }
+/* stat-item 横向统计条（顶栏） */
+#statsBar { display:flex; align-items:center; flex-wrap:wrap; gap:4px 10px; padding:0 4px; }
+.stat-item { display:inline-flex; align-items:center; gap:5px; font-size:12px; color:var(--text2); white-space:nowrap; padding:2px 8px 2px 6px; border-radius:20px; background:var(--header-bg); border:1px solid var(--border); cursor:default; transition:background .15s; }
+.stat-item:hover { background:var(--border); }
+.stat-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.stat-val { font-weight:700; color:var(--text); margin-left:1px; }
+body.dark-mode .stat-item { background:#1e2334; border-color:#2e3348; }
+body.dark-mode .stat-item:hover { background:#262d3f; }
+
 .stats-bars { display:flex; flex-direction:column; gap:6px; }
 .stats-bar-row { display:flex; align-items:center; gap:8px; font-size:12px; }
 .stats-bar-lbl { width:70px; color:var(--text2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex-shrink:0; }
