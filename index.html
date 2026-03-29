@@ -196,7 +196,9 @@ tr:hover .row-actions{display:flex}
 /* boardPage 默认 flex-column；cl-open 时变 flex-row 分栏 */
 #boardPage { display:flex; flex-direction:column; }
 #boardPage.cl-open { flex-direction:row; overflow:hidden; height:100vh; }
-#boardPage.cl-open .board-main { flex:1; min-width:0; overflow-y:auto; display:flex; flex-direction:column; }
+#boardPage.cl-open .board-main { flex:1; min-width:0; overflow:auto; display:flex; flex-direction:column; }
+#boardPage.cl-open .topbar { min-width:0; overflow-x:auto; flex-wrap:nowrap; }
+#boardPage.cl-open .wrapper { min-width:600px; }
 .cl-drawer { width:340px; min-width:340px; flex-shrink:0; background:var(--white); border-left:1px solid var(--border); display:none; flex-direction:column; height:100%; overflow:hidden; }
 #boardPage.cl-open .cl-drawer { display:flex; }
 body.dark-mode .cl-drawer { background:#1a1e2a; border-color:#2a2f3d; }
@@ -1048,7 +1050,7 @@ body.dark-mode .matrix-card { background:var(--white); }
   </div>
   <div class="cl-drawer-hint" id="clHint">选择另一个清单，然后点两行的 ⬡ 完成联动</div>
   <div class="cl-board-selector" id="clBoardSelector"></div>
-  <div id="clOtherBoard" style="display:none; flex-direction:column; flex:1; overflow:hidden; display:none">
+  <div id="clOtherBoard" style="display:none; flex-direction:column; flex:1; overflow:hidden;">
     <div class="cl-board-label" id="clOtherLabel"></div>
     <div class="cl-row-list" id="clRowList"></div>
   </div>
@@ -2526,7 +2528,7 @@ function openCrossLink() {
   const selector = document.getElementById('clBoardSelector');
   const others = homeBoards.filter(b => b.id !== currentBoardId);
   selector.innerHTML = others.length
-    ? others.map(b => `<button class="cl-board-btn" onclick="clSelectBoard('${b.id}')">${b.emoji||'📋'} ${b.title}</button>`).join('')
+    ? others.map(b => `<button class="cl-board-btn" onclick="clSelectBoard('${b.id}',this)">${b.emoji||'📋'} ${b.title}</button>`).join('')
     : '<div style="color:var(--text3);font-size:12px;padding:8px 4px">没有其他清单</div>';
   document.getElementById('clOtherBoard').style.display = 'none';
   document.getElementById('clHint').textContent = '① 先选一个清单  ② 点左边行末 ⬡  ③ 点右边行末 ⬡ 完成配对';
@@ -2543,12 +2545,12 @@ function closeCrossLink() {
   renderTable();
 }
 
-function clSelectBoard(boardId) {
+function clSelectBoard(boardId, btn) {
   _clOtherBoardId = boardId;
   _clPendingLocal = null; _clPendingRemote = null;
   // 高亮选中
   document.querySelectorAll('.cl-board-btn').forEach(b => b.classList.remove('active'));
-  event.currentTarget.classList.add('active');
+  btn?.classList.add('active');
   // 加载另一个清单的行
   const board = homeBoards.find(b => b.id === boardId);
   const data = JSON.parse(localStorage.getItem(STORE_PREFIX + boardId) || 'null');
