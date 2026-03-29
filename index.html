@@ -234,7 +234,7 @@ body{padding-bottom:env(safe-area-inset-bottom,0px)}
   .wrapper{display:none !important}
   .mobile-view{display:block}
   .mobile-search{display:block}
-  .stats-bar{padding:8px 12px;gap:10px;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}
+  .stats-bar{padding:5px 12px;gap:5px 6px;overflow-x:auto;flex-wrap:wrap;-webkit-overflow-scrolling:touch}
   .panel-area{padding:8px 12px 0}
   .topbar{padding-left:12px;padding-right:12px;gap:6px;flex-wrap:nowrap}
   .title-display{max-width:130px;font-size:15px}
@@ -691,11 +691,13 @@ body.dark-mode .cdp-btn-danger { background:#2a1f1f; color:#e35454; }
 .heat-3 { background:#3aaa78; }
 .heat-4 { background:#1d7a52; }
 /* stat-item 横向统计条（顶栏） */
-#statsBar { display:flex; align-items:center; flex-wrap:wrap; gap:4px 10px; padding:0 4px; }
-.stat-item { display:inline-flex; align-items:center; gap:5px; font-size:12px; color:var(--text2); white-space:nowrap; padding:2px 8px 2px 6px; border-radius:20px; background:var(--header-bg); border:1px solid var(--border); cursor:default; transition:background .15s; }
+#statsBar { display:flex; align-items:center; flex-wrap:wrap; gap:5px 8px; padding:6px 18px; background:#fff; border-bottom:1px solid var(--border); }
+body.dark-mode #statsBar { background:#161b27; }
+.stat-divider { width:1px; height:16px; background:var(--border); flex-shrink:0; margin:0 2px; }
+.stat-item { display:inline-flex; align-items:center; gap:5px; font-size:12px; color:var(--text2); white-space:nowrap; padding:3px 9px 3px 7px; border-radius:20px; background:var(--header-bg); border:1px solid var(--border); cursor:default; transition:background .15s; line-height:1.4; }
 .stat-item:hover { background:var(--border); }
-.stat-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-.stat-val { font-weight:700; color:var(--text); margin-left:1px; }
+.stat-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; display:inline-block; }
+.stat-val { font-weight:700; color:var(--text); }
 body.dark-mode .stat-item { background:#1e2334; border-color:#2e3348; }
 body.dark-mode .stat-item:hover { background:#262d3f; }
 
@@ -1975,11 +1977,12 @@ function updateStats(){
     });
   });
   const bar=document.getElementById('statsBar');
-  let h=`<div class="stat-item"><span class="stat-dot" style="background:var(--accent)"></span>总计 <span class="stat-val">${total}</span></div>`;
+  let h=`<div class="stat-item"><span class="stat-dot" style="background:#8b9ab5"></span>总计 <span class="stat-val">${total}</span></div>`;
   h+=`<div class="stat-item"><span class="stat-dot" style="background:#4caf82"></span>完成 <span class="stat-val">${done}</span></div>`;
   h+=`<div class="stat-item"><span class="stat-dot" style="background:#ff9800"></span>未完成 <span class="stat-val">${total-done}</span></div>`;
+  if(Object.keys(tags).length) h+=`<div class="stat-divider"></div>`;
   Object.entries(tags).forEach(([label,{cnt,bg,fg}])=>{
-    h+=`<div class="stat-item"><span class="stat-dot" style="background:${bg};border:1px solid ${fg}"></span>${label} <span class="stat-val">${cnt}</span></div>`;
+    h+=`<div class="stat-item"><span class="stat-dot" style="background:${fg}"></span>${label} <span class="stat-val">${cnt}</span></div>`;
   });
   bar.innerHTML=h;
 }
