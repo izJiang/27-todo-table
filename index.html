@@ -190,6 +190,7 @@ tr:hover .row-actions{display:flex}
 .popover-mask{position:fixed;inset:0;z-index:999}
 .popover{position:fixed;z-index:1000;background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);min-width:220px;overflow:hidden;animation:fadeIn .12s ease;max-height:80vh;overflow-y:auto}
 @keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
 .pop-title{font-size:12px;font-weight:500;color:#9fa8b5;padding:10px 14px 6px;background:#fff;border-bottom:1px solid #f0f1f3}
 .pop-item{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;transition:background .1s;font-size:13px;color:#1f2329}
 .pop-item:hover{background:#f5f7fa}
@@ -2195,7 +2196,11 @@ function renderRowHtml(row,vi,depth,totalCols){
     }
     h+='</td>';
   });
-  const syncIcon = row.syncId ? `<button class="row-act" onclick="manageSyncId('${row.id}')" title="已同步 · 点击管理" style="color:#4caf82">🔗</button>` : `<button class="row-act" onclick="manageSyncId('${row.id}')" title="设为同步行">⬡</button>`;
+  const syncIcon = row.syncId
+    ? `<button class="row-act" onclick="manageSyncId('${row.id}')" title="已联动 · 点击解除" style="color:#4caf82">🔗</button>`
+    : row._syncPending
+      ? `<button class="row-act" onclick="manageSyncId('${row.id}')" title="待配对 · 再点另一行完成联动" style="color:#f9a825;animation:pulse 1s infinite">⬡</button>`
+      : `<button class="row-act" onclick="manageSyncId('${row.id}')" title="设置联动：完成此条时自动完成另一条">⬡</button>`;
   const recurIcon = row.recurring ? `<button class="row-act" onclick="setRecurring('${row.id}')" title="重复:${row.recurring}" style="color:var(--accent)">🔁</button>` : `<button class="row-act" onclick="setRecurring('${row.id}')" title="设置重复">🔁</button>`;
   const reminderIcon = row.reminder ? `<button class="row-act" onclick="setReminder('${row.id}')" title="提醒已设" style="color:#ff9800">⏰</button>` : `<button class="row-act" onclick="setReminder('${row.id}')" title="设置提醒">⏰</button>`;
   const aiIcon = `<button class="row-act" onclick="aiDecompose('${row.id}')" title="AI拆解任务">🤖</button>`;
@@ -2379,22 +2384,77 @@ function toggleDone(rowId,event){
   ALL rows with the same syncId across all boards
   via Supabase. URL cells (type=url) are excluded.
 ──────────────────────────────────────── */
+/* ── 联动管理：同一清单内两条 todo 互相绑定 ──
+   逻辑：
+   - 第一次点⬡：选中这行，等待选第二行（进入「待配对」状态）
+   - 第二次点⬡（另一行）：把两行绑定同一个 syncId
+   - 点已绑定的🔗：解除绑定（同时解除对方）
+*/
+let _syncPendingRowId = null; // 等待配对的第一行
+
 function manageSyncId(rowId) {
   const row = S.rows.find(r => r.id === rowId);
   if (!row) return;
+
+  // 已有绑定 → 弹窗询问解除
   if (row.syncId) {
-    const action = confirm(`此行已有同步ID：${row.syncId}\n\n点「确定」移除同步，点「取消」保留`);
-    if (action) { row.syncId = null; save(); renderTable(); toast('已移除同步'); }
+    showSyncInfoPopup(rowId);
     return;
   }
-  const key = prompt('输入同步 Key（两个清单里要同步的行用同一个 Key，如：visa、thesis）\n留空可自动生成');
-  if (key === null) return;
-  row.syncId = key.trim() || 'sync_' + Math.random().toString(36).slice(2, 7);
+
+  // 还没有绑定 → 进入配对流程
+  if (!_syncPendingRowId) {
+    // 第一步：标记这行为「待配对」
+    _syncPendingRowId = rowId;
+    row._syncPending = true;
+    renderTable();
+    toast('🔗 已选中，再点另一条 todo 的 ⬡ 完成联动');
+    return;
+  }
+
+  if (_syncPendingRowId === rowId) {
+    // 点了同一行 → 取消
+    _syncPendingRowId = null;
+    row._syncPending = false;
+    renderTable();
+    toast('已取消');
+    return;
+  }
+
+  // 第二步：配对！两行绑定同一个 syncId
+  const firstRow = S.rows.find(r => r.id === _syncPendingRowId);
+  if (!firstRow) { _syncPendingRowId = null; return; }
+
+  const syncKey = 'link_' + gid().slice(0, 8);
+  firstRow.syncId = syncKey;
+  firstRow._syncPending = false;
+  row.syncId = syncKey;
+  _syncPendingRowId = null;
+
   save(); renderTable();
-  toast(`已设置同步 Key：${row.syncId}`);
-  // push to Supabase immediately so other boards' realtime can pick it up
+  toast(`✅ 已联动：完成任一个，另一个同步完成`);
+
   if (isOnline && currentBoardId) {
-    sb.from('rows').update({ sync_id: row.syncId }).eq('id', row.id).then(() => {});
+    sb.from('rows').update({ sync_id: syncKey }).in('id', [firstRow.id, row.id]).then(() => {});
+  }
+}
+
+function showSyncInfoPopup(rowId) {
+  const row = S.rows.find(r => r.id === rowId);
+  if (!row) return;
+  // 找到所有绑定同一 syncId 的行
+  const partners = S.rows.filter(r => r.syncId === row.syncId && r.id !== rowId);
+  const partnerNames = partners.map(r => `「${r.cells[S.columns[0]?.id] || '无标题'}」`).join('、');
+  const msg = partners.length
+    ? `此条 todo 已与 ${partnerNames} 联动\n\n点「确定」解除联动`
+    : `此条 todo 有联动 Key，但找不到配对行\n\n点「确定」清除`;
+  if (confirm(msg)) {
+    // 解除所有绑定同一 syncId 的行
+    S.rows.forEach(r => { if (r.syncId === row.syncId) r.syncId = null; });
+    save(); renderTable(); toast('已解除联动');
+    if (isOnline && currentBoardId) {
+      sb.from('rows').update({ sync_id: null }).eq('sync_id', row.syncId).then(() => {});
+    }
   }
 }
 
