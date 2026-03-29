@@ -189,6 +189,32 @@ tr:hover .row-actions{display:flex}
 /* Popover */
 .popover-mask{position:fixed;inset:0;z-index:999}
 .popover{position:fixed;z-index:1000;background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);min-width:220px;overflow:hidden;animation:fadeIn .12s ease;max-height:80vh;overflow-y:auto}
+/* popover 内部通用样式 */
+.pop-title{font-size:12px;font-weight:700;color:var(--text3);padding:10px 14px 6px;letter-spacing:.4px;text-transform:uppercase;border-bottom:1px solid var(--border);}
+.tag-opt-item{display:flex;align-items:center;gap:8px;padding:7px 14px;cursor:pointer;transition:background .12s;}
+.tag-opt-item:hover{background:var(--header-bg);}
+.tag-opt-item.sel{background:#eaf7f0;}
+.color-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.add-opt-row{display:flex;gap:6px;padding:8px 10px;border-top:1px solid var(--border);}
+.add-opt-row input{flex:1;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:13px;outline:none;}
+.add-opt-row input:focus{border-color:var(--accent);}
+.add-opt-row button{background:var(--accent);color:#fff;border:none;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:13px;white-space:nowrap;}
+.pop-opt-item{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;font-size:13px;color:var(--text);transition:background .12s;}
+.pop-opt-item:hover{background:var(--header-bg);color:var(--accent2);}
+.pop-opt-item.active{color:var(--accent);font-weight:600;}
+.pop-sep{height:1px;background:var(--border);margin:4px 0;}
+body.dark-mode .popover{background:#1e2334;border-color:#2e3348;}
+body.dark-mode .tag-opt-item:hover{background:#262d3f;}
+body.dark-mode .tag-opt-item.sel{background:#1e3a2f;}
+body.dark-mode .pop-opt-item:hover{background:#262d3f;}
+.pop-item{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;font-size:13px;color:var(--text);transition:background .12s;white-space:nowrap;}
+.pop-item:hover{background:var(--header-bg);}
+.pop-item.danger{color:#e03;}
+.pop-item.danger:hover{background:#fff0f0;}
+.pop-icon{width:18px;text-align:center;flex-shrink:0;}
+.pop-div{height:1px;background:var(--border);margin:4px 0;}
+body.dark-mode .pop-item:hover{background:#262d3f;}
+body.dark-mode .pop-item.danger:hover{background:#2a1515;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
 
