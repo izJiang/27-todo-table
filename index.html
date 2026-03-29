@@ -153,7 +153,7 @@ td:hover .url-add-btn{display:block}
 
 /* Date */
 .cell-date{width:100%;border:none;outline:none;background:transparent;font-size:14px;color:#1f2329;padding:0 12px;cursor:pointer;height:40px;display:block}
-.cell-date::-webkit-calendar-picker-indicator{opacity:.4;cursor:pointer}
+.cell-date::-webkit-calendar-picker-indicator{display:none}
 
 /* Number */
 .cell-num-wrap{padding:0 12px;height:40px;cursor:text;display:flex;align-items:center;justify-content:flex-end;font-size:14px;color:#1f2329}
@@ -716,7 +716,7 @@ body.dark-mode .matrix-card { background:var(--white); }
 .hp-btn-ok:hover { background:var(--accent2); }
 
 /* ═══ SYNC BADGE ═══ */
-.sync-badge { font-size:12px; padding:2px 10px; border-radius:20px; }
+.sync-badge { font-size:12px; padding:2px 10px; border-radius:20px; white-space:nowrap; }
 .sync-ok { background:#eaf7f0; color:#2d7a4f; }
 .sync-ing { background:#fff8e1; color:#c57c00; }
 .sync-off { background:#fff0f0; color:#c0476e; }
@@ -2179,8 +2179,12 @@ function toggleDone(rowId,event){
     const el = event ? event.target : document.querySelector(`tr[data-row="${rowId}"] .custom-check`);
     if(el){const r=el.getBoundingClientRect();confetti(r.left+r.width/2,r.top+r.height/2);}
   }
-  // cross-board sync
-  if(row.syncId) syncCellAcrossBoards(row.syncId, {done: row.done});
+  // cross-board sync: update local rows with same syncId (for same-board duplicates)
+  if(row.syncId) {
+    S.rows.forEach(r=>{ if(r.id!==rowId && r.syncId===row.syncId) r.done=row.done; });
+    save();renderTable();
+    syncCellAcrossBoards(row.syncId, {done: row.done});
+  }
 }
 
 /* ─────────────────────────────────────
