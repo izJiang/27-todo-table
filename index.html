@@ -192,25 +192,32 @@ tr:hover .row-actions{display:flex}
 @keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
 
-/* ── 跨表联动行内展开条 ── */
-.cl-expand-row { display:none; }
-.cl-expand-row.show { display:table-row; }
-.cl-expand-cell { padding:0 !important; border-bottom:2px solid var(--accent) !important; }
-.cl-expand-inner { background:#f0faf7; padding:8px 16px 10px; display:flex; align-items:flex-start; gap:12px; overflow:hidden; }
-body.dark-mode .cl-expand-inner { background:#0f1f1a; }
-.cl-expand-label { font-size:11px; font-weight:700; color:var(--accent2); white-space:nowrap; padding-top:4px; flex-shrink:0; }
-.cl-expand-boards { display:flex; flex-wrap:wrap; gap:6px; flex-shrink:0; }
-.cl-expand-board-btn { font-size:12px; border:1px solid var(--border); border-radius:20px; padding:3px 10px; background:#fff; cursor:pointer; color:var(--text2); transition:all .15s; white-space:nowrap; }
-.cl-expand-board-btn:hover { border-color:var(--accent); color:var(--accent2); background:#eaf7f0; }
-.cl-expand-board-btn.selected { border-color:var(--accent); background:#eaf7f0; color:var(--accent2); font-weight:600; }
-body.dark-mode .cl-expand-board-btn { background:#1a1e2a; }
-.cl-expand-rows { display:flex; flex-wrap:wrap; gap:5px; flex:1; min-width:0; }
-.cl-expand-row-chip { font-size:12px; border:1px solid var(--border); border-radius:6px; padding:3px 10px; background:#fff; cursor:pointer; color:var(--text); transition:all .15s; white-space:nowrap; max-width:180px; overflow:hidden; text-overflow:ellipsis; }
-.cl-expand-row-chip:hover { border-color:var(--accent); background:#eaf7f0; }
-.cl-expand-row-chip.linked { border-color:var(--accent); color:var(--accent); background:#eaf7f0; }
-.cl-expand-row-chip.done-chip { opacity:.45; text-decoration:line-through; }
-body.dark-mode .cl-expand-row-chip { background:#1a1e2a; }
-.cl-expand-empty { font-size:12px; color:var(--text3); padding-top:4px; }
+/* ── 跨表联动底部条 ── */
+#clBar { position:fixed; bottom:-200px; left:0; right:0; height:180px; background:#fff; border-top:2px solid var(--accent); box-shadow:0 -4px 24px rgba(0,0,0,.12); z-index:500; display:flex; flex-direction:column; transition:bottom .25s cubic-bezier(.32,.72,0,1); }
+#clBar.open { bottom:0; }
+body.dark-mode #clBar { background:#1a1e2a; border-color:var(--accent); }
+.cl-bar-header { display:flex; align-items:center; gap:10px; padding:8px 16px 6px; border-bottom:1px solid var(--border); flex-shrink:0; }
+.cl-bar-source { font-size:13px; font-weight:600; color:var(--text); background:var(--header-bg); padding:3px 10px; border-radius:20px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:240px; }
+.cl-bar-arrow { color:var(--accent); font-size:16px; flex-shrink:0; }
+.cl-bar-hint { font-size:12px; color:var(--text2); flex:1; }
+.cl-bar-close { background:none; border:none; cursor:pointer; color:var(--text3); font-size:18px; padding:0 4px; margin-left:auto; flex-shrink:0; }
+.cl-bar-close:hover { color:var(--text); }
+.cl-bar-body { display:flex; flex:1; overflow:hidden; }
+.cl-bar-boards { width:160px; flex-shrink:0; border-right:1px solid var(--border); overflow-y:auto; padding:6px; display:flex; flex-direction:column; gap:4px; }
+.cl-bar-board-btn { display:flex; align-items:center; gap:6px; padding:6px 10px; border:1px solid var(--border); border-radius:8px; background:var(--header-bg); cursor:pointer; font-size:12px; color:var(--text); transition:all .15s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cl-bar-board-btn:hover, .cl-bar-board-btn.sel { border-color:var(--accent); background:#eaf7f0; color:var(--accent2); font-weight:600; }
+body.dark-mode .cl-bar-board-btn { background:#1e2334; }
+body.dark-mode .cl-bar-board-btn.sel { background:#1e3a2f; }
+.cl-bar-rows { flex:1; overflow-x:auto; overflow-y:hidden; display:flex; align-items:center; gap:8px; padding:0 14px; }
+.cl-bar-chip { flex-shrink:0; font-size:13px; border:1.5px solid var(--border); border-radius:8px; padding:6px 14px; background:#fff; cursor:pointer; color:var(--text); transition:all .15s; white-space:nowrap; max-width:200px; overflow:hidden; text-overflow:ellipsis; }
+.cl-bar-chip:hover { border-color:var(--accent); background:#eaf7f0; box-shadow:0 2px 8px rgba(76,175,130,.2); }
+.cl-bar-chip.linked { border-color:var(--accent); color:var(--accent); background:#eaf7f0; }
+.cl-bar-chip.done-chip { opacity:.45; text-decoration:line-through; }
+.cl-bar-empty { font-size:13px; color:var(--text3); padding:0 8px; }
+body.dark-mode .cl-bar-chip { background:#1e2334; }
+/* 底部条打开时，表格区域上移避免被遮挡 */
+body.cl-bar-open .wrapper { padding-bottom:200px; }
+body.cl-bar-open .mobile-view { padding-bottom:200px; }
 
 /* ── Safe areas (iPhone notch/home bar) ── */
 body{padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -969,6 +976,22 @@ body.dark-mode .matrix-card { background:var(--white); }
 <!-- (cross-link removed) -->
 
 </div><!-- end #boardPage -->
+
+<!-- ═══ 跨表联动底部条 ═══ -->
+<div id="clBar">
+  <div class="cl-bar-header">
+    <span class="cl-bar-source" id="clBarSource">-</span>
+    <span class="cl-bar-arrow">→ 联动到</span>
+    <span class="cl-bar-hint" id="clBarHint">先选左边的清单，再点右边的待办完成配对</span>
+    <button class="cl-bar-close" onclick="clBarClose()">✕</button>
+  </div>
+  <div class="cl-bar-body">
+    <div class="cl-bar-boards" id="clBarBoards"></div>
+    <div class="cl-bar-rows" id="clBarRows">
+      <span class="cl-bar-empty">← 先选一个清单</span>
+    </div>
+  </div>
+</div>
 
 <!-- ═══════ HOME CREATE MODAL ═══════ -->
 <div class="hp-modal-overlay" id="createModal" style="display:none" onclick="if(event.target===this)closeCreateModal()">
@@ -2166,7 +2189,7 @@ function renderRowHtml(row,vi,depth,totalCols){
     ? `<button class="row-act" onclick="manageSyncId('${row.id}')" title="已联动 · 点击解除" style="color:#4caf82">🔗</button>`
     : row._syncPending
       ? `<button class="row-act" onclick="manageSyncId('${row.id}')" title="待配对 · 再点另一行完成同表联动" style="color:#f9a825;animation:pulse 1s infinite">⬡</button>`
-      : `<button class="row-act" onclick="openCrossLinkExpand('${row.id}')" title="跨表联动 · 展开选择另一清单的行">⬡</button>`;
+      : `<button class="row-act" onclick="openCrossLinkExpand('${row.id}')" title="跨表联动">⬡</button>`;
   const recurIcon = row.recurring ? `<button class="row-act" onclick="setRecurring('${row.id}')" title="重复:${row.recurring}" style="color:var(--accent)">🔁</button>` : `<button class="row-act" onclick="setRecurring('${row.id}')" title="设置重复">🔁</button>`;
   const reminderIcon = row.reminder ? `<button class="row-act" onclick="setReminder('${row.id}')" title="提醒已设" style="color:#ff9800">⏰</button>` : `<button class="row-act" onclick="setReminder('${row.id}')" title="设置提醒">⏰</button>`;
   const aiIcon = `<button class="row-act" onclick="aiDecompose('${row.id}')" title="AI拆解任务">🤖</button>`;
@@ -2182,13 +2205,6 @@ function renderRowHtml(row,vi,depth,totalCols){
     </div>
     </td>`;
   h+='</tr>';
-  // 展开条：跨表联动选择器（行内，不遮挡）
-  const colCount = S.columns.length + 3; // check + num + data cols + actions
-  h+=`<tr class="cl-expand-row${_clExpandRowId===row.id?' show':''}" id="cl-exp-${row.id}">
-    <td class="cl-expand-cell" colspan="${colCount}">
-      <div class="cl-expand-inner"></div>
-    </td>
-  </tr>`;
   return h;
 }
 
@@ -2430,99 +2446,69 @@ function showSyncInfoPopup(rowId) {
     }
   }
 }
-
 /* ══════════════════════════════════════
-   跨表联动 — 行内展开条
-   点 ⬡ 按钮 → 在该行下方展开一条带
-   左侧选清单 → 右侧显示那个清单的行 chip
-   点 chip → 配对完成，条带收起
+   跨表联动 — 底部固定条
 ══════════════════════════════════════ */
-// (moved to top of globals)
-
 function openCrossLinkExpand(rowId) {
-  // 如果已经展开同一行 → 收起
-  if (_clExpandRowId === rowId) {
-    closeCrossLinkExpand();
-    return;
-  }
-  closeCrossLinkExpand(); // 先关掉其他
+  const row = S.rows.find(r => r.id === rowId);
+  if (!row) return;
+  if (row.syncId) { manageSyncId(rowId); return; }
+
   _clExpandRowId = rowId;
   _clExpandBoardId = null;
-  renderExpandRow(rowId);
+
+  const title = row.cells?.[S.columns[0]?.id] || '无标题';
+  document.getElementById('clBarSource').textContent = title;
+  document.getElementById('clBarHint').textContent = '← 选清单，再点右边的待办完成配对';
+
+  const boards = homeBoards.filter(b => b.id !== currentBoardId);
+  document.getElementById('clBarBoards').innerHTML = boards.map(b =>
+    `<button class="cl-bar-board-btn" onclick="clBarSelectBoard('${b.id}',this)">${b.emoji||'📋'} ${b.title}</button>`
+  ).join('') || '<span style="font-size:12px;color:var(--text3);padding:8px">没有其他清单</span>';
+
+  document.getElementById('clBarRows').innerHTML = '<span class="cl-bar-empty">← 先选一个清单</span>';
+  document.getElementById('clBar').classList.add('open');
+  document.body.classList.add('cl-bar-open');
 }
 
-function closeCrossLinkExpand() {
-  if (_clExpandRowId) {
-    const el = document.getElementById('cl-exp-' + _clExpandRowId);
-    if (el) el.classList.remove('show');
-  }
-  _clExpandRowId = null;
-  _clExpandBoardId = null;
+function clBarClose() {
+  _clExpandRowId = null; _clExpandBoardId = null;
+  document.getElementById('clBar').classList.remove('open');
+  document.body.classList.remove('cl-bar-open');
 }
 
-function renderExpandRow(rowId) {
-  const el = document.getElementById('cl-exp-' + rowId);
-  if (!el) return;
-  const others = homeBoards.filter(b => b.id !== currentBoardId);
-  const boardBtns = others.map(b =>
-    `<button class="cl-expand-board-btn${_clExpandBoardId===b.id?' selected':''}" onclick="clExpSelectBoard('${b.id}','${rowId}')">${b.emoji||'📋'} ${b.title}</button>`
-  ).join('');
-
-  let rowChips = '<span class="cl-expand-empty">← 先选一个清单</span>';
-  if (_clExpandBoardId) {
-    const board = homeBoards.find(b => b.id === _clExpandBoardId);
-    const data = JSON.parse(localStorage.getItem(STORE_PREFIX + _clExpandBoardId) || 'null');
-    const rows = (data?.rows || []).filter(r => !r.p);
-    const titleColId = board?.columns?.[0]?.id;
-    rowChips = rows.length
-      ? rows.map(r => {
-          const title = (r.cells?.[titleColId] || '无标题').slice(0, 20);
-          const isLinked = r.syncId && S.rows.find(lr => lr.syncId === r.syncId);
-          return `<button class="cl-expand-row-chip${isLinked?' linked':''}${r.done?' done-chip':''}"
-            onclick="clExpLinkRow('${rowId}','${r.id}','${_clExpandBoardId}')"
-            title="${r.cells?.[titleColId]||'无标题'}">${isLinked?'🔗 ':''}${title}</button>`;
-        }).join('')
-      : '<span class="cl-expand-empty">此清单暂无待办</span>';
-  }
-
-  el.querySelector('.cl-expand-inner').innerHTML = `
-    <span class="cl-expand-label">🔗 联动到：</span>
-    <div class="cl-expand-boards">${boardBtns}</div>
-    <div class="cl-expand-rows">${rowChips}</div>
-    <button class="cl-expand-row-chip" style="color:var(--text3);margin-left:auto;flex-shrink:0" onclick="closeCrossLinkExpand()">✕</button>
-  `;
-  el.classList.add('show');
-}
-
-function clExpSelectBoard(boardId, rowId) {
+function clBarSelectBoard(boardId, btn) {
   _clExpandBoardId = boardId;
-  renderExpandRow(rowId);
+  document.querySelectorAll('.cl-bar-board-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  const board = homeBoards.find(b => b.id === boardId);
+  const data = JSON.parse(localStorage.getItem(STORE_PREFIX + boardId) || 'null');
+  const rows = (data?.rows || []).filter(r => !r.p);
+  const titleColId = board?.columns?.[0]?.id;
+  const rowsEl = document.getElementById('clBarRows');
+  if (!rows.length) { rowsEl.innerHTML = '<span class="cl-bar-empty">此清单暂无待办</span>'; return; }
+  rowsEl.innerHTML = rows.map(r => {
+    const t = r.cells?.[titleColId] || '无标题';
+    return `<button class="cl-bar-chip${r.syncId?' linked':''}${r.done?' done-chip':''}"
+      onclick="clBarLink('${r.id}','${boardId}')" title="${t}">${r.syncId?'🔗 ':''}${t}</button>`;
+  }).join('');
 }
 
-function clExpLinkRow(localRowId, remoteRowId, remoteBoardId) {
-  const localRow = S.rows.find(r => r.id === localRowId);
+function clBarLink(remoteRowId, remoteBoardId) {
+  const localRow = S.rows.find(r => r.id === _clExpandRowId);
   if (!localRow) return;
-
   const otherData = JSON.parse(localStorage.getItem(STORE_PREFIX + remoteBoardId) || 'null');
   const remoteRow = otherData?.rows?.find(r => r.id === remoteRowId);
   if (!remoteRow) return;
-
   const syncKey = 'xlink_' + gid().slice(0, 8);
-  localRow.syncId = syncKey;
-  save();
-
+  localRow.syncId = syncKey; save();
   remoteRow.syncId = syncKey;
   localStorage.setItem(STORE_PREFIX + remoteBoardId, JSON.stringify(otherData));
-
-  if (isOnline) {
-    sb.from('rows').update({ sync_id: syncKey }).in('id', [localRow.id, remoteRow.id]).then(() => {});
-  }
-
-  closeCrossLinkExpand();
-  renderTable();
-  const remoteName = (otherData.rows ? (remoteRow.cells?.[homeBoards.find(b=>b.id===remoteBoardId)?.columns?.[0]?.id] || '对方') : '对方');
-  toast(`✅ 已联动！完成任一条，另一条同步完成`);
+  if (isOnline) sb.from('rows').update({ sync_id: syncKey }).in('id', [localRow.id, remoteRow.id]).then(() => {});
+  clBarClose(); renderTable();
+  toast('✅ 跨表联动成功！完成任一条，另一条同步完成');
 }
+
 
 /* ══════════════════════════════════════
    MULTI-SELECT MODE
