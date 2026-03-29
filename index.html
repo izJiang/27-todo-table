@@ -728,6 +728,7 @@ body.dark-mode .matrix-card { background:var(--white); }
 #homePage { display:flex; flex-direction:column; min-height:100vh; }
 /* #boardPage display controlled by JS class .bp-visible */
 #boardPage:not(.bp-visible) { display:none !important; }
+#boardPage.bp-visible { display:block; }
 .hp-bar { background:#fff; border-bottom:1px solid #e5e7eb; padding:0 20px; height:54px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:300; box-shadow:0 1px 6px rgba(0,0,0,.04); }
 .hp-title { font-size:18px; font-weight:700; color:#1f2329; }
 .hp-new-btn { background:var(--accent); color:#fff; border:none; padding:8px 16px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; transition:background .15s; }
