@@ -1478,43 +1478,52 @@ async function duplicateBoard(boardId) {
   const board = homeBoards.find(b => b.id === boardId);
   if (!board) return;
   const newId = uid();
-  const newBoard = {...board, id: newId, title: board.title + ' 副本', created_at: nowISO(), updated_at: nowISO()};
+  const newBoard = {
+    ...board, id: newId,
+    title: board.title + ' 副本',
+    created_at: nowISO(), updated_at: nowISO(),
+    password_hash: null, visibility: 'public'   // 复制出来默认公开，避免密码锁住
+  };
   homeBoards.unshift(newBoard);
   saveHomeBoards();
 
-  // 用 gid() 生成唯一 ID（不依赖 Date.now，不会碰撞）
-  const makeRowId = () => 'r' + gid();
-
-  // Copy rows from localStorage
+  // ── 从本地 localStorage 拿源数据（最完整）──
   const localData = JSON.parse(localStorage.getItem(STORE_PREFIX + boardId) || 'null');
-  if (localData) {
-    const newData = {
-      ...localData,
-      rows: (localData.rows || []).map(r => ({ ...r, id: makeRowId() }))
-    };
-    localStorage.setItem(STORE_PREFIX + newId, JSON.stringify(newData));
-  }
+  const srcRows = (localData?.rows || []);
+  const srcCount = srcRows.length;
 
+  // 建立旧ID → 新ID的映射，保持父子关系
+  const idMap = {};
+  srcRows.forEach(r => { idMap[r.id] = gid(); });
+
+  const copiedRows = srcRows.map(r => ({
+    ...r,
+    id: idMap[r.id],
+    p: r.p ? (idMap[r.p] || null) : null,   // 修正 parent_id
+    _updatedAt: nowISO(),
+    syncId: null   // 不继承 syncId，避免跨表格状态混乱
+  }));
+
+  // 先写本地，立刻可用
+  const newLocalData = {
+    ...(localData || {}),
+    title: newBoard.title,
+    rows: copiedRows
+  };
+  localStorage.setItem(STORE_PREFIX + newId, JSON.stringify(newLocalData));
+  renderHome();
+  toast(`✅ 已复制 ${srcCount} 条，同步中…`);
+
+  // 再异步推云端
   if (isOnline) {
     try { await sb.from('boards').insert(newBoard); } catch(e) {}
-    // 优先用云端数据（更完整），逐条生成唯一 ID
-    const { data: srcRows } = await sb.from('rows').select('*').eq('board_id', boardId);
-    if (srcRows && srcRows.length) {
-      const newRows = srcRows.map(r => ({ ...r, id: makeRowId(), board_id: newId }));
-      // 分批插入，避免单次请求过大
-      const BATCH = 50;
-      for (let i = 0; i < newRows.length; i += BATCH) {
-        try { await sb.from('rows').insert(newRows.slice(i, i + BATCH)); } catch(e) {}
-      }
-      // 同步更新本地缓存为云端完整版
-      const localState = JSON.parse(localStorage.getItem(STORE_PREFIX + newId) || 'null') || {};
-      localState.rows = newRows.map(rowFromDb);
-      localStorage.setItem(STORE_PREFIX + newId, JSON.stringify(localState));
+    const dbRows = copiedRows.map((r, i) => rowToDb(r, newId, i));
+    const BATCH = 50;
+    for (let i = 0; i < dbRows.length; i += BATCH) {
+      try { await sb.from('rows').insert(dbRows.slice(i, i + BATCH)); } catch(e) {}
     }
   }
-
-  renderHome();
-  toast('✅ 清单已复制（' + ((localData?.rows||[]).length) + ' 条）');
+  toast(`✅ 清单已复制完成（${srcCount} 条）`);
 }
 
 async function deleteBoardConfirm(boardId) {
