@@ -191,6 +191,34 @@ tr:hover .row-actions{display:flex}
 .popover{position:fixed;z-index:1000;background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);min-width:220px;overflow:hidden;animation:fadeIn .12s ease;max-height:80vh;overflow-y:auto}
 @keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* ── 跨表联动抽屉 ── */
+.cl-drawer { position:fixed; right:-380px; top:0; bottom:0; width:360px; background:#fff; border-left:1px solid var(--border); box-shadow:-4px 0 24px rgba(0,0,0,.1); z-index:600; transition:right .28s cubic-bezier(.32,.72,0,1); display:flex; flex-direction:column; }
+.cl-drawer.open { right:0; }
+body.dark-mode .cl-drawer { background:#1a1e2a; border-color:#2a2f3d; }
+.cl-mask { position:fixed; inset:0; background:rgba(0,0,0,.2); z-index:599; }
+.cl-drawer-header { display:flex; align-items:center; justify-content:space-between; padding:16px 18px; border-bottom:1px solid var(--border); flex-shrink:0; }
+.cl-drawer-title { font-size:15px; font-weight:700; color:var(--text); }
+.cl-drawer-close { background:none; border:none; cursor:pointer; color:var(--text3); font-size:18px; padding:0 2px; }
+.cl-drawer-close:hover { color:var(--text); }
+.cl-drawer-hint { font-size:12px; color:var(--text2); padding:10px 18px 6px; line-height:1.6; flex-shrink:0; }
+.cl-board-selector { padding:8px 12px; display:flex; flex-direction:column; gap:6px; flex-shrink:0; border-bottom:1px solid var(--border); max-height:180px; overflow-y:auto; }
+.cl-board-btn { display:flex; align-items:center; gap:10px; padding:9px 12px; border:1px solid var(--border); border-radius:10px; background:var(--header-bg); cursor:pointer; font-size:13px; color:var(--text); transition:all .15s; text-align:left; }
+.cl-board-btn:hover { border-color:var(--accent); background:#eaf7f0; color:var(--accent2); }
+.cl-board-btn.active { border-color:var(--accent); background:#eaf7f0; color:var(--accent2); font-weight:600; }
+body.dark-mode .cl-board-btn { background:var(--header-bg); }
+body.dark-mode .cl-board-btn.active { background:#1e3a2f; }
+.cl-board-label { font-size:12px; font-weight:600; color:var(--text3); padding:10px 18px 4px; text-transform:uppercase; letter-spacing:.4px; }
+.cl-row-list { flex:1; overflow-y:auto; padding:4px 0 20px; }
+.cl-row-item { display:flex; align-items:center; gap:8px; padding:7px 16px; cursor:pointer; transition:background .1s; font-size:13px; color:var(--text); }
+.cl-row-item:hover { background:var(--row-hover); }
+.cl-row-item.linked { color:var(--accent); }
+.cl-row-item.pending { color:#f9a825; }
+.cl-row-done { text-decoration:line-through; opacity:.5; }
+.cl-link-btn { background:none; border:1px solid var(--border); border-radius:5px; padding:2px 7px; font-size:13px; cursor:pointer; color:var(--text3); flex-shrink:0; transition:all .15s; }
+.cl-link-btn:hover { border-color:var(--accent); color:var(--accent); }
+.cl-link-btn.linked { border-color:var(--accent); color:var(--accent); background:#eaf7f0; }
+.cl-link-btn.pending { border-color:#f9a825; color:#f9a825; animation:pulse 1s infinite; }
 .pop-title{font-size:12px;font-weight:500;color:#9fa8b5;padding:10px 14px 6px;background:#fff;border-bottom:1px solid #f0f1f3}
 .pop-item{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;transition:background .1s;font-size:13px;color:#1f2329}
 .pop-item:hover{background:#f5f7fa}
@@ -909,6 +937,7 @@ body.dark-mode .matrix-card { background:var(--white); }
   <button class="tb-btn tb-btn-desktop" id="groupBtn" onclick="togglePanel('group')">⊞ 分组</button>
   <button class="tb-btn tb-btn-desktop" id="kanbanBtn" onclick="toggleKanban()">⊞ 看板</button>
   <button class="tb-btn tb-btn-desktop" id="calBtn" onclick="toggleCalendar()">📅 日历</button>
+  <button class="tb-btn tb-btn-desktop" id="crossLinkBtn" onclick="openCrossLink()" title="跨清单联动：绑定两个清单的 todo，完成一个另一个同步完成">🔗 跨表联动</button>
   <button class="tb-btn tb-btn-desktop" id="tlBtn" onclick="toggleTimeline()">🗓️ 时间轴</button>
   <button class="tb-btn tb-btn-desktop" id="mtxBtn" onclick="toggleMatrix()">🎯 四象限</button>
   <div class="tb-sep tb-btn-desktop"></div>
@@ -1004,6 +1033,20 @@ body.dark-mode .matrix-card { background:var(--white); }
   <button class="batch-act danger" onclick="batchDelete()">🗑 删除</button>
   <button class="batch-act cancel" onclick="exitSelectMode()">× 取消</button>
 </div>
+<!-- ═══ 跨表联动抽屉 ═══ -->
+<div id="crossLinkDrawer" class="cl-drawer">
+  <div class="cl-drawer-header">
+    <span class="cl-drawer-title">🔗 跨表联动</span>
+    <button class="cl-drawer-close" onclick="closeCrossLink()">✕</button>
+  </div>
+  <div class="cl-drawer-hint" id="clHint">选择另一个清单，然后点两行的 ⬡ 完成联动</div>
+  <div class="cl-board-selector" id="clBoardSelector"></div>
+  <div id="clOtherBoard" style="display:none">
+    <div class="cl-board-label" id="clOtherLabel"></div>
+    <div class="cl-row-list" id="clRowList"></div>
+  </div>
+</div>
+<div id="crossLinkMask" class="cl-mask" onclick="closeCrossLink()" style="display:none"></div>
 </div><!-- end #boardPage -->
 
 <!-- ═══════ HOME CREATE MODAL ═══════ -->
@@ -2196,11 +2239,17 @@ function renderRowHtml(row,vi,depth,totalCols){
     }
     h+='</td>';
   });
+  // 跨表联动模式 vs 同表联动模式
+  const isCrossMode = !!_clOtherBoardId;
   const syncIcon = row.syncId
-    ? `<button class="row-act" onclick="manageSyncId('${row.id}')" title="已联动 · 点击解除" style="color:#4caf82">🔗</button>`
-    : row._syncPending
-      ? `<button class="row-act" onclick="manageSyncId('${row.id}')" title="待配对 · 再点另一行完成联动" style="color:#f9a825;animation:pulse 1s infinite">⬡</button>`
-      : `<button class="row-act" onclick="manageSyncId('${row.id}')" title="设置联动：完成此条时自动完成另一条">⬡</button>`;
+    ? `<button class="row-act" onclick="${isCrossMode ? `clPickLocal('${row.id}')` : `manageSyncId('${row.id}')`}" title="已联动 · 点击解除" style="color:#4caf82">🔗</button>`
+    : isCrossMode
+      ? (_clPendingLocal === row.id
+          ? `<button class="row-act" onclick="clPickLocal('${row.id}')" title="待配对 · 再在抽屉里选一行" style="color:#f9a825;animation:pulse 1s infinite">⬡</button>`
+          : `<button class="row-act" onclick="clPickLocal('${row.id}')" title="点这行，再在右侧抽屉选配对行">⬡</button>`)
+      : row._syncPending
+        ? `<button class="row-act" onclick="manageSyncId('${row.id}')" title="待配对 · 再点另一行完成联动" style="color:#f9a825;animation:pulse 1s infinite">⬡</button>`
+        : `<button class="row-act" onclick="manageSyncId('${row.id}')" title="设置联动：完成此条时自动完成另一条">⬡</button>`;
   const recurIcon = row.recurring ? `<button class="row-act" onclick="setRecurring('${row.id}')" title="重复:${row.recurring}" style="color:var(--accent)">🔁</button>` : `<button class="row-act" onclick="setRecurring('${row.id}')" title="设置重复">🔁</button>`;
   const reminderIcon = row.reminder ? `<button class="row-act" onclick="setReminder('${row.id}')" title="提醒已设" style="color:#ff9800">⏰</button>` : `<button class="row-act" onclick="setReminder('${row.id}')" title="设置提醒">⏰</button>`;
   const aiIcon = `<button class="row-act" onclick="aiDecompose('${row.id}')" title="AI拆解任务">🤖</button>`;
@@ -2459,6 +2508,153 @@ function showSyncInfoPopup(rowId) {
 }
 
 /* ══════════════════════════════════════
+   跨表联动抽屉
+══════════════════════════════════════ */
+let _clOtherBoardId = null;   // 抽屉里选中的另一个清单
+let _clPendingLocal = null;   // 本清单里待配对的行ID
+let _clPendingRemote = null;  // 另一清单里待配对的行ID
+
+function openCrossLink() {
+  _clOtherBoardId = null; _clPendingLocal = null; _clPendingRemote = null;
+  // 渲染可选的其他清单
+  const selector = document.getElementById('clBoardSelector');
+  const others = homeBoards.filter(b => b.id !== currentBoardId);
+  selector.innerHTML = others.length
+    ? others.map(b => `<button class="cl-board-btn" onclick="clSelectBoard('${b.id}')">${b.emoji||'📋'} ${b.title}</button>`).join('')
+    : '<div style="color:var(--text3);font-size:12px;padding:8px 4px">没有其他清单</div>';
+  document.getElementById('clOtherBoard').style.display = 'none';
+  document.getElementById('clHint').textContent = '选择另一个清单，然后点两行的 ⬡ 完成联动';
+  document.getElementById('crossLinkDrawer').classList.add('open');
+  document.getElementById('crossLinkMask').style.display = 'block';
+  document.getElementById('crossLinkBtn').classList.add('active');
+  // 刷新本清单行按钮（加上联动按钮列）
+  renderTable();
+}
+
+function closeCrossLink() {
+  _clOtherBoardId = null; _clPendingLocal = null; _clPendingRemote = null;
+  document.getElementById('crossLinkDrawer').classList.remove('open');
+  document.getElementById('crossLinkMask').style.display = 'none';
+  document.getElementById('crossLinkBtn').classList.remove('active');
+  renderTable();
+}
+
+function clSelectBoard(boardId) {
+  _clOtherBoardId = boardId;
+  _clPendingLocal = null; _clPendingRemote = null;
+  // 高亮选中
+  document.querySelectorAll('.cl-board-btn').forEach(b => b.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  // 加载另一个清单的行
+  const board = homeBoards.find(b => b.id === boardId);
+  const data = JSON.parse(localStorage.getItem(STORE_PREFIX + boardId) || 'null');
+  const rows = data?.rows || [];
+  document.getElementById('clOtherLabel').textContent = (board?.emoji||'📋') + ' ' + (board?.title||'');
+  document.getElementById('clHint').textContent = '先点左边清单行末的 ⬡，再点右边抽屉里的 ⬡ 完成配对';
+  renderClRowList(rows, board);
+  document.getElementById('clOtherBoard').style.display = 'block';
+}
+
+function renderClRowList(rows, board) {
+  const titleColId = board?.columns?.[0]?.id;
+  const list = document.getElementById('clRowList');
+  const topRows = rows.filter(r => !r.p);
+  list.innerHTML = topRows.map(r => {
+    const title = r.cells?.[titleColId] || '无标题';
+    const isLinked = !!r.syncId;
+    const isPending = r.id === _clPendingRemote;
+    return `<div class="cl-row-item ${isLinked?'linked':''}" id="clr-${r.id}">
+      <span class="cl-row-title ${r.done?'cl-row-done':''}" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${title}</span>
+      ${isLinked ? `<button class="cl-link-btn linked" onclick="clUnlinkRemote('${r.id}')" title="已联动，点击解除">🔗</button>`
+                 : `<button class="cl-link-btn ${isPending?'pending':''}" onclick="clPickRemote('${r.id}')">${isPending?'⬡ 待配对':'⬡'}</button>`}
+    </div>`;
+  }).join('') || '<div style="padding:12px 18px;color:var(--text3);font-size:12px">此清单暂无待办</div>';
+}
+
+// 本清单里点 ⬡（联动模式下）
+function clPickLocal(rowId) {
+  if (_clPendingLocal === rowId) {
+    // 取消
+    _clPendingLocal = null;
+    renderTable();
+    return;
+  }
+  _clPendingLocal = rowId;
+  renderTable();
+  // 如果另一侧也选好了，执行配对
+  if (_clPendingRemote) clDoLink();
+}
+
+// 抽屉里点 ⬡
+function clPickRemote(rowId) {
+  if (_clPendingRemote === rowId) {
+    _clPendingRemote = null;
+    clRefreshRemoteList();
+    return;
+  }
+  _clPendingRemote = rowId;
+  clRefreshRemoteList();
+  if (_clPendingLocal) clDoLink();
+}
+
+function clDoLink() {
+  const localRow = S.rows.find(r => r.id === _clPendingLocal);
+  if (!localRow || !_clOtherBoardId) return;
+
+  const otherData = JSON.parse(localStorage.getItem(STORE_PREFIX + _clOtherBoardId) || 'null');
+  if (!otherData) return;
+  const remoteRow = otherData.rows?.find(r => r.id === _clPendingRemote);
+  if (!remoteRow) return;
+
+  const syncKey = 'xlink_' + gid().slice(0, 8);
+
+  // 更新本清单
+  localRow.syncId = syncKey;
+  save();
+  renderTable();
+
+  // 更新另一个清单的 localStorage
+  remoteRow.syncId = syncKey;
+  localStorage.setItem(STORE_PREFIX + _clOtherBoardId, JSON.stringify(otherData));
+
+  // 推云端
+  if (isOnline) {
+    sb.from('rows').update({ sync_id: syncKey }).in('id', [localRow.id, remoteRow.id]).then(() => {});
+  }
+
+  _clPendingLocal = null; _clPendingRemote = null;
+  clRefreshRemoteList();
+  toast(`✅ 跨表联动成功！完成任一条，另一条同步完成`);
+}
+
+function clUnlinkRemote(rowId) {
+  if (!_clOtherBoardId) return;
+  const otherData = JSON.parse(localStorage.getItem(STORE_PREFIX + _clOtherBoardId) || 'null');
+  const remoteRow = otherData?.rows?.find(r => r.id === rowId);
+  if (!remoteRow) return;
+  const syncKey = remoteRow.syncId;
+  // 解除本清单里相同 syncId 的行
+  S.rows.forEach(r => { if (r.syncId === syncKey) r.syncId = null; });
+  save();
+  // 解除另一个清单
+  if (otherData.rows) {
+    otherData.rows.forEach(r => { if (r.syncId === syncKey) r.syncId = null; });
+    localStorage.setItem(STORE_PREFIX + _clOtherBoardId, JSON.stringify(otherData));
+  }
+  if (isOnline) sb.from('rows').update({ sync_id: null }).eq('sync_id', syncKey).then(() => {});
+  clRefreshRemoteList();
+  renderTable();
+  toast('已解除跨表联动');
+}
+
+function clRefreshRemoteList() {
+  if (!_clOtherBoardId) return;
+  const board = homeBoards.find(b => b.id === _clOtherBoardId);
+  const data = JSON.parse(localStorage.getItem(STORE_PREFIX + _clOtherBoardId) || 'null');
+  renderClRowList(data?.rows || [], board);
+}
+
+/* ══════════════════════════════════════
    MULTI-SELECT MODE
 ══════════════════════════════════════ */
 let selectMode = false;
@@ -2564,7 +2760,24 @@ function batchSetSyncId() {
 
 async function syncCellAcrossBoards(syncId, patch) {
   // patch = { done?, cells? } — never includes url-type cells
-  if (!isOnline || !syncId) return;
+  if (!syncId) return;
+
+  // 同步本地其他所有清单的 localStorage（离线也能用）
+  homeBoards.forEach(board => {
+    if (board.id === currentBoardId) return;
+    const key = STORE_PREFIX + board.id;
+    const data = JSON.parse(localStorage.getItem(key) || 'null');
+    if (!data?.rows) return;
+    let changed = false;
+    data.rows.forEach(r => {
+      if (r.syncId === syncId) {
+        if (patch.done !== undefined) { r.done = patch.done; changed = true; }
+      }
+    });
+    if (changed) localStorage.setItem(key, JSON.stringify(data));
+  });
+
+  if (!isOnline) return;
   try {
     await sb.from('rows').update({ ...patch, updated_at: nowISO() }).eq('sync_id', syncId);
   } catch(e) {}
