@@ -193,8 +193,9 @@ tr:hover .row-actions{display:flex}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
 
 /* ── 跨表联动：boardPage 变成左右分栏布局 ── */
-#boardPage { display:none; flex-direction:column; }
-#boardPage.cl-open { display:flex !important; flex-direction:row; overflow:hidden; height:100vh; }
+/* boardPage 默认 flex-column；cl-open 时变 flex-row 分栏 */
+#boardPage { display:flex; flex-direction:column; }
+#boardPage.cl-open { flex-direction:row; overflow:hidden; height:100vh; }
 #boardPage.cl-open .board-main { flex:1; min-width:0; overflow-y:auto; display:flex; flex-direction:column; }
 .cl-drawer { width:340px; min-width:340px; flex-shrink:0; background:var(--white); border-left:1px solid var(--border); display:none; flex-direction:column; height:100%; overflow:hidden; }
 #boardPage.cl-open .cl-drawer { display:flex; }
@@ -795,7 +796,8 @@ body.dark-mode .matrix-card { background:var(--white); }
 
 /* ═══ HOMEPAGE ═══ */
 #homePage { display:flex; flex-direction:column; min-height:100vh; }
-#boardPage { display:none; }
+/* #boardPage display controlled by JS class .bp-visible */
+#boardPage:not(.bp-visible) { display:none !important; }
 .hp-bar { background:#fff; border-bottom:1px solid #e5e7eb; padding:0 20px; height:54px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:300; box-shadow:0 1px 6px rgba(0,0,0,.04); }
 .hp-title { font-size:18px; font-weight:700; color:#1f2329; }
 .hp-new-btn { background:var(--accent); color:#fff; border:none; padding:8px 16px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; transition:background .15s; }
@@ -1289,7 +1291,7 @@ function goHome() {
   currentBoardId = null;
   STORE = 'jt_v7'; // reset to default (won't be used actively)
   document.getElementById('homePage').style.display = 'flex';
-  document.getElementById('boardPage').style.display = 'none';
+  document.getElementById('boardPage').classList.remove('bp-visible','cl-open');
   renderHome();
   history.pushState(null, '', '#/');
 }
@@ -1343,7 +1345,7 @@ async function openBoard(boardId, readOnly) {
 
   // Show board page
   document.getElementById('homePage').style.display = 'none';
-  document.getElementById('boardPage').style.display = 'block';
+  document.getElementById('boardPage').classList.add('bp-visible');
 
   // Update title display
   document.getElementById('titleDisplay').textContent = (board.emoji || '📋') + ' ' + S.title;
@@ -2536,8 +2538,8 @@ function openCrossLink() {
 
 function closeCrossLink() {
   _clOtherBoardId = null; _clPendingLocal = null; _clPendingRemote = null;
-  document.getElementById('boardPage').classList.remove('cl-open');
-  document.getElementById('crossLinkBtn').classList.remove('active');
+  document.getElementById('boardPage').classList.remove('cl-open'); // 只移分栏，不影响 bp-visible
+  document.getElementById('crossLinkBtn')?.classList.remove('active');
   renderTable();
 }
 
