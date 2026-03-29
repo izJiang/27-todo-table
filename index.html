@@ -607,6 +607,41 @@ body.dark-mode .kb-card-title{color:#e8eaed}
 .cal-more { font-size:10px; color:var(--text3); padding:1px 4px; }
 body.dark-mode .cal-cell { background:var(--white); }
 body.dark-mode .cal-dow { background:var(--header-bg); }
+body.dark-mode #homeCalendar { background:var(--bg); border-color:var(--border); }
+body.dark-mode #homeCalendar .cal-cell { background:var(--white); }
+body.dark-mode #homeCalendar .cal-cell.cal-empty { background:var(--header-bg); }
+body.dark-mode #homeCalendar .cal-cell.has-todos { background: linear-gradient(180deg, var(--white) 0%, #1a2f26 100%); }
+body.dark-mode #homeCalendar .cal-cell.holiday { background: linear-gradient(180deg, #2a1f1f 0%, #1f1515 100%); }
+body.dark-mode #homeCalendar .cal-cell.birthday { background: linear-gradient(180deg, #2a2615 0%, #1f1a0f 100%); }
+body.dark-mode #homeCalendar .cal-cell.anniversary { background: linear-gradient(180deg, #1a252f 0%, #0f1a25 100%); }
+
+/* ── Home Calendar ── */
+.hp-section-title { display:flex; align-items:center; justify-content:space-between; padding:20px 18px 12px; margin-top:10px; }
+.hp-section-title span { font-size:15px; font-weight:700; color:var(--text); }
+.hp-section-btn { background:transparent; border:1px solid var(--border); border-radius:6px; padding:4px 12px; font-size:12px; color:var(--text2); cursor:pointer; }
+.hp-section-btn:hover { background:var(--header-bg); color:var(--text); }
+#homeCalendar { background:var(--white); border-top:1px solid var(--border); padding:0 0 20px; }
+#homeCalendar .cal-header { justify-content:flex-start; gap:8px; padding:16px 18px 12px; }
+#homeCalendar .cal-grid { margin:0 18px 12px; border-radius:12px; }
+#homeCalendar .cal-cell { min-height:90px; cursor:pointer; transition:background .15s; }
+#homeCalendar .cal-cell:hover { background:var(--row-hover); }
+#homeCalendar .cal-cell.has-todos { background: linear-gradient(180deg, var(--white) 0%, #f0faf7 100%); }
+#homeCalendar .cal-cell.holiday { background: linear-gradient(180deg, #fff5f5 0%, #ffeeee 100%); }
+#homeCalendar .cal-cell.holiday .cal-day-num { color:#e74c3c; font-weight:700; }
+#homeCalendar .cal-cell.birthday { background: linear-gradient(180deg, #fff8e7 0%, #fef3d8 100%); }
+#homeCalendar .cal-cell.birthday::before { content:'🎂'; position:absolute; top:4px; right:4px; font-size:14px; }
+#homeCalendar .cal-cell.anniversary { background: linear-gradient(180deg, #f0f8ff 0%, #e6f2ff 100%); }
+#homeCalendar .cal-cell.anniversary::before { content:'💝'; position:absolute; top:4px; right:4px; font-size:14px; }
+#homeCalendar .cal-cell.custom-mark::before { content:attr(data-emoji); position:absolute; top:4px; right:4px; font-size:14px; }
+.cal-todo-list { margin-top:4px; }
+.cal-todo-item { font-size:10px; padding:1px 4px; border-radius:3px; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cal-todo-item.done { text-decoration:line-through; opacity:.5; }
+.cal-more-dots { font-size:10px; color:var(--text3); padding-left:4px; }
+.cal-dot-list { display:flex; gap:3px; flex-wrap:wrap; margin-top:2px; }
+.cal-dot-item { width:6px; height:6px; border-radius:50%; }
+.cal-legend { display:flex; gap:16px; padding:0 18px; flex-wrap:wrap; }
+.cal-legend-item { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text2); }
+.cal-dot { width:8px; height:8px; border-radius:50%; }
 
 /* ── Stats Panel ── */
 .stats-panel-inner { padding:20px; }
@@ -756,6 +791,29 @@ body.dark-mode .matrix-card { background:var(--white); }
   <div class="hp-body">
     <div class="hp-grid" id="boardsGrid"></div>
     <div class="hp-quote" id="dailyQuote"></div>
+    
+    <!-- 首页日历区域 -->
+    <div class="hp-section-title">
+      <span>📅 日历概览</span>
+      <button class="hp-section-btn" id="homeCalToggle" onclick="toggleHomeCalendar()">展开 ▼</button>
+    </div>
+    <div id="homeCalendar" style="display:none;">
+      <div class="cal-header">
+        <button class="tb-btn" onclick="homeCalPrev()">‹</button>
+        <span class="cal-title" id="homeCalTitle"></span>
+        <button class="tb-btn" onclick="homeCalNext()">›</button>
+        <button class="tb-btn" onclick="homeCalToday()" style="margin-left:8px;font-size:12px">今天</button>
+        <button class="tb-btn" onclick="openMarkDateModal()" style="margin-left:auto" title="标记特殊日期">🔖 标记</button>
+      </div>
+      <div class="cal-grid" id="homeCalGrid"></div>
+      <!-- 图例 -->
+      <div class="cal-legend">
+        <span class="cal-legend-item"><span class="cal-dot" style="background:#ff6b6b"></span> 节假日</span>
+        <span class="cal-legend-item"><span class="cal-dot" style="background:#4ecdc4"></span> 生日</span>
+        <span class="cal-legend-item"><span class="cal-dot" style="background:#ffe66d"></span> 纪念日</span>
+        <span class="cal-legend-item"><span class="cal-dot" style="background:#a8e6cf"></span> 自定义</span>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1224,6 +1282,8 @@ function renderHome() {
       <div class="board-card-progress"><div class="board-card-progress-bar" style="width:${progress}%"></div></div>
     </div>`;
   }).join('');
+  // 如果日历已展开，更新日历
+  if (homeCalOpen) renderHomeCalendarGrid();
 }
 
 function showBoardMenu(e, boardId) {
@@ -3245,6 +3305,222 @@ function renderCalendar() {
 
 function calPrev() { calendarMonth--; if(calendarMonth<0){calendarMonth=11;calendarYear--;} renderCalendar(); }
 function calNext() { calendarMonth++; if(calendarMonth>11){calendarMonth=0;calendarYear++;} renderCalendar(); }
+
+/* ─── Home Page Calendar ─── */
+let homeCalYear = new Date().getFullYear();
+let homeCalMonth = new Date().getMonth();
+let homeCalOpen = false;
+
+// 2026年节假日数据（中国）
+const HOLIDAYS_2026 = {
+  '2026-01-01': { name: '元旦', type: 'holiday' },
+  '2026-02-17': { name: '除夕', type: 'holiday' },
+  '2026-02-18': { name: '春节', type: 'holiday' },
+  '2026-02-19': { name: '春节', type: 'holiday' },
+  '2026-02-20': { name: '春节', type: 'holiday' },
+  '2026-02-21': { name: '春节', type: 'holiday' },
+  '2026-02-22': { name: '春节', type: 'holiday' },
+  '2026-02-23': { name: '春节', type: 'holiday' },
+  '2026-04-04': { name: '清明', type: 'holiday' },
+  '2026-04-05': { name: '清明', type: 'holiday' },
+  '2026-04-06': { name: '清明', type: 'holiday' },
+  '2026-05-01': { name: '劳动节', type: 'holiday' },
+  '2026-05-02': { name: '劳动节', type: 'holiday' },
+  '2026-05-03': { name: '劳动节', type: 'holiday' },
+  '2026-05-04': { name: '劳动节', type: 'holiday' },
+  '2026-05-05': { name: '劳动节', type: 'holiday' },
+  '2026-06-19': { name: '端午', type: 'holiday' },
+  '2026-06-20': { name: '端午', type: 'holiday' },
+  '2026-06-21': { name: '端午', type: 'holiday' },
+  '2026-09-21': { name: '中秋', type: 'holiday' },
+  '2026-09-22': { name: '中秋', type: 'holiday' },
+  '2026-09-23': { name: '中秋', type: 'holiday' },
+  '2026-10-01': { name: '国庆', type: 'holiday' },
+  '2026-10-02': { name: '国庆', type: 'holiday' },
+  '2026-10-03': { name: '国庆', type: 'holiday' },
+  '2026-10-04': { name: '国庆', type: 'holiday' },
+  '2026-10-05': { name: '国庆', type: 'holiday' },
+  '2026-10-06': { name: '国庆', type: 'holiday' },
+  '2026-10-07': { name: '国庆', type: 'holiday' },
+  '2026-10-08': { name: '国庆', type: 'holiday' },
+};
+
+// 获取自定义标记日期（存储在 localStorage）
+function getMarkedDates() {
+  return JSON.parse(localStorage.getItem('cal_marked_dates') || '{}');
+}
+function saveMarkedDate(dateStr, mark) {
+  const marked = getMarkedDates();
+  if (mark) marked[dateStr] = mark;
+  else delete marked[dateStr];
+  localStorage.setItem('cal_marked_dates', JSON.stringify(marked));
+  renderHomeCalendarGrid();
+}
+
+function toggleHomeCalendar() {
+  homeCalOpen = !homeCalOpen;
+  const el = document.getElementById('homeCalendar');
+  const btn = document.getElementById('homeCalToggle');
+  el.style.display = homeCalOpen ? 'block' : 'none';
+  btn.textContent = homeCalOpen ? '收起 ▲' : '展开 ▼';
+  if (homeCalOpen) renderHomeCalendarGrid();
+}
+
+function homeCalPrev() { homeCalMonth--; if(homeCalMonth<0){homeCalMonth=11;homeCalYear--;} renderHomeCalendarGrid(); }
+function homeCalNext() { homeCalMonth++; if(homeCalMonth>11){homeCalMonth=0;homeCalYear++;} renderHomeCalendarGrid(); }
+function homeCalToday() { 
+  const now = new Date(); 
+  homeCalYear = now.getFullYear(); 
+  homeCalMonth = now.getMonth(); 
+  renderHomeCalendarGrid(); 
+}
+
+function renderHomeCalendarGrid() {
+  const markedDates = getMarkedDates();
+  const monthNames = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+  document.getElementById('homeCalTitle').textContent = `${homeCalYear}年 ${monthNames[homeCalMonth]}`;
+  
+  const today = new Date();
+  const year = homeCalYear, month = homeCalMonth;
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  
+  // 收集所有表格的日期待办
+  const allTodos = [];
+  homeBoards.forEach(board => {
+    const dateCol = board.columns?.find(c => c.type === 'date');
+    if (!dateCol) return;
+    // 从本地存储获取该表格的 rows
+    const storeKey = STORE_PREFIX + board.id;
+    const data = JSON.parse(localStorage.getItem(storeKey) || 'null');
+    if (data && data.rows) {
+      data.rows.forEach(row => {
+        const dateVal = row.cells?.[dateCol.id];
+        if (dateVal && dateVal.startsWith(`${year}-${String(month+1).padStart(2,'0')}`)) {
+          allTodos.push({
+            date: dateVal,
+            title: row.cells?.[board.columns[0]?.id] || '无标题',
+            done: row.done,
+            boardName: board.title
+          });
+        }
+      });
+    }
+  });
+  
+  // 按日期分组
+  const byDate = {};
+  allTodos.forEach(t => {
+    byDate[t.date] = byDate[t.date] || [];
+    byDate[t.date].push(t);
+  });
+  
+  let h = `<div class="cal-dow">日</div><div class="cal-dow">一</div>
+    <div class="cal-dow">二</div><div class="cal-dow">三</div>
+    <div class="cal-dow">四</div><div class="cal-dow">五</div>
+    <div class="cal-dow">六</div>`;
+  
+  // 空白填充
+  for (let i = 0; i < firstDay; i++) h += `<div class="cal-cell cal-empty"></div>`;
+  
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = today.getFullYear()===year && today.getMonth()===month && today.getDate()===d;
+    const todos = byDate[dateStr] || [];
+    const holiday = HOLIDAYS_2026[dateStr];
+    const marked = markedDates[dateStr];
+    
+    let classes = [];
+    if (isToday) classes.push('cal-today');
+    if (todos.length > 0) classes.push('has-todos');
+    if (holiday) {
+      if (holiday.type === 'holiday') classes.push('holiday');
+    }
+    if (marked) {
+      if (marked.type === 'birthday') classes.push('birthday');
+      else if (marked.type === 'anniversary') classes.push('anniversary');
+      else classes.push('custom-mark');
+    }
+    
+    let badge = '';
+    if (holiday) badge = `<span style="color:#e74c3c;font-size:10px;font-weight:600">${holiday.name}</span>`;
+    else if (marked) badge = `<span style="color:var(--accent);font-size:10px;font-weight:600">${marked.text || ''}</span>`;
+    
+    // 待办圆点 - 按完成状态变色
+    let dots = '';
+    if (todos.length > 0) {
+      const allDone = todos.every(t => t.done);
+      const anyDone = todos.some(t => t.done);
+      let dotColor = '#4caf82'; // 绿色=待办
+      if (allDone) dotColor = '#9fa8b5'; // 灰色=全完成
+      else if (anyDone) dotColor = '#f9a825'; // 黄色=部分完成
+      dots = `<div class="cal-dot-list">${todos.slice(0,5).map(() => `<span class="cal-dot-item" style="background:${dotColor}"></span>`).join('')}</div>`;
+    }
+    
+    // 悬停显示tooltip
+    let tooltip = '';
+    if (todos.length > 0) {
+      tooltip = `title="${todos.map(t => (t.done ? '✓' : '○') + t.title).join('\\n')}"`;
+    } else if (holiday) {
+      tooltip = `title="${holiday.name}"`;
+    }
+    
+    h += `<div class="cal-cell ${classes.join(' ')}" ${marked ? `data-emoji="${marked.emoji || '🔖'}"` : ''} onclick="onHomeCalDayClick('${dateStr}')" ${tooltip}>
+      <div class="cal-day-num">${d}</div>
+      ${badge}
+      ${dots}
+    </div>`;
+  }
+  
+  document.getElementById('homeCalGrid').innerHTML = h;
+}
+
+function onHomeCalDayClick(dateStr) {
+  // 点击日期：打开当天的待办清单（默认搜索该日期）
+  // 可以后续扩展为弹窗显示当天详细待办
+  const todos = [];
+  homeBoards.forEach(board => {
+    const dateCol = board.columns?.find(c => c.type === 'date');
+    if (!dateCol) return;
+    const storeKey = STORE_PREFIX + board.id;
+    const data = JSON.parse(localStorage.getItem(storeKey) || 'null');
+    if (data && data.rows) {
+      data.rows.forEach(row => {
+        if (row.cells?.[dateCol.id] === dateStr) {
+          todos.push({ board: board.title, title: row.cells?.[board.columns[0]?.id] || '无标题', done: row.done });
+        }
+      });
+    }
+  });
+  
+  if (todos.length === 0) {
+    toast(`${dateStr} 暂无待办`);
+  } else {
+    const list = todos.map(t => `${t.done ? '✓' : '○'} [${t.board}] ${t.title}`).join('\\n');
+    alert(`${dateStr} 共 ${todos.length} 项待办:\\n\\n${list}`);
+  }
+}
+
+function openMarkDateModal() {
+  const dateStr = prompt('输入要标记的日期 (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
+  if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return;
+  
+  const type = prompt('标记类型:\n1: 生日 🎂\n2: 纪念日 💝\n3: 自定义 🔖\n\n输入数字 (1-3):', '3');
+  if (!type) return;
+  
+  const emojiMap = { '1': '🎂', '2': '💝', '3': '🔖' };
+  const typeMap = { '1': 'birthday', '2': 'anniversary', '3': 'custom' };
+  
+  const mark = {
+    type: typeMap[type] || 'custom',
+    emoji: emojiMap[type] || '🔖',
+    text: prompt('备注文字 (可选):', '') || ''
+  };
+  
+  saveMarkedDate(dateStr, mark);
+  toast(`已标记 ${dateStr}`);
+}
+
 function focusRow(rowId) {
   toggleCalendar();
   if(kanbanMode) toggleKanban();
