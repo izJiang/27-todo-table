@@ -1481,22 +1481,40 @@ async function duplicateBoard(boardId) {
   const newBoard = {...board, id: newId, title: board.title + ' 副本', created_at: nowISO(), updated_at: nowISO()};
   homeBoards.unshift(newBoard);
   saveHomeBoards();
-  // Copy rows
+
+  // 用 gid() 生成唯一 ID（不依赖 Date.now，不会碰撞）
+  const makeRowId = () => 'r' + gid();
+
+  // Copy rows from localStorage
   const localData = JSON.parse(localStorage.getItem(STORE_PREFIX + boardId) || 'null');
   if (localData) {
-    const newData = {...localData, rows: (localData.rows||[]).map(r => ({...r, id:'r'+Date.now()+Math.random().toString(36).slice(2)}))};
+    const newData = {
+      ...localData,
+      rows: (localData.rows || []).map(r => ({ ...r, id: makeRowId() }))
+    };
     localStorage.setItem(STORE_PREFIX + newId, JSON.stringify(newData));
   }
+
   if (isOnline) {
     try { await sb.from('boards').insert(newBoard); } catch(e) {}
+    // 优先用云端数据（更完整），逐条生成唯一 ID
     const { data: srcRows } = await sb.from('rows').select('*').eq('board_id', boardId);
     if (srcRows && srcRows.length) {
-      const newRows = srcRows.map(r => ({...r, id:'r'+Date.now()+Math.random().toString(36).slice(2), board_id: newId}));
-      try { await sb.from('rows').insert(newRows); } catch(e) {}
+      const newRows = srcRows.map(r => ({ ...r, id: makeRowId(), board_id: newId }));
+      // 分批插入，避免单次请求过大
+      const BATCH = 50;
+      for (let i = 0; i < newRows.length; i += BATCH) {
+        try { await sb.from('rows').insert(newRows.slice(i, i + BATCH)); } catch(e) {}
+      }
+      // 同步更新本地缓存为云端完整版
+      const localState = JSON.parse(localStorage.getItem(STORE_PREFIX + newId) || 'null') || {};
+      localState.rows = newRows.map(rowFromDb);
+      localStorage.setItem(STORE_PREFIX + newId, JSON.stringify(localState));
     }
   }
+
   renderHome();
-  toast('清单已复制');
+  toast('✅ 清单已复制（' + ((localData?.rows||[]).length) + ' 条）');
 }
 
 async function deleteBoardConfirm(boardId) {
@@ -1796,7 +1814,7 @@ const save=()=>{
   localStorage.setItem(STORE,JSON.stringify(S));
   debouncedCloudSave();
 };
-const gid=()=>'id'+Date.now()+Math.floor(Math.random()*9999);
+const gid=()=>crypto.randomUUID ? crypto.randomUUID() : 'id'+Date.now().toString(36)+Math.random().toString(36).slice(2);
 const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
 /* ═══ UI STATE ═══ */
