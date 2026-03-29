@@ -656,6 +656,55 @@ body.dark-mode #homeCalendar .cal-cell.anniversary { background: linear-gradient
 .cal-legend-item { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text2); }
 .cal-dot { width:8px; height:8px; border-radius:50%; }
 
+/* ── 日期点击浮层 ── */
+.cal-day-pop { background:#fff; border:1px solid #e5e7eb; border-radius:14px; box-shadow:0 8px 32px rgba(0,0,0,.14); padding:0; width:280px; overflow:hidden; animation:fadeIn .12s ease; }
+body.dark-mode .cal-day-pop { background:#1a1e2a; border-color:#2a2f3d; }
+.cdp-header { display:flex; align-items:center; justify-content:space-between; padding:12px 14px 10px; border-bottom:1px solid #f0f1f3; }
+body.dark-mode .cdp-header { border-color:#2a2f3d; }
+.cdp-date { font-size:13px; font-weight:700; color:#1f2329; }
+body.dark-mode .cdp-date { color:#e2e6f0; }
+.cdp-close { background:none; border:none; cursor:pointer; color:#9fa8b5; font-size:16px; padding:0 2px; line-height:1; }
+.cdp-close:hover { color:#646a73; }
+.cdp-section-title { font-size:11px; font-weight:600; color:#9fa8b5; text-transform:uppercase; letter-spacing:.4px; padding:8px 14px 4px; }
+.cdp-divider { height:1px; background:#f0f1f3; margin:6px 0 0; }
+body.dark-mode .cdp-divider { background:#2a2f3d; }
+.cdp-todo-row { display:flex; align-items:center; gap:7px; padding:5px 14px; margin:0; background:transparent; font-size:12px; }
+.cdp-todo-check { font-size:11px; width:14px; flex-shrink:0; }
+.cdp-todo-title { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#1f2329; }
+body.dark-mode .cdp-todo-title { color:#e2e6f0; }
+.cdp-todo-title.done { text-decoration:line-through; color:#9fa8b5; }
+.cdp-board-tag { font-size:10px; flex-shrink:0; opacity:.8; }
+.cdp-type-row { display:flex; gap:6px; padding:6px 14px; }
+.cdp-type-btn { flex:1; border:1px solid #e5e7eb; border-radius:8px; padding:6px 4px; font-size:12px; cursor:pointer; background:#f7f8fa; color:#646a73; transition:all .15s; text-align:center; }
+body.dark-mode .cdp-type-btn { background:#1e2334; border-color:#2a2f3d; color:#8b94a8; }
+.cdp-type-btn:hover { border-color:#4caf82; color:#4caf82; }
+.cdp-type-btn.active { border-color:#4caf82; background:#eaf7f0; color:#2d7a4f; font-weight:600; }
+body.dark-mode .cdp-type-btn.active { background:#1e3a2f; color:#4caf82; }
+.cdp-emoji-row { display:flex; gap:4px; flex-wrap:wrap; padding:4px 14px 6px; }
+.cdp-emoji-btn { background:none; border:1px solid transparent; border-radius:6px; padding:3px 5px; font-size:16px; cursor:pointer; transition:all .12s; }
+.cdp-emoji-btn:hover { background:#f0f1f3; border-color:#e5e7eb; }
+.cdp-emoji-btn.active { background:#eaf7f0; border-color:#4caf82; }
+body.dark-mode .cdp-emoji-btn.active { background:#1e3a2f; border-color:#4caf82; }
+.cdp-note-input { width:calc(100% - 28px); margin:2px 14px 8px; border:1px solid #e5e7eb; border-radius:8px; padding:7px 10px; font-size:13px; outline:none; color:#1f2329; background:#fff; }
+body.dark-mode .cdp-note-input { background:#1e2334; border-color:#2a2f3d; color:#e2e6f0; }
+.cdp-note-input:focus { border-color:#4caf82; }
+.cdp-footer { display:flex; align-items:center; justify-content:space-between; padding:8px 14px 12px; border-top:1px solid #f0f1f3; }
+body.dark-mode .cdp-footer { border-color:#2a2f3d; }
+.cdp-btn { border:none; border-radius:8px; padding:7px 16px; font-size:13px; font-weight:600; cursor:pointer; transition:all .15s; }
+.cdp-btn-primary { background:#4caf82; color:#fff; }
+.cdp-btn-primary:hover { background:#3d9970; }
+.cdp-btn-danger { background:#fff0f0; color:#e35454; }
+.cdp-btn-danger:hover { background:#ffe0e0; }
+body.dark-mode .cdp-btn-danger { background:#2a1f1f; color:#e35454; }
+
+/* ── 悬浮 tooltip ── */
+.cal-day-tooltip { background:#1f2329; color:#e2e6f0; border-radius:10px; padding:10px 0; box-shadow:0 6px 24px rgba(0,0,0,.25); min-width:200px; max-width:260px; pointer-events:none; animation:fadeIn .1s ease; }
+.cdt-holiday { font-size:12px; font-weight:700; color:#ff7675; padding:4px 14px 6px; border-bottom:1px solid rgba(255,255,255,.08); margin-bottom:4px; }
+.cdt-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:4px 14px; font-size:12px; overflow:hidden; }
+.cdt-row span:first-child { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cdt-done { text-decoration:line-through; opacity:.5; }
+.cdt-board { font-size:10px; flex-shrink:0; opacity:.7; }
+
 /* ── Stats Panel ── */
 .stats-panel-inner { padding:20px; }
 .stats-panel-hdr { display:flex; justify-content:space-between; align-items:center; font-size:16px; font-weight:700; color:var(--text); margin-bottom:20px; }
@@ -3483,7 +3532,10 @@ function renderHomeCalendarGrid() {
       bars += `</div>`;
     }
 
-    h += `<div class="cal-cell ${classes.join(' ')}" ${marked ? `data-emoji="${marked.emoji || '🔖'}"` : ''} onclick="onHomeCalDayClick('${dateStr}')">
+    h += `<div class="cal-cell ${classes.join(' ')}" ${marked ? `data-emoji="${marked.emoji || '🔖'}"` : ''} 
+      onclick="onHomeCalDayClick('${dateStr}',event)"
+      onmouseenter="onHomeCalCellEnter('${dateStr}',event)"
+      onmouseleave="onHomeCalCellLeave()">
       <div class="cal-day-num">${d}</div>
       ${badge}
       ${bars}
@@ -3493,50 +3545,183 @@ function renderHomeCalendarGrid() {
   document.getElementById('homeCalGrid').innerHTML = h;
 }
 
-function onHomeCalDayClick(dateStr) {
-  // 点击日期：打开当天的待办清单（默认搜索该日期）
-  // 可以后续扩展为弹窗显示当天详细待办
+/* ── 获取某天所有待办 ── */
+function getTodosForDate(dateStr) {
   const todos = [];
   homeBoards.forEach(board => {
     const dateCol = board.columns?.find(c => c.type === 'date');
     if (!dateCol) return;
-    const storeKey = STORE_PREFIX + board.id;
-    const data = JSON.parse(localStorage.getItem(storeKey) || 'null');
-    if (data && data.rows) {
+    const data = JSON.parse(localStorage.getItem(STORE_PREFIX + board.id) || 'null');
+    if (data?.rows) {
       data.rows.forEach(row => {
         if (row.cells?.[dateCol.id] === dateStr) {
-          todos.push({ board: board.title, title: row.cells?.[board.columns[0]?.id] || '无标题', done: row.done });
+          todos.push({ board: board.title, boardId: board.id, title: row.cells?.[board.columns[0]?.id] || '无标题', done: row.done });
         }
       });
     }
   });
-  
-  if (todos.length === 0) {
-    toast(`${dateStr} 暂无待办`);
-  } else {
-    const list = todos.map(t => `${t.done ? '✓' : '○'} [${t.board}] ${t.title}`).join('\\n');
-    alert(`${dateStr} 共 ${todos.length} 项待办:\\n\\n${list}`);
+  return todos;
+}
+
+/* ── 点击日期格子 → 浮动标记表单 ── */
+function onHomeCalDayClick(dateStr, event) {
+  event && event.stopPropagation();
+  closeCalPopups();
+  const markedDates = getMarkedDates();
+  const existing = markedDates[dateStr];
+  const todos = getTodosForDate(dateStr);
+
+  // 用点击位置定位浮层
+  const rect = (event?.currentTarget || event?.target)?.getBoundingClientRect?.() || { left: window.innerWidth/2 - 140, bottom: 100 };
+  const x = Math.min(rect.left, window.innerWidth - 300);
+  const y = rect.bottom + 6;
+
+  const pop = document.createElement('div');
+  pop.id = 'calDayPop';
+  pop.className = 'cal-day-pop';
+  pop.style.cssText = `position:fixed;left:${x}px;top:${y}px;z-index:2000`;
+
+  const BOARD_COLORS = ['#4a90d9','#9b59b0','#27ae60','#e67e22','#e74c3c','#16a085','#2980b9','#8e44ad'];
+  const boardColorMap = {};
+  homeBoards.forEach((b,i) => { boardColorMap[b.id] = BOARD_COLORS[i % BOARD_COLORS.length]; });
+
+  const dateLabel = new Date(dateStr + 'T00:00').toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'short' });
+
+  let todoHtml = '';
+  if (todos.length) {
+    todoHtml = `<div class="cdp-section-title">📋 当天待办</div>` + todos.map(t => {
+      const c = boardColorMap[t.boardId] || '#4a90d9';
+      return `<div class="cdp-todo-row" style="border-left:3px solid ${c}">
+        <span class="cdp-todo-check" style="color:${t.done?'#9fa8b5':'#fff'}">${t.done ? '✓' : '○'}</span>
+        <span class="cdp-todo-title ${t.done ? 'done' : ''}">${t.title}</span>
+        <span class="cdp-board-tag" style="color:${c}">${t.board}</span>
+      </div>`;
+    }).join('');
   }
+
+  const typeOptions = [
+    { v: 'birthday',    e: '🎂', label: '生日' },
+    { v: 'anniversary', e: '💝', label: '纪念日' },
+    { v: 'custom',      e: '🔖', label: '自定义' },
+  ];
+
+  const emojiList = ['🔖','🎉','🌟','❤️','🎂','💝','🏆','🌸','🔥','✨','💡','📌'];
+
+  pop.innerHTML = `
+    <div class="cdp-header">
+      <span class="cdp-date">${dateLabel}</span>
+      <button class="cdp-close" onclick="closeCalPopups()">✕</button>
+    </div>
+    ${todoHtml}
+    <div class="cdp-divider"></div>
+    <div class="cdp-section-title">🔖 日期标记</div>
+    <div class="cdp-type-row">
+      ${typeOptions.map(o => `<button class="cdp-type-btn ${existing?.type===o.v?'active':''}" data-type="${o.v}" data-emoji="${o.e}" onclick="cdpSelectType(this)">${o.e} ${o.label}</button>`).join('')}
+    </div>
+    <div class="cdp-emoji-row">
+      ${emojiList.map(e => `<button class="cdp-emoji-btn ${(existing?.emoji===e&&!typeOptions.find(t=>t.e===e&&t.v===existing?.type))?'active':''}" onclick="cdpSelectEmoji(this,'${e}')">${e}</button>`).join('')}
+    </div>
+    <input class="cdp-note-input" id="cdpNote" placeholder="备注（可选）" value="${existing?.text || ''}">
+    <div class="cdp-footer">
+      ${existing ? `<button class="cdp-btn cdp-btn-danger" onclick="cdpRemoveMark('${dateStr}')">移除标记</button>` : '<span></span>'}
+      <button class="cdp-btn cdp-btn-primary" onclick="cdpSaveMark('${dateStr}')">保存</button>
+    </div>
+  `;
+
+  // 存当前选中的 type/emoji
+  pop._markType = existing?.type || 'custom';
+  pop._markEmoji = existing?.emoji || '🔖';
+
+  document.body.appendChild(pop);
+  // 点击外部关闭
+  setTimeout(() => document.addEventListener('click', closeCalPopups, { once: true }), 10);
+}
+
+function cdpSelectType(btn) {
+  document.querySelectorAll('.cdp-type-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const pop = document.getElementById('calDayPop');
+  if (pop) { pop._markType = btn.dataset.type; pop._markEmoji = btn.dataset.emoji; }
+  // 同步 emoji 高亮
+  document.querySelectorAll('.cdp-emoji-btn').forEach(b => b.classList.toggle('active', b.textContent === btn.dataset.emoji));
+}
+
+function cdpSelectEmoji(btn, emoji) {
+  document.querySelectorAll('.cdp-emoji-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const pop = document.getElementById('calDayPop');
+  if (pop) pop._markEmoji = emoji;
+}
+
+function cdpSaveMark(dateStr) {
+  const pop = document.getElementById('calDayPop');
+  if (!pop) return;
+  const note = document.getElementById('cdpNote')?.value || '';
+  saveMarkedDate(dateStr, { type: pop._markType, emoji: pop._markEmoji, text: note });
+  closeCalPopups();
+  toast('✅ 已保存标记');
+}
+
+function cdpRemoveMark(dateStr) {
+  saveMarkedDate(dateStr, null);
+  closeCalPopups();
+  toast('已移除标记');
+}
+
+function closeCalPopups() {
+  document.getElementById('calDayPop')?.remove();
+  document.getElementById('calDayTooltip')?.remove();
+  document.removeEventListener('click', closeCalPopups);
+}
+
+/* ── 悬浮日期 → 待办 tooltip ── */
+let _calHoverTimer = null;
+function onHomeCalCellEnter(dateStr, event) {
+  clearTimeout(_calHoverTimer);
+  _calHoverTimer = setTimeout(() => {
+    document.getElementById('calDayTooltip')?.remove();
+    const todos = getTodosForDate(dateStr);
+    const holiday = HOLIDAYS_2026[dateStr];
+    if (!todos.length && !holiday) return;
+
+    const BOARD_COLORS = ['#4a90d9','#9b59b0','#27ae60','#e67e22','#e74c3c','#16a085'];
+    const boardColorMap = {};
+    homeBoards.forEach((b,i) => { boardColorMap[b.id] = BOARD_COLORS[i % BOARD_COLORS.length]; });
+
+    const tip = document.createElement('div');
+    tip.id = 'calDayTooltip';
+    tip.className = 'cal-day-tooltip';
+
+    let inner = '';
+    if (holiday) inner += `<div class="cdt-holiday">${holiday.name}</div>`;
+    if (todos.length) {
+      inner += todos.map(t => {
+        const c = boardColorMap[t.boardId] || '#4a90d9';
+        return `<div class="cdt-row" style="border-left:3px solid ${c}">
+          <span class="${t.done ? 'cdt-done' : ''}">${t.done ? '✓ ' : ''}${t.title}</span>
+          <span class="cdt-board" style="color:${c}">${t.board}</span>
+        </div>`;
+      }).join('');
+    }
+    tip.innerHTML = inner;
+
+    // 定位：跟着鼠标
+    const x = Math.min(event.clientX + 12, window.innerWidth - 220);
+    const y = Math.min(event.clientY + 12, window.innerHeight - 200);
+    tip.style.cssText = `position:fixed;left:${x}px;top:${y}px;z-index:1999`;
+    document.body.appendChild(tip);
+  }, 300); // 悬浮 300ms 后出现
+}
+
+function onHomeCalCellLeave() {
+  clearTimeout(_calHoverTimer);
+  // 小延迟后移除，避免鼠标划过时闪烁
+  setTimeout(() => document.getElementById('calDayTooltip')?.remove(), 200);
 }
 
 function openMarkDateModal() {
-  const dateStr = prompt('输入要标记的日期 (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
-  if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return;
-  
-  const type = prompt('标记类型:\n1: 生日 🎂\n2: 纪念日 💝\n3: 自定义 🔖\n\n输入数字 (1-3):', '3');
-  if (!type) return;
-  
-  const emojiMap = { '1': '🎂', '2': '💝', '3': '🔖' };
-  const typeMap = { '1': 'birthday', '2': 'anniversary', '3': 'custom' };
-  
-  const mark = {
-    type: typeMap[type] || 'custom',
-    emoji: emojiMap[type] || '🔖',
-    text: prompt('备注文字 (可选):', '') || ''
-  };
-  
-  saveMarkedDate(dateStr, mark);
-  toast(`已标记 ${dateStr}`);
+  // 保留旧入口，但现在直接走浮层
+  toast('请直接点击日历格子来标记日期 🔖');
 }
 
 function focusRow(rowId) {
