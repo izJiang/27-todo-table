@@ -623,7 +623,7 @@ body.dark-mode #homeCalendar .cal-cell.anniversary { background: linear-gradient
 #homeCalendar { background:var(--white); border-top:1px solid var(--border); padding:0 0 20px; }
 #homeCalendar .cal-header { justify-content:flex-start; gap:8px; padding:16px 18px 12px; }
 #homeCalendar .cal-grid { margin:0 18px 12px; border-radius:12px; }
-#homeCalendar .cal-cell { min-height:90px; cursor:pointer; transition:background .15s; }
+#homeCalendar .cal-cell { min-height:100px; cursor:pointer; transition:background .15s; display:flex; flex-direction:column; }
 #homeCalendar .cal-cell:hover { background:var(--row-hover); }
 #homeCalendar .cal-cell.has-todos { background: linear-gradient(180deg, var(--white) 0%, #f0faf7 100%); }
 #homeCalendar .cal-cell.holiday { background: linear-gradient(180deg, #fff5f5 0%, #ffeeee 100%); }
@@ -633,10 +633,23 @@ body.dark-mode #homeCalendar .cal-cell.anniversary { background: linear-gradient
 #homeCalendar .cal-cell.anniversary { background: linear-gradient(180deg, #f0f8ff 0%, #e6f2ff 100%); }
 #homeCalendar .cal-cell.anniversary::before { content:'💝'; position:absolute; top:4px; right:4px; font-size:14px; }
 #homeCalendar .cal-cell.custom-mark::before { content:attr(data-emoji); position:absolute; top:4px; right:4px; font-size:14px; }
-.cal-todo-list { margin-top:4px; }
-.cal-todo-item { font-size:10px; padding:1px 4px; border-radius:3px; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.cal-todo-item.done { text-decoration:line-through; opacity:.5; }
-.cal-more-dots { font-size:10px; color:var(--text3); padding-left:4px; }
+/* Apple-style colored bars for todos */
+.cal-todo-list { margin-top:6px; display:flex; flex-direction:column; gap:2px; }
+.cal-todo-bar { font-size:10px; padding:3px 6px; border-radius:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; gap:4px; }
+.cal-todo-bar::before { content:''; width:3px; height:100%; border-radius:2px; flex-shrink:0; }
+.cal-todo-bar.done { opacity:.5; }
+.cal-todo-bar.done .cal-todo-text { text-decoration:line-through; }
+.cal-todo-bar.study { background:#e3f2fd; color:#1976d2; }
+.cal-todo-bar.study::before { background:#1976d2; }
+.cal-todo-bar.work { background:#f3e5f5; color:#7b1fa2; }
+.cal-todo-bar.work::before { background:#7b1fa2; }
+.cal-todo-bar.personal { background:#e8f5e9; color:#388e3c; }
+.cal-todo-bar.personal::before { background:#388e3c; }
+.cal-todo-bar.urgent { background:#ffebee; color:#c62828; }
+.cal-todo-bar.urgent::before { background:#c62828; }
+.cal-todo-bar.default { background:#f5f5f5; color:#616161; }
+.cal-todo-bar.default::before { background:#616161; }
+.cal-more { font-size:9px; color:#9e9e9e; padding-left:6px; margin-top:2px; }
 .cal-dot-list { display:flex; gap:3px; flex-wrap:wrap; margin-top:2px; }
 .cal-dot-item { width:6px; height:6px; border-radius:50%; }
 .cal-legend { display:flex; gap:16px; padding:0 18px; flex-wrap:wrap; }
@@ -784,8 +797,8 @@ body.dark-mode .matrix-card { background:var(--white); }
   <div class="hp-bar">
     <span class="hp-title">📋 我的清单</span>
     <div style="flex:1"></div>
-    <button class="tb-btn btn-icon" id="darkModeBtnHome" onclick="toggleDarkMode()" title="深色模式">🌙</button>
-    <button class="tb-btn btn-icon" id="themeBtnHome" onclick="cycleTheme()" title="切换主题" style="font-size:16px">🎨</button>
+    <button class="tb-btn btn-icon" id="darkModeBtnHome" onclick="toggleDarkMode()" title="深色模式" style="width:34px;height:34px;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;flex-shrink:0">🌙</button>
+    <button class="tb-btn btn-icon" id="themeBtnHome" onclick="cycleTheme()" title="切换主题" style="width:34px;height:34px;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;flex-shrink:0;margin-left:10px">🎨</button>
     <button class="hp-new-btn" onclick="showCreateModal()" style="margin-left:8px">＋ 新建</button>
   </div>
   <div class="hp-body">
@@ -795,9 +808,9 @@ body.dark-mode .matrix-card { background:var(--white); }
     <!-- 首页日历区域 -->
     <div class="hp-section-title">
       <span>📅 日历概览</span>
-      <button class="hp-section-btn" id="homeCalToggle" onclick="toggleHomeCalendar()">展开 ▼</button>
+      <button class="hp-section-btn" id="homeCalToggle" onclick="toggleHomeCalendar()">收起 ▲</button>
     </div>
-    <div id="homeCalendar" style="display:none;">
+    <div id="homeCalendar" style="display:block;">
       <div class="cal-header">
         <button class="tb-btn" onclick="homeCalPrev()">‹</button>
         <span class="cal-title" id="homeCalTitle"></span>
@@ -3309,7 +3322,7 @@ function calNext() { calendarMonth++; if(calendarMonth>11){calendarMonth=0;calen
 /* ─── Home Page Calendar ─── */
 let homeCalYear = new Date().getFullYear();
 let homeCalMonth = new Date().getMonth();
-let homeCalOpen = false;
+let homeCalOpen = true;
 
 // 2026年节假日数据（中国）
 const HOLIDAYS_2026 = {
@@ -3401,7 +3414,8 @@ function renderHomeCalendarGrid() {
             date: dateVal,
             title: row.cells?.[board.columns[0]?.id] || '无标题',
             done: row.done,
-            boardName: board.title
+            boardName: board.title,
+            boardId: board.id
           });
         }
       });
@@ -3446,29 +3460,33 @@ function renderHomeCalendarGrid() {
     if (holiday) badge = `<span style="color:#e74c3c;font-size:10px;font-weight:600">${holiday.name}</span>`;
     else if (marked) badge = `<span style="color:var(--accent);font-size:10px;font-weight:600">${marked.text || ''}</span>`;
     
-    // 待办圆点 - 按完成状态变色
-    let dots = '';
+    // Apple Calendar 风格彩色竖条
+    // 每个来源表格一个颜色
+    const BOARD_COLORS = ['#4a90d9','#9b59b0','#27ae60','#e67e22','#e74c3c','#16a085','#2980b9','#8e44ad'];
+    const boardColorMap = {};
+    homeBoards.forEach((b,i) => { boardColorMap[b.id] = BOARD_COLORS[i % BOARD_COLORS.length]; });
+
+    let bars = '';
     if (todos.length > 0) {
-      const allDone = todos.every(t => t.done);
-      const anyDone = todos.some(t => t.done);
-      let dotColor = '#4caf82'; // 绿色=待办
-      if (allDone) dotColor = '#9fa8b5'; // 灰色=全完成
-      else if (anyDone) dotColor = '#f9a825'; // 黄色=部分完成
-      dots = `<div class="cal-dot-list">${todos.slice(0,5).map(() => `<span class="cal-dot-item" style="background:${dotColor}"></span>`).join('')}</div>`;
+      const show = todos.slice(0, 3);
+      bars = `<div class="cal-todo-list">` + show.map(t => {
+        const color = boardColorMap[t.boardId] || '#4a90d9';
+        const bg = t.done ? '#e0e0e0' : color + '22'; // 透明背景
+        const textColor = t.done ? '#9e9e9e' : color;
+        const barColor = t.done ? '#bdbdbd' : color;
+        const truncated = t.title.length > 9 ? t.title.slice(0,9)+'…' : t.title;
+        return `<div class="cal-todo-bar${t.done?' done':''}" style="background:${bg};color:${textColor};border-left:3px solid ${barColor}" onclick="event.stopPropagation();onHomeCalDayClick('${dateStr}')">
+          <span class="cal-todo-text" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${truncated}</span>
+        </div>`;
+      }).join('');
+      if (todos.length > 3) bars += `<div class="cal-more">+${todos.length - 3} 个</div>`;
+      bars += `</div>`;
     }
-    
-    // 悬停显示tooltip
-    let tooltip = '';
-    if (todos.length > 0) {
-      tooltip = `title="${todos.map(t => (t.done ? '✓' : '○') + t.title).join('\\n')}"`;
-    } else if (holiday) {
-      tooltip = `title="${holiday.name}"`;
-    }
-    
-    h += `<div class="cal-cell ${classes.join(' ')}" ${marked ? `data-emoji="${marked.emoji || '🔖'}"` : ''} onclick="onHomeCalDayClick('${dateStr}')" ${tooltip}>
+
+    h += `<div class="cal-cell ${classes.join(' ')}" ${marked ? `data-emoji="${marked.emoji || '🔖'}"` : ''} onclick="onHomeCalDayClick('${dateStr}')">
       <div class="cal-day-num">${d}</div>
       ${badge}
-      ${dots}
+      ${bars}
     </div>`;
   }
   
