@@ -1088,7 +1088,8 @@ function rowFromDb(dbRow) {
     cells: dbRow.cells || {},
     pos: dbRow.position || 0,
     visibility: dbRow.visibility || 'public',
-    syncId: dbRow.sync_id || null
+    syncId: dbRow.sync_id || null,
+    _updatedAt: dbRow.updated_at || ''   // 用于 Realtime 冲突判断
   };
 }
 
@@ -1119,11 +1120,21 @@ async function syncBoardFromCloud(boardId) {
   if (!isOnline) return;
   const { data, error } = await sb.from('rows').select('*').eq('board_id', boardId).order('position');
   if (!error && data) {
-    const remoteIds = new Set(data.map(r => r.id));
-    const localOnly = S.rows.filter(r => !remoteIds.has(r.id));
-    const merged = [...data.map(rowFromDb), ...localOnly];
-    S.rows = merged;
+    const remoteMap = new Map(data.map(r => [r.id, r]));
+    const localOnly = S.rows.filter(r => !remoteMap.has(r.id));
+
+    // 对已存在的行：只在云端更新时间 > 本地才采用云端版本（防止覆盖刚编辑的内容）
+    const merged = data.map(remoteRow => {
+      const localRow = S.rows.find(r => r.id === remoteRow.id);
+      if (!localRow) return rowFromDb(remoteRow);
+      const remoteTs = remoteRow.updated_at || '';
+      const localTs  = localRow._updatedAt || '';
+      return remoteTs > localTs ? { ...localRow, ...rowFromDb(remoteRow) } : localRow;
+    });
+
+    S.rows = [...merged, ...localOnly];
     save();
+    // 把本地独有的行推上云
     for (const r of localOnly) {
       sb.from('rows').upsert(rowToDb(r, boardId, S.rows.indexOf(r))).then(() => {});
     }
@@ -1138,8 +1149,13 @@ function debouncedCloudSave() {
     if (!isOnline || !currentBoardId) return;
     setSyncBadge('ing');
     try {
+      const pushTs = nowISO();
       const dbRows = S.rows.map((r, i) => rowToDb(r, currentBoardId, i));
       await sb.from('rows').upsert(dbRows);
+      // 推送成功后把本地 _updatedAt 更新为推送时间，
+      // 这样 Realtime 回来的事件时间戳一定 <= pushTs，不会再覆盖
+      S.rows.forEach(r => { r._updatedAt = pushTs; });
+      localStorage.setItem(STORE, JSON.stringify(S));
       const board = homeBoards.find(b => b.id === currentBoardId);
       if (board) {
         await sb.from('boards').update({
@@ -1169,14 +1185,27 @@ function subscribeBoard(boardId) {
   realtimeChannel = sb.channel('rows_' + boardId)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'rows', filter: 'board_id=eq.' + boardId }, payload => {
       if (payload.eventType === 'INSERT') {
-        if (!S.rows.find(r => r.id === payload.new.id)) S.rows.push(rowFromDb(payload.new));
+        // 只有本地没有这条记录才插入（避免把刚本地新增的行误判为远端新增覆盖）
+        if (!S.rows.find(r => r.id === payload.new.id)) {
+          S.rows.push(rowFromDb(payload.new));
+          save(); renderTable();
+        }
       } else if (payload.eventType === 'UPDATE') {
         const idx = S.rows.findIndex(r => r.id === payload.new.id);
-        if (idx >= 0) S.rows[idx] = { ...S.rows[idx], ...rowFromDb(payload.new) };
+        if (idx >= 0) {
+          const localRow = S.rows[idx];
+          const remoteTs = payload.new.updated_at || '';
+          const localTs  = localRow._updatedAt || '';
+          // 只有云端更新时间 > 本地才合并，防止自己的 debounce 推送回来覆盖自己
+          if (remoteTs > localTs) {
+            S.rows[idx] = { ...localRow, ...rowFromDb(payload.new) };
+            save(); renderTable();
+          }
+        }
       } else if (payload.eventType === 'DELETE') {
         S.rows = S.rows.filter(r => r.id !== payload.old.id);
+        save(); renderTable();
       }
-      save(); renderTable();
     })
     // Also subscribe to sync updates from OTHER boards (same sync_id, different board_id)
     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'rows' }, payload => {
@@ -1760,7 +1789,13 @@ S.rows.forEach(r=>{
   });
 });
 
-const save=()=>{localStorage.setItem(STORE,JSON.stringify(S));debouncedCloudSave();};
+const save=()=>{
+  // 给每行打本地时间戳，用于 Realtime 冲突判断
+  const now = nowISO();
+  S.rows.forEach(r=>{ if(!r._updatedAt) r._updatedAt = now; });
+  localStorage.setItem(STORE,JSON.stringify(S));
+  debouncedCloudSave();
+};
 const gid=()=>'id'+Date.now()+Math.floor(Math.random()*9999);
 const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
