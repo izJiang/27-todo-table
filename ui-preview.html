@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UI 方案预览</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',sans-serif; background:#111; color:#fff; }
+
+/* 顶部导航 */
+.nav { position:fixed; top:0; left:0; right:0; z-index:100; display:flex; gap:8px; padding:14px 24px; background:rgba(17,17,17,.85); backdrop-filter:blur(20px); border-bottom:1px solid rgba(255,255,255,.08); }
+.nav-btn { padding:7px 18px; border-radius:20px; border:1px solid rgba(255,255,255,.15); background:transparent; color:rgba(255,255,255,.6); cursor:pointer; font-size:13px; transition:all .2s; }
+.nav-btn.active { background:#fff; color:#111; border-color:#fff; }
+.nav-title { margin-left:auto; font-size:13px; color:rgba(255,255,255,.3); align-self:center; }
+
+/* 预览区 */
+.preview { display:none; padding-top:58px; height:100vh; overflow:hidden; }
+.preview.active { display:block; }
+
+/* ══════ 方案A：iPadOS ══════ */
+#previewA { background:#F2F2F7; }
+.a-wrap { display:flex; height:calc(100vh - 58px); }
+
+.a-sidebar { width:220px; background:#fff; border-right:1px solid #E5E5EA; display:flex; flex-direction:column; padding:0; flex-shrink:0; }
+.a-sidebar-header { padding:20px 16px 12px; }
+.a-sidebar-title { font-size:22px; font-weight:700; color:#1C1C1E; letter-spacing:-.5px; }
+.a-sidebar-sub { font-size:12px; color:#8E8E93; margin-top:2px; }
+.a-sidebar-list { flex:1; overflow-y:auto; padding:4px 8px; }
+.a-list-item { display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:10px; cursor:pointer; transition:background .15s; margin-bottom:1px; }
+.a-list-item:hover { background:#F2F2F7; }
+.a-list-item.active { background:#007AFF1A; }
+.a-list-emoji { font-size:16px; width:24px; text-align:center; }
+.a-list-label { font-size:14px; color:#1C1C1E; font-weight:500; flex:1; }
+.a-list-item.active .a-list-label { color:#007AFF; font-weight:600; }
+.a-list-count { font-size:12px; color:#8E8E93; background:#F2F2F7; padding:1px 7px; border-radius:10px; }
+.a-list-item.active .a-list-count { background:#007AFF1A; color:#007AFF; }
+.a-sidebar-add { padding:12px 16px; border-top:1px solid #E5E5EA; }
+.a-add-btn { width:100%; padding:9px; border:1.5px dashed #C7C7CC; border-radius:10px; background:none; color:#8E8E93; font-size:13px; cursor:pointer; transition:all .15s; }
+.a-add-btn:hover { border-color:#007AFF; color:#007AFF; }
+
+.a-main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.a-topbar { padding:14px 20px 12px; border-bottom:1px solid #E5E5EA; background:#fff; display:flex; align-items:center; gap:10px; }
+.a-board-title { font-size:18px; font-weight:700; color:#1C1C1E; letter-spacing:-.3px; flex:1; }
+.a-tb-btn { padding:6px 14px; border-radius:8px; border:1px solid #E5E5EA; background:#F2F2F7; color:#3C3C43; font-size:13px; cursor:pointer; }
+.a-tb-btn.blue { background:#007AFF; color:#fff; border-color:#007AFF; }
+.a-stats { padding:8px 20px; background:#F2F2F7; border-bottom:1px solid #E5E5EA; display:flex; gap:6px; }
+.a-stat { padding:3px 10px; border-radius:20px; font-size:12px; font-weight:500; }
+.a-stat.total { background:#E5E5EA; color:#3C3C43; }
+.a-stat.done { background:#34C75920; color:#34C759; }
+.a-stat.undone { background:#FF950020; color:#FF9500; }
+.a-table { flex:1; overflow-y:auto; padding:0; }
+.a-row { display:flex; align-items:center; padding:0 20px; height:46px; border-bottom:1px solid #F2F2F7; transition:background .1s; cursor:default; gap:12px; }
+.a-row:hover { background:#F9F9FB; }
+.a-check { width:18px; height:18px; border-radius:50%; border:2px solid #C7C7CC; flex-shrink:0; transition:all .15s; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.a-check.done { background:#34C759; border-color:#34C759; }
+.a-check.done::after { content:'✓'; color:#fff; font-size:10px; font-weight:700; }
+.a-row-title { flex:1; font-size:14px; color:#1C1C1E; }
+.a-row.done-row .a-row-title { color:#8E8E93; text-decoration:line-through; }
+.a-tag { padding:2px 8px; border-radius:6px; font-size:11px; font-weight:600; white-space:nowrap; }
+.a-date { font-size:12px; color:#8E8E93; white-space:nowrap; }
+.a-pri { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.a-group-hdr { padding:6px 20px; font-size:11px; font-weight:700; color:#8E8E93; letter-spacing:.6px; text-transform:uppercase; background:#F2F2F7; border-bottom:1px solid #E5E5EA; border-top:1px solid #E5E5EA; }
+
+/* ══════ 方案B：Notion Dark ══════ */
+#previewB { background:#191919; }
+.b-wrap { display:flex; height:calc(100vh - 58px); }
+.b-sidebar { width:240px; background:#1F1F1F; border-right:1px solid rgba(255,255,255,.06); padding:12px 8px; display:flex; flex-direction:column; gap:2px; flex-shrink:0; }
+.b-ws { padding:8px 10px 16px; font-size:14px; font-weight:600; color:rgba(255,255,255,.85); display:flex; align-items:center; gap:8px; }
+.b-ws-dot { width:24px; height:24px; border-radius:6px; background:linear-gradient(135deg,#7C3AED,#EC4899); display:flex; align-items:center; justify-content:center; font-size:12px; }
+.b-nav-item { display:flex; align-items:center; gap:8px; padding:6px 10px; border-radius:4px; cursor:pointer; color:rgba(255,255,255,.5); font-size:14px; transition:all .15s; }
+.b-nav-item:hover { background:rgba(255,255,255,.06); color:rgba(255,255,255,.85); }
+.b-nav-item.active { background:rgba(255,255,255,.08); color:rgba(255,255,255,.9); }
+.b-nav-icon { width:20px; text-align:center; font-size:15px; }
+.b-nav-label { flex:1; }
+.b-nav-count { font-size:12px; color:rgba(255,255,255,.25); }
+.b-section { font-size:11px; color:rgba(255,255,255,.25); padding:12px 10px 4px; letter-spacing:.5px; text-transform:uppercase; }
+
+.b-main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.b-header { padding:40px 48px 16px; }
+.b-h-title { font-size:30px; font-weight:700; color:#fff; letter-spacing:-.5px; margin-bottom:8px; }
+.b-h-sub { font-size:14px; color:rgba(255,255,255,.4); }
+.b-h-tags { display:flex; gap:6px; margin-top:12px; }
+.b-h-tag { padding:3px 10px; border-radius:4px; font-size:12px; font-weight:500; }
+.b-toolbar { padding:0 48px 16px; display:flex; gap:8px; border-bottom:1px solid rgba(255,255,255,.06); }
+.b-tb { padding:5px 12px; border-radius:6px; background:rgba(255,255,255,.06); color:rgba(255,255,255,.5); font-size:13px; cursor:pointer; border:none; transition:all .15s; }
+.b-tb:hover { background:rgba(255,255,255,.1); color:#fff; }
+.b-tb.accent { background:#4ADE8020; color:#4ADE80; }
+.b-table { flex:1; overflow-y:auto; padding:0 48px; }
+.b-row { display:flex; align-items:center; height:40px; border-bottom:1px solid rgba(255,255,255,.04); gap:12px; transition:background .1s; cursor:default; }
+.b-row:hover { background:rgba(255,255,255,.03); }
+.b-check { width:16px; height:16px; border-radius:3px; border:1.5px solid rgba(255,255,255,.2); flex-shrink:0; cursor:pointer; }
+.b-check.done { background:#4ADE80; border-color:#4ADE80; display:flex; align-items:center; justify-content:center; }
+.b-check.done::after { content:'✓'; color:#000; font-size:9px; font-weight:800; }
+.b-row-title { flex:1; font-size:14px; color:rgba(255,255,255,.85); }
+.b-row.done-row .b-row-title { color:rgba(255,255,255,.3); text-decoration:line-through; }
+.b-tag { padding:1px 7px; border-radius:3px; font-size:11px; font-weight:500; }
+.b-date { font-size:12px; color:rgba(255,255,255,.3); }
+
+/* ══════ 方案C：Linear ══════ */
+#previewC { background:#FAFAFA; }
+.c-wrap { display:flex; height:calc(100vh - 58px); }
+.c-sidebar { width:220px; background:#fff; border-right:1px solid #EBEBEB; display:flex; flex-direction:column; flex-shrink:0; }
+.c-logo { padding:16px 16px 8px; display:flex; align-items:center; gap:10px; }
+.c-logo-mark { width:26px; height:26px; background:#5E6AD2; border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:14px; }
+.c-logo-name { font-size:14px; font-weight:700; color:#111; }
+.c-section { padding:12px 12px 4px; font-size:10px; font-weight:700; color:#9CA3AF; letter-spacing:.8px; text-transform:uppercase; }
+.c-nav { padding:2px 8px; }
+.c-nav-item { display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:6px; cursor:pointer; font-size:13px; color:#374151; transition:background .1s; }
+.c-nav-item:hover { background:#F3F4F6; }
+.c-nav-item.active { background:#EEF2FF; color:#5E6AD2; font-weight:600; }
+.c-nav-icon { width:16px; text-align:center; font-size:13px; color:#9CA3AF; }
+.c-nav-item.active .c-nav-icon { color:#5E6AD2; }
+.c-nav-label { flex:1; }
+.c-nav-count { font-size:11px; color:#9CA3AF; background:#F3F4F6; padding:1px 6px; border-radius:10px; }
+.c-nav-item.active .c-nav-count { background:#EEF2FF; color:#5E6AD2; }
+
+.c-main { flex:1; display:flex; flex-direction:column; overflow:hidden; background:#FAFAFA; }
+.c-topbar { padding:12px 24px; border-bottom:1px solid #EBEBEB; background:#fff; display:flex; align-items:center; gap:8px; }
+.c-breadcrumb { font-size:13px; color:#9CA3AF; }
+.c-breadcrumb span { color:#111; font-weight:600; }
+.c-topbar-actions { margin-left:auto; display:flex; gap:6px; }
+.c-btn { padding:5px 12px; border-radius:6px; font-size:12px; border:1px solid #E5E7EB; background:#fff; color:#374151; cursor:pointer; font-weight:500; }
+.c-btn.primary { background:#5E6AD2; color:#fff; border-color:#5E6AD2; }
+.c-stats-row { padding:8px 24px; display:flex; gap:6px; border-bottom:1px solid #EBEBEB; background:#fff; }
+.c-stat { display:flex; align-items:center; gap:5px; padding:2px 8px; border-radius:20px; font-size:12px; border:1px solid #E5E7EB; color:#6B7280; }
+.c-stat-dot { width:6px; height:6px; border-radius:50%; }
+
+.c-table { flex:1; overflow-y:auto; }
+.c-group-hdr { display:flex; align-items:center; gap:8px; padding:10px 24px 6px; font-size:11px; font-weight:700; color:#6B7280; letter-spacing:.5px; text-transform:uppercase; cursor:pointer; }
+.c-group-hdr:hover { color:#374151; }
+.c-group-arr { font-size:9px; transition:transform .2s; }
+.c-row { display:flex; align-items:center; height:44px; border-bottom:1px solid #F3F4F6; padding:0 24px; gap:12px; transition:background .1s; cursor:default; position:relative; }
+.c-row::before { content:''; position:absolute; left:0; top:8px; bottom:8px; width:3px; border-radius:0 2px 2px 0; }
+.c-row.pri-high::before { background:#EF4444; }
+.c-row.pri-med::before { background:#F59E0B; }
+.c-row.pri-low::before { background:#E5E7EB; }
+.c-row:hover { background:#F9FAFB; }
+.c-status { width:16px; height:16px; border-radius:50%; border:2px solid #D1D5DB; flex-shrink:0; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s; }
+.c-status.in-progress { border-color:#5E6AD2; background:#EEF2FF; }
+.c-status.in-progress::after { content:''; width:6px; height:6px; border-radius:50%; background:#5E6AD2; }
+.c-status.done { background:#10B981; border-color:#10B981; }
+.c-status.done::after { content:'✓'; color:#fff; font-size:8px; font-weight:800; display:flex; align-items:center; justify-content:center; }
+.c-row-id { font-size:11px; color:#D1D5DB; font-family:monospace; width:36px; flex-shrink:0; }
+.c-row-title { flex:1; font-size:13px; color:#111; font-weight:450; }
+.c-row.done-row .c-row-title { color:#9CA3AF; }
+.c-row.done-row { opacity:.5; }
+.c-tag { padding:2px 7px; border-radius:4px; font-size:11px; font-weight:500; white-space:nowrap; }
+.c-date { font-size:11px; color:#9CA3AF; white-space:nowrap; }
+.c-assignee { width:22px; height:22px; border-radius:50%; background:linear-gradient(135deg,#5E6AD2,#8B5CF6); font-size:10px; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0; }
+.c-add-row { display:flex; align-items:center; gap:10px; padding:0 24px; height:36px; color:#9CA3AF; font-size:13px; cursor:pointer; transition:color .15s; }
+.c-add-row:hover { color:#5E6AD2; }
+
+/* ── 切换按钮 ── */
+.scheme-badge { position:fixed; bottom:20px; right:20px; background:rgba(255,255,255,.1); backdrop-filter:blur(20px); border:1px solid rgba(255,255,255,.15); border-radius:12px; padding:10px 16px; font-size:12px; color:rgba(255,255,255,.6); }
+#previewA .scheme-badge, #previewB .scheme-badge { display:block; }
+#previewA .scheme-badge { color:#8E8E93; background:rgba(0,0,0,.06); border-color:rgba(0,0,0,.08); }
+#previewC .scheme-badge { color:#6B7280; background:rgba(0,0,0,.04); border-color:rgba(0,0,0,.06); }
+</style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<div class="nav">
+  <button class="nav-btn active" onclick="show('A',this)">方案 A · iPadOS 风</button>
+  <button class="nav-btn" onclick="show('B',this)">方案 B · Notion Dark</button>
+  <button class="nav-btn" onclick="show('C',this)">方案 C · Linear 风</button>
+  <span class="nav-title">UI 方案预览 · 点击切换</span>
+</div>
+
+<!-- ══ 方案A ══ -->
+<div class="preview active" id="previewA">
+  <div class="a-wrap">
+    <div class="a-sidebar">
+      <div class="a-sidebar-header">
+        <div class="a-sidebar-title">我的待办</div>
+        <div class="a-sidebar-sub">6 个清单 · 24 条任务</div>
+      </div>
+      <div class="a-sidebar-list">
+        <div class="a-list-item active">
+          <span class="a-list-emoji">🎓</span>
+          <span class="a-list-label">学签办理</span>
+          <span class="a-list-count">8</span>
+        </div>
+        <div class="a-list-item">
+          <span class="a-list-emoji">📝</span>
+          <span class="a-list-label">毕业论文</span>
+          <span class="a-list-count">5</span>
+        </div>
+        <div class="a-list-item">
+          <span class="a-list-emoji">🏠</span>
+          <span class="a-list-label">香港租房</span>
+          <span class="a-list-count">6</span>
+        </div>
+        <div class="a-list-item">
+          <span class="a-list-emoji">🚗</span>
+          <span class="a-list-label">驾照科三</span>
+          <span class="a-list-count">3</span>
+        </div>
+        <div class="a-list-item">
+          <span class="a-list-emoji">💼</span>
+          <span class="a-list-label">实习转正</span>
+          <span class="a-list-count">2</span>
+        </div>
+      </div>
+      <div class="a-sidebar-add">
+        <button class="a-add-btn">＋ 新建清单</button>
+      </div>
+    </div>
+    <div class="a-main">
+      <div class="a-topbar">
+        <div class="a-board-title">🎓 学签办理</div>
+        <button class="a-tb-btn">🔽 筛选</button>
+        <button class="a-tb-btn">⊞ 分组</button>
+        <button class="a-tb-btn">📅 日历</button>
+        <button class="a-tb-btn blue">＋ 添加</button>
+      </div>
+      <div class="a-stats">
+        <span class="a-stat total">总计 8</span>
+        <span class="a-stat done" style="background:#34C75918;color:#34C759">完成 2</span>
+        <span class="a-stat undone" style="background:#FF950018;color:#FF9500">未完成 6</span>
+        <span class="a-stat" style="background:#007AFF18;color:#007AFF">P1 3</span>
+        <span class="a-stat" style="background:#8E8E9318;color:#8E8E93">P2 5</span>
+      </div>
+      <div class="a-table">
+        <div class="a-group-hdr">▾ &nbsp;P1 · 高优先级</div>
+        <div class="a-row">
+          <span class="a-pri" style="background:#FF3B30"></span>
+          <span class="a-check"></span>
+          <span class="a-row-title">准备材料：护照 + 学信网认证</span>
+          <span class="a-tag" style="background:#FF3B3018;color:#FF3B30">P1</span>
+          <span class="a-date">2026-04-01</span>
+        </div>
+        <div class="a-row">
+          <span class="a-pri" style="background:#FF3B30"></span>
+          <span class="a-check"></span>
+          <span class="a-row-title">办理中行签证卡</span>
+          <span class="a-tag" style="background:#FF3B3018;color:#FF3B30">P1</span>
+          <span class="a-date">2026-03-31</span>
+        </div>
+        <div class="a-row">
+          <span class="a-pri" style="background:#FF3B30"></span>
+          <span class="a-check done"></span>
+          <span class="a-row-title done-row" style="color:#8E8E93;text-decoration:line-through">填写 DS-160 表格</span>
+          <span class="a-tag" style="background:#34C75918;color:#34C759">完成</span>
+          <span class="a-date">2026-03-20</span>
+        </div>
+        <div class="a-group-hdr">▾ &nbsp;P2 · 普通</div>
+        <div class="a-row">
+          <span class="a-pri" style="background:#FF9500"></span>
+          <span class="a-check"></span>
+          <span class="a-row-title">预约签证面谈时间</span>
+          <span class="a-tag" style="background:#FF950018;color:#FF9500">P2</span>
+          <span class="a-date">2026-04-10</span>
+        </div>
+        <div class="a-row">
+          <span class="a-pri" style="background:#FF9500"></span>
+          <span class="a-check"></span>
+          <span class="a-row-title">准备住宿证明文件</span>
+          <span class="a-tag" style="background:#FF950018;color:#FF9500">P2</span>
+          <span class="a-date">2026-04-15</span>
+        </div>
+        <div class="a-row">
+          <span class="a-pri" style="background:#E5E5EA"></span>
+          <span class="a-check"></span>
+          <span class="a-row-title">申请银行存款证明</span>
+          <span class="a-tag" style="background:#8E8E9318;color:#8E8E93">P3</span>
+          <span class="a-date">2026-04-20</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="scheme-badge">方案 A · iPadOS · #007AFF · SF Pro</div>
+</div>
+
+<!-- ══ 方案B ══ -->
+<div class="preview" id="previewB">
+  <div class="b-wrap">
+    <div class="b-sidebar">
+      <div class="b-ws">
+        <div class="b-ws-dot">27</div>
+        27 的工作区
+      </div>
+      <div class="b-section">清单</div>
+      <div class="b-nav-item active">
+        <span class="b-nav-icon">🎓</span>
+        <span class="b-nav-label">学签办理</span>
+        <span class="b-nav-count">8</span>
+      </div>
+      <div class="b-nav-item">
+        <span class="b-nav-icon">📝</span>
+        <span class="b-nav-label">毕业论文</span>
+        <span class="b-nav-count">5</span>
+      </div>
+      <div class="b-nav-item">
+        <span class="b-nav-icon">🏠</span>
+        <span class="b-nav-label">香港租房</span>
+        <span class="b-nav-count">6</span>
+      </div>
+      <div class="b-nav-item">
+        <span class="b-nav-icon">🚗</span>
+        <span class="b-nav-label">驾照科三</span>
+        <span class="b-nav-count">3</span>
+      </div>
+      <div class="b-section">视图</div>
+      <div class="b-nav-item">
+        <span class="b-nav-icon">📅</span>
+        <span class="b-nav-label">日历</span>
+      </div>
+      <div class="b-nav-item">
+        <span class="b-nav-icon">🎯</span>
+        <span class="b-nav-label">目标树</span>
+      </div>
+    </div>
+    <div class="b-main">
+      <div class="b-header">
+        <div class="b-h-title">🎓 学签办理</div>
+        <div class="b-h-sub">8 条任务 · 更新于 3 分钟前</div>
+        <div class="b-h-tags">
+          <span class="b-h-tag" style="background:#4ADE8020;color:#4ADE80">完成 2</span>
+          <span class="b-h-tag" style="background:#F472B620;color:#F472B6">进行中 6</span>
+          <span class="b-h-tag" style="background:#FBBF2420;color:#FBBF24">截止 5天内</span>
+        </div>
+      </div>
+      <div class="b-toolbar">
+        <button class="b-tb">🔽 筛选</button>
+        <button class="b-tb">↕ 排序</button>
+        <button class="b-tb">⊞ 分组</button>
+        <button class="b-tb accent">＋ 新建任务</button>
+      </div>
+      <div class="b-table" style="padding:16px 0">
+        <div style="padding:6px 48px;font-size:11px;color:rgba(255,255,255,.25);letter-spacing:.5px;text-transform:uppercase;">P1 · 高优先级</div>
+        <div class="b-row">
+          <div class="b-check"></div>
+          <span class="b-row-title">准备材料：护照 + 学信网认证</span>
+          <span class="b-tag" style="background:#EF444420;color:#EF4444">紧急</span>
+          <span class="b-date">04-01</span>
+        </div>
+        <div class="b-row">
+          <div class="b-check"></div>
+          <span class="b-row-title">办理中行签证卡</span>
+          <span class="b-tag" style="background:#F472B620;color:#F472B6">进行中</span>
+          <span class="b-date">03-31</span>
+        </div>
+        <div class="b-row done-row">
+          <div class="b-check done"></div>
+          <span class="b-row-title">填写 DS-160 表格</span>
+          <span class="b-tag" style="background:#4ADE8020;color:#4ADE80">完成</span>
+          <span class="b-date">03-20</span>
+        </div>
+        <div style="padding:14px 48px 6px;font-size:11px;color:rgba(255,255,255,.25);letter-spacing:.5px;text-transform:uppercase;">P2 · 普通</div>
+        <div class="b-row">
+          <div class="b-check"></div>
+          <span class="b-row-title">预约签证面谈时间</span>
+          <span class="b-tag" style="background:#FBBF2420;color:#FBBF24">待办</span>
+          <span class="b-date">04-10</span>
+        </div>
+        <div class="b-row">
+          <div class="b-check"></div>
+          <span class="b-row-title">准备住宿证明文件</span>
+          <span class="b-tag" style="background:#60A5FA20;color:#60A5FA">资料</span>
+          <span class="b-date">04-15</span>
+        </div>
+        <div class="b-row">
+          <div class="b-check"></div>
+          <span class="b-row-title">申请银行存款证明</span>
+          <span class="b-tag" style="background:#60A5FA20;color:#60A5FA">资料</span>
+          <span class="b-date">04-20</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="scheme-badge" style="color:rgba(255,255,255,.4);background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1)">方案 B · Notion Dark · #191919 · 霓虹色</div>
+</div>
+
+<!-- ══ 方案C ══ -->
+<div class="preview" id="previewC">
+  <div class="c-wrap">
+    <div class="c-sidebar">
+      <div class="c-logo">
+        <div class="c-logo-mark">✦</div>
+        <div class="c-logo-name">27 Todo</div>
+      </div>
+      <div class="c-section">我的清单</div>
+      <div class="c-nav">
+        <div class="c-nav-item active">
+          <span class="c-nav-icon">🎓</span>
+          <span class="c-nav-label">学签办理</span>
+          <span class="c-nav-count">8</span>
+        </div>
+        <div class="c-nav-item">
+          <span class="c-nav-icon">📝</span>
+          <span class="c-nav-label">毕业论文</span>
+          <span class="c-nav-count">5</span>
+        </div>
+        <div class="c-nav-item">
+          <span class="c-nav-icon">🏠</span>
+          <span class="c-nav-label">香港租房</span>
+          <span class="c-nav-count">6</span>
+        </div>
+        <div class="c-nav-item">
+          <span class="c-nav-icon">🚗</span>
+          <span class="c-nav-label">驾照科三</span>
+          <span class="c-nav-count">3</span>
+        </div>
+      </div>
+      <div class="c-section">视图</div>
+      <div class="c-nav">
+        <div class="c-nav-item">
+          <span class="c-nav-icon">📅</span>
+          <span class="c-nav-label">日历</span>
+        </div>
+        <div class="c-nav-item">
+          <span class="c-nav-icon">🎯</span>
+          <span class="c-nav-label">目标树</span>
+        </div>
+        <div class="c-nav-item">
+          <span class="c-nav-icon">📊</span>
+          <span class="c-nav-label">统计</span>
+        </div>
+      </div>
+    </div>
+    <div class="c-main">
+      <div class="c-topbar">
+        <span class="c-breadcrumb">我的清单 › <span>学签办理</span></span>
+        <div class="c-topbar-actions">
+          <button class="c-btn">🔽 筛选</button>
+          <button class="c-btn">⊞ 分组</button>
+          <button class="c-btn">⋯ 更多</button>
+          <button class="c-btn primary">＋ 新建</button>
+        </div>
+      </div>
+      <div class="c-stats-row">
+        <div class="c-stat"><span class="c-stat-dot" style="background:#9CA3AF"></span>总计 8</div>
+        <div class="c-stat"><span class="c-stat-dot" style="background:#10B981"></span>完成 2</div>
+        <div class="c-stat"><span class="c-stat-dot" style="background:#F59E0B"></span>未完成 6</div>
+        <div class="c-stat"><span class="c-stat-dot" style="background:#EF4444"></span>P1 · 3条</div>
+        <div class="c-stat"><span class="c-stat-dot" style="background:#5E6AD2"></span>进行中 2</div>
+      </div>
+      <div class="c-table">
+        <div class="c-group-hdr"><span class="c-group-arr">▾</span> P1 · 高优先级 <span style="color:#D1D5DB;font-weight:400;margin-left:4px">3</span></div>
+        <div class="c-row pri-high">
+          <div class="c-status in-progress"></div>
+          <span class="c-row-id" style="color:#D1D5DB">#001</span>
+          <span class="c-row-title">准备材料：护照 + 学信网认证</span>
+          <span class="c-tag" style="background:#FEF2F2;color:#EF4444">紧急</span>
+          <span class="c-date">2026-04-01</span>
+          <div class="c-assignee">27</div>
+        </div>
+        <div class="c-row pri-high">
+          <div class="c-status"></div>
+          <span class="c-row-id" style="color:#D1D5DB">#002</span>
+          <span class="c-row-title">办理中行签证卡</span>
+          <span class="c-tag" style="background:#FFF7ED;color:#F59E0B">待办</span>
+          <span class="c-date">2026-03-31</span>
+          <div class="c-assignee">27</div>
+        </div>
+        <div class="c-row pri-high done-row">
+          <div class="c-status done"></div>
+          <span class="c-row-id" style="color:#D1D5DB">#003</span>
+          <span class="c-row-title">填写 DS-160 表格</span>
+          <span class="c-tag" style="background:#ECFDF5;color:#10B981">完成</span>
+          <span class="c-date">2026-03-20</span>
+          <div class="c-assignee">27</div>
+        </div>
+        <div class="c-group-hdr"><span class="c-group-arr">▾</span> P2 · 普通 <span style="color:#D1D5DB;font-weight:400;margin-left:4px">4</span></div>
+        <div class="c-row pri-med">
+          <div class="c-status"></div>
+          <span class="c-row-id" style="color:#D1D5DB">#004</span>
+          <span class="c-row-title">预约签证面谈时间</span>
+          <span class="c-tag" style="background:#EFF6FF;color:#3B82F6">计划中</span>
+          <span class="c-date">2026-04-10</span>
+          <div class="c-assignee">27</div>
+        </div>
+        <div class="c-row pri-med">
+          <div class="c-status"></div>
+          <span class="c-row-id" style="color:#D1D5DB">#005</span>
+          <span class="c-row-title">准备住宿证明文件</span>
+          <span class="c-tag" style="background:#F5F3FF;color:#8B5CF6">资料</span>
+          <span class="c-date">2026-04-15</span>
+          <div class="c-assignee">27</div>
+        </div>
+        <div class="c-row pri-low">
+          <div class="c-status"></div>
+          <span class="c-row-id" style="color:#D1D5DB">#006</span>
+          <span class="c-row-title">申请银行存款证明</span>
+          <span class="c-tag" style="background:#F5F3FF;color:#8B5CF6">资料</span>
+          <span class="c-date">2026-04-20</span>
+          <div class="c-assignee">27</div>
+        </div>
+        <div class="c-add-row">＋ 在「P2」中添加任务</div>
+      </div>
+    </div>
+  </div>
+  <div class="scheme-badge" style="color:#6B7280;background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.06)">方案 C · Linear · #5E6AD2 · 极简高效</div>
+</div>
+
+<script>
+function show(id, btn) {
+  document.querySelectorAll('.preview').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('preview' + id).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>
