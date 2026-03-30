@@ -3,7 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>我的清单</title>
+<title>27 Todo</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4caf82">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="27 Todo">
+<link rel="apple-touch-icon" href="icon-192.png">
+<!-- iPhone safe area -->
+<style>
+  body { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+  #batchBar, #clBar { padding-bottom: max(24px, env(safe-area-inset-bottom)); }
+</style>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Todo清单">
@@ -884,6 +897,7 @@ body.dark-mode .matrix-card { background:var(--white); }
     <button class="tb-btn btn-icon" id="darkModeBtnHome" onclick="toggleDarkMode()" title="深色模式" style="width:34px;height:34px;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;flex-shrink:0">🌙</button>
     <button class="tb-btn btn-icon" id="themeBtnHome" onclick="cycleTheme()" title="切换主题" style="width:34px;height:34px;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0;flex-shrink:0;margin-left:10px">🎨</button>
     <button class="hp-new-btn" onclick="showCreateModal()" style="margin-left:8px">＋ 新建</button>
+    <button id="pwaInstallBtn" onclick="promptPWAInstall()" title="安装到主屏幕" style="display:none;align-items:center;gap:5px;margin-left:8px;padding:6px 12px;border-radius:8px;border:1.5px solid var(--accent);background:transparent;color:var(--accent);font-size:13px;cursor:pointer;font-weight:600">📲 安装App</button>
   </div>
   <div class="hp-body">
     <div class="hp-grid" id="boardsGrid"></div>
@@ -3570,6 +3584,40 @@ function toggleDarkMode() {
 if (localStorage.getItem('darkMode') === '1') {
   document.body.classList.add('dark-mode');
   document.addEventListener('DOMContentLoaded', generateStars);
+
+// ── PWA Service Worker 注册 ──
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/27-todo-table/sw.js')
+      .then(r => console.log('SW registered:', r.scope))
+      .catch(e => console.log('SW failed:', e));
+  });
+}
+
+// ── PWA 安装提示（Android Chrome）──
+let _pwaPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  _pwaPrompt = e;
+  // 显示安装按钮
+  const btn = document.getElementById('pwaInstallBtn');
+  if (btn) btn.style.display = 'flex';
+});
+window.addEventListener('appinstalled', () => {
+  const btn = document.getElementById('pwaInstallBtn');
+  if (btn) btn.style.display = 'none';
+  _pwaPrompt = null;
+  toast('✅ 已添加到主屏幕！');
+});
+function promptPWAInstall() {
+  if (_pwaPrompt) {
+    _pwaPrompt.prompt();
+    _pwaPrompt.userChoice.then(r => { if (r.outcome === 'accepted') _pwaPrompt = null; });
+  } else {
+    // iOS 提示
+    toast('📱 iOS：点击底部分享按钮 → 添加到主屏幕');
+  }
+}
 }
 const isDark = document.body.classList.contains('dark-mode');
 const dmBtn = document.getElementById('darkModeBtn');
