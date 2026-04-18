@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>主页 · 27 Todo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Varela+Round&family=Nunito+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#6366F1;
+  --primary-soft:#EEF2FF;
+  --primary-mid:#C7D2FE;
+  --green:#10B981;
+  --green-soft:#ECFDF5;
+  --amber:#F59E0B;
+  --amber-soft:#FFFBEB;
+  --red:#EF4444;
+  --red-soft:#FEF2F2;
+  --bg:#F8FAFC;
+  --card:#FFFFFF;
+  --border:#E2E8F0;
+  --text:#0F172A;
+  --text2:#475569;
+  --text3:#94A3B8;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:0 4px 20px rgba(0,0,0,.08),0 2px 6px rgba(0,0,0,.04);
+}
+body{
+  font-family:'Nunito Sans',-apple-system,'PingFang SC',sans-serif;
+  background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;
+}
+
+/* ─── TOPBAR ─── */
+.topbar{background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:300;box-shadow:var(--shadow-sm);}
+.topbar-accent{height:3px;background:linear-gradient(90deg,#6366F1,#8B5CF6,#A78BFA);}
+.topbar-inner{padding:0 24px;height:52px;display:flex;align-items:center;gap:10px;}
+.brand{font-family:'Varela Round',sans-serif;font-size:17px;color:var(--text);}
+.brand em{color:var(--primary);font-style:normal;}
+.spacer{flex:1}
+.nav-tabs{display:flex;gap:2px;}
+.nav-tab{
+  display:flex;align-items:center;gap:5px;padding:5px 14px;border-radius:8px;
+  font-size:13px;font-weight:600;cursor:pointer;border:none;background:none;
+  color:var(--text3);font-family:inherit;transition:all .15s ease-out;text-decoration:none;
+}
+.nav-tab:hover{background:var(--primary-soft);color:var(--primary);}
+.nav-tab.active{background:var(--primary-soft);color:var(--primary);}
+.nav-tab svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+
+/* ─── HERO ─── */
+.hero{
+  background:linear-gradient(135deg,#6366F1 0%,#8B5CF6 60%,#A78BFA 100%);
+  padding:36px 28px 48px;position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;opacity:.06;
+  background-image:radial-gradient(circle at 20% 50%,#fff 1px,transparent 1px),
+    radial-gradient(circle at 80% 20%,#fff 1px,transparent 1px);
+  background-size:40px 40px;
+}
+.hero-inner{position:relative;z-index:1;max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:40px;flex-wrap:wrap;}
+.hero-text{flex:1;min-width:260px;}
+.hero-sub-title{font-size:12px;color:rgba(255,255,255,.65);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;}
+.hero-title{font-family:'Varela Round',sans-serif;font-size:28px;color:#fff;line-height:1.3;margin-bottom:10px;}
+.hero-desc{font-size:13.5px;color:rgba(255,255,255,.7);line-height:1.7;max-width:380px;min-height:22px;}
+.hero-badges{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap;}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);
+  border-radius:20px;padding:4px 12px;font-size:12px;color:#fff;font-weight:600;
+  backdrop-filter:blur(4px);
+}
+.hero-badge-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+
+/* ring */
+.hero-ring-wrap{flex-shrink:0;position:relative;width:140px;height:140px;}
+.hero-ring-svg{width:140px;height:140px;transform:rotate(-90deg);position:absolute;top:0;left:0;}
+.hero-ring-bg{fill:none;stroke:rgba(255,255,255,.18);stroke-width:10;}
+.hero-ring-fg{
+  fill:none;stroke:#fff;stroke-width:10;stroke-linecap:round;
+  stroke-dasharray:376.8;stroke-dashoffset:376.8;
+  filter:drop-shadow(0 0 6px rgba(255,255,255,.4));
+  transition:stroke-dashoffset 1s cubic-bezier(.4,0,.2,1);
+}
+.ring-center{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;
+}
+.ring-pct{font-family:'Varela Round',sans-serif;font-size:26px;color:#fff;line-height:1;}
+.ring-sub{font-size:11px;color:rgba(255,255,255,.65);margin-top:3px;}
+
+/* ─── CONTENT ─── */
+.content{max-width:1100px;margin:0 auto;padding:0 24px 80px;}
+.section{margin-top:24px;}
+.section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.section-title{
+  font-family:'Varela Round',sans-serif;font-size:14.5px;color:var(--text);
+  display:flex;align-items:center;gap:6px;
+}
+.section-title svg{width:15px;height:15px;stroke:var(--primary);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.section-link{font-size:12.5px;color:var(--primary);cursor:pointer;font-weight:600;text-decoration:none;}
+.section-link:hover{text-decoration:underline;}
+
+/* ─── TAG CARDS (动态) ─── */
+.tag-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+.tag-card{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:18px;box-shadow:var(--shadow-sm);cursor:pointer;
+  transition:all .2s ease-out;position:relative;overflow:hidden;
+}
+.tag-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.tag-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);}
+.tag-card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;}
+.tag-icon{
+  width:36px;height:36px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;
+}
+.tag-name{font-size:13px;font-weight:700;color:var(--text);}
+.tag-total{font-size:11.5px;color:var(--text3);margin-top:2px;}
+.tag-num{font-family:'Varela Round',sans-serif;font-size:26px;color:var(--text);line-height:1;}
+.tag-num-lbl{font-size:11px;color:var(--text3);margin-top:2px;}
+.tag-bar-bg{width:100%;height:4px;background:var(--border);border-radius:4px;overflow:hidden;margin-top:12px;}
+.tag-bar-fill{height:4px;border-radius:4px;transition:width .7s cubic-bezier(.4,0,.2,1);}
+.tag-bar-row{display:flex;justify-content:space-between;margin-top:4px;font-size:11px;color:var(--text3);}
+
+/* palette: 循环取色 */
+.pal-0{--c:#6366F1;--cs:#EEF2FF;}
+.pal-1{--c:#10B981;--cs:#ECFDF5;}
+.pal-2{--c:#F59E0B;--cs:#FFFBEB;}
+.pal-3{--c:#8B5CF6;--cs:#F5F3FF;}
+.pal-4{--c:#EF4444;--cs:#FEF2F2;}
+.pal-5{--c:#3B82F6;--cs:#EFF6FF;}
+.pal-6{--c:#EC4899;--cs:#FDF2F8;}
+.pal-7{--c:#14B8A6;--cs:#F0FDFA;}
+.tag-card[class*="pal-"]::before{background:var(--c);}
+.tag-card[class*="pal-"] .tag-icon{background:var(--cs);color:var(--c);}
+.tag-card[class*="pal-"] .tag-bar-fill{background:var(--c);}
+.tag-card[class*="pal-"] .tag-num{color:var(--c);}
+
+/* ─── 紧急事项 ─── */
+.urgent-list{display:flex;flex-direction:column;gap:6px;}
+.urgent-item{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:11px 16px;display:flex;align-items:center;gap:12px;
+  box-shadow:var(--shadow-sm);cursor:pointer;
+  transition:all .15s ease-out;
+}
+.urgent-item:hover{box-shadow:var(--shadow-md);transform:translateX(3px);}
+.urgent-item.overdue{border-left:3px solid var(--red);}
+.urgent-item.due-soon{border-left:3px solid var(--amber);}
+.urgent-item.due-normal{border-left:3px solid var(--primary);}
+.urgent-badge{
+  flex-shrink:0;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;
+  white-space:nowrap;min-width:52px;text-align:center;
+}
+.overdue .urgent-badge{background:var(--red-soft);color:var(--red);}
+.due-soon .urgent-badge{background:var(--amber-soft);color:var(--amber);}
+.due-normal .urgent-badge{background:var(--primary-soft);color:var(--primary);}
+.urgent-name{flex:1;font-size:13.5px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.urgent-tag-pill{font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;flex-shrink:0;white-space:nowrap;}
+.urgent-date{font-size:12px;color:var(--text3);flex-shrink:0;min-width:70px;text-align:right;font-variant-numeric:tabular-nums;}
+.overdue .urgent-date{color:var(--red);font-weight:700;}
+.due-soon .urgent-date{color:var(--amber);font-weight:600;}
+.urgent-empty{color:var(--text3);font-size:13px;padding:20px;text-align:center;background:var(--card);border:1px solid var(--border);border-radius:10px;}
+
+/* ─── 看板列表 ─── */
+.board-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;}
+.board-card{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:14px 16px;cursor:pointer;transition:all .15s ease-out;
+  box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:10px;
+}
+.board-card:hover{border-color:var(--primary-mid);box-shadow:0 4px 14px rgba(99,102,241,.12);transform:translateY(-1px);}
+.board-emoji{font-size:22px;flex-shrink:0;}
+.board-info{flex:1;min-width:0;}
+.board-title{font-size:13.5px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.board-meta{font-size:11.5px;color:var(--text3);margin-top:2px;}
+.board-progress{font-size:11px;font-weight:700;color:var(--primary);flex-shrink:0;}
+
+/* ─── 骨架屏 ─── */
+@keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
+.skeleton{
+  background:linear-gradient(90deg,#f0f2f5 25%,#e8eaed 50%,#f0f2f5 75%);
+  background-size:800px 100%;animation:shimmer 1.4s infinite;border-radius:6px;
+}
+.skel-card{height:110px;border-radius:12px;}
+.skel-row{height:44px;border-radius:8px;}
+.skel-row+.skel-row{margin-top:6px;}
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.anim{animation:fadeUp .3s ease both;}
+
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+@media(max-width:600px){
+  .hero-ring-wrap{display:none;}
+  .hero-title{font-size:22px;}
+  .hero{padding:24px 16px 36px;}
+  .content{padding:0 16px 80px;}
+  .topbar-inner{padding:0 16px;}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-accent"></div>
+  <div class="topbar-inner">
+    <div class="brand">✦ <em>27</em> Todo</div>
+    <div class="spacer"></div>
+    <div class="nav-tabs">
+      <a class="nav-tab active" href="home.html">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        主页
+      </a>
+      <a class="nav-tab" href="index.html">
+        <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        任务清单
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- HERO (动态渲染) -->
+<div class="hero" id="hero">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="hero-sub-title" id="heroDate">加载中…</div>
+      <div class="hero-title" id="heroTitle">27 的任务中心</div>
+      <div class="hero-desc" id="heroDesc"></div>
+      <div class="hero-badges" id="heroBadges"></div>
+    </div>
+    <div class="hero-ring-wrap">
+      <svg class="hero-ring-svg" viewBox="0 0 140 140">
+        <circle class="hero-ring-bg" cx="70" cy="70" r="60"/>
+        <circle class="hero-ring-fg" id="heroRing" cx="70" cy="70" r="60"/>
+      </svg>
+      <div class="ring-center">
+        <div class="ring-pct" id="ringPct">–</div>
+        <div class="ring-sub">总完成率</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- 分类进度（按 tag 动态生成） -->
+  <div class="section">
+    <div class="section-hd">
+      <div class="section-title">
+        <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+        分类进度
+      </div>
+    </div>
+    <div class="tag-grid" id="tagGrid">
+      <!-- 骨架屏 -->
+      <div class="skeleton skel-card"></div>
+      <div class="skeleton skel-card"></div>
+      <div class="skeleton skel-card"></div>
+    </div>
+  </div>
+
+  <!-- 需要关注 -->
+  <div class="section">
+    <div class="section-hd">
+      <div class="section-title">
+        <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        需要关注
+      </div>
+      <a class="section-link" href="index.html">去处理 →</a>
+    </div>
+    <div class="urgent-list" id="urgentList">
+      <div class="skeleton skel-row"></div>
+      <div class="skeleton skel-row"></div>
+      <div class="skeleton skel-row"></div>
+    </div>
+  </div>
+
+  <!-- 所有看板 -->
+  <div class="section">
+    <div class="section-hd">
+      <div class="section-title">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        全部清单
+      </div>
+      <a class="section-link" href="index.html">打开清单 →</a>
+    </div>
+    <div class="board-grid" id="boardGrid">
+      <div class="skeleton skel-card" style="height:64px;"></div>
+      <div class="skeleton skel-card" style="height:64px;"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SUPABASE_URL = 'https://dbymgvfnydyunnxjsndh.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_0LvNrnUViQnaFfznZ1cCVw_K0RfNZ2P';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// 调色板（循环使用）
+const PALETTE = ['pal-0','pal-1','pal-2','pal-3','pal-4','pal-5','pal-6','pal-7'];
+const PALETTE_COLORS = [
+  '#6366F1','#10B981','#F59E0B','#8B5CF6','#EF4444','#3B82F6','#EC4899','#14B8A6'
+];
+
+// 问候语
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 6)  return '🌙 夜深了';
+  if (h < 11) return '☀️ 早安';
+  if (h < 13) return '🌤 午好';
+  if (h < 18) return '🌈 下午好';
+  if (h < 22) return '🌆 晚上好';
+  return '🌙 夜深了';
+}
+
+// 日期格式
+function fmt(d) {
+  if (!d) return '';
+  const dt = new Date(d);
+  return `${dt.getMonth()+1}/${dt.getDate()}`;
+}
+
+function daysUntil(d) {
+  if (!d) return null;
+  const now = new Date(); now.setHours(0,0,0,0);
+  const due = new Date(d); due.setHours(0,0,0,0);
+  return Math.round((due - now) / 86400000);
+}
+
+// 找 tag 列（c2）和 due 列（c3）—— 从 columns 定义里找，兼容用户自定义
+function findCol(columns, label) {
+  return columns.find(c => c.label === label || c.label === label) || null;
+}
+
+async function loadAll() {
+  // 1. 拉所有看板
+  const { data: boards, error: bErr } = await sb.from('boards').select('*').order('updated_at', { ascending: false });
+  if (bErr || !boards?.length) {
+    renderEmpty();
+    return;
+  }
+
+  // 2. 拉所有 rows
+  const boardIds = boards.map(b => b.id);
+  const { data: rows } = await sb.from('rows').select('*').in('board_id', boardIds);
+  const allRows = rows || [];
+
+  // 3. 全局统计
+  const totalRows = allRows.length;
+  const doneRows  = allRows.filter(r => r.done).length;
+  const pct = totalRows > 0 ? Math.round(doneRows / totalRows * 100) : 0;
+
+  renderHero(boards, totalRows, doneRows, pct);
+  renderTagGrid(boards, allRows);
+  renderUrgent(boards, allRows);
+  renderBoards(boards, allRows);
+}
+
+function renderHero(boards, total, done, pct) {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('zh-CN', { year:'numeric', month:'long', day:'numeric', weekday:'short' });
+  document.getElementById('heroDate').textContent = `${getGreeting()} · ${dateStr}`;
+
+  // 标题：用所有看板名拼或默认
+  const titles = boards.map(b => (b.emoji||'') + b.title).slice(0,2);
+  document.getElementById('heroTitle').textContent = titles.length > 0 ? titles.join(' & ') : '我的任务中心';
+
+  // 徽章
+  const pending = total - done;
+  const overdueCount = getOverdueRows(boards, []).length; // 下面再细算
+  const badges = [
+    { dot: '#A5B4FC', label: `${done} / ${total} 已完成` },
+    { dot: '#6EE7B7', label: `${boards.length} 个清单` },
+  ];
+  document.getElementById('heroBadges').innerHTML = badges.map(b =>
+    `<div class="hero-badge"><div class="hero-badge-dot" style="background:${b.dot}"></div>${b.label}</div>`
+  ).join('');
+
+  // 进度环
+  document.getElementById('ringPct').textContent = pct + '%';
+  const circumference = 376.8;
+  const offset = circumference * (1 - pct / 100);
+  setTimeout(() => {
+    document.getElementById('heroRing').style.strokeDashoffset = offset;
+  }, 200);
+}
+
+function getTagCol(board) {
+  const cols = board.columns || [];
+  return cols.find(c => c.id === 'c2' || c.label === 'tag' || c.label === '标签') || null;
+}
+function getDueCol(board) {
+  const cols = board.columns || [];
+  return cols.find(c => c.id === 'c3' || c.type === 'date') || null;
+}
+
+function renderTagGrid(boards, allRows) {
+  // 收集所有 tag，跨所有看板
+  const tagMap = {}; // tagLabel -> { total, done, color }
+  let palIdx = 0;
+
+  boards.forEach(board => {
+    const tagCol = getTagCol(board);
+    if (!tagCol) return;
+    const boardRows = allRows.filter(r => r.board_id === board.id);
+    boardRows.forEach(r => {
+      const cells = r.cells || {};
+      const tagIds = Array.isArray(cells[tagCol.id]) ? cells[tagCol.id] : [];
+      if (tagIds.length === 0) {
+        // 无 tag，计入"其他"
+        if (!tagMap['其他']) tagMap['其他'] = { total:0, done:0 };
+        tagMap['其他'].total++;
+        if (r.done) tagMap['其他'].done++;
+      }
+      tagIds.forEach(tid => {
+        const opt = (tagCol.options || []).find(o => o.id === tid);
+        const label = opt ? opt.label : tid;
+        if (!tagMap[label]) {
+          tagMap[label] = { total:0, done:0, color: opt?.color || null };
+        }
+        tagMap[label].total++;
+        if (r.done) tagMap[label].done++;
+      });
+    });
+  });
+
+  const entries = Object.entries(tagMap).filter(([k]) => k !== '其他' || tagMap['其他'].total > 0);
+  if (entries.length === 0) {
+    document.getElementById('tagGrid').innerHTML = `<div style="color:var(--text3);font-size:13px;padding:20px;">暂无分类数据</div>`;
+    return;
+  }
+
+  // 排序：完成率低→高（越紧急越靠前）
+  entries.sort((a,b) => {
+    const ra = a[1].done/a[1].total;
+    const rb = b[1].done/b[1].total;
+    return ra - rb;
+  });
+
+  const html = entries.map(([label, stat], i) => {
+    const pal = PALETTE[i % PALETTE.length];
+    const pct = stat.total > 0 ? Math.round(stat.done/stat.total*100) : 0;
+    const pending = stat.total - stat.done;
+    const emoji = getTagEmoji(label);
+    return `
+    <div class="tag-card ${pal} anim" style="animation-delay:${i*.06}s" onclick="window.location.href='index.html'">
+      <div class="tag-card-top">
+        <div>
+          <div class="tag-name">${label}</div>
+          <div class="tag-total">共 ${stat.total} 项</div>
+        </div>
+        <div class="tag-icon">${emoji}</div>
+      </div>
+      <div class="tag-num">${stat.done}<span style="font-size:15px;opacity:.5">/${stat.total}</span></div>
+      <div class="tag-num-lbl">已完成 · ${pending} 项待处理</div>
+      <div class="tag-bar-bg"><div class="tag-bar-fill" style="width:0%" data-pct="${pct}"></div></div>
+      <div class="tag-bar-row"><span>${pct}% 完成</span><span>${pending} 项未完成</span></div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('tagGrid').innerHTML = html;
+
+  // 动画进度条
+  setTimeout(() => {
+    document.querySelectorAll('.tag-bar-fill').forEach(el => {
+      el.style.width = el.dataset.pct + '%';
+    });
+  }, 300);
+}
+
+function getTagEmoji(label) {
+  const map = {
+    '升学':'🎓','毕业':'📜','香港':'🏙','工作':'💼','学习':'📚','生活':'🏠',
+    '健身':'💪','旅行':'✈️','读书':'📖','其他':'📌','项目':'🚀','购物':'🛍',
+    '医疗':'🏥','财务':'💰','社交':'👥','驾照':'🚗',
+  };
+  for (const [key, val] of Object.entries(map)) {
+    if (label.includes(key)) return val;
+  }
+  return '🏷';
+}
+
+function getOverdueRows(boards, allRows) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const result = [];
+  boards.forEach(board => {
+    const dueCol = getDueCol(board);
+    if (!dueCol) return;
+    const boardRows = allRows.filter(r => r.board_id === board.id && !r.done);
+    boardRows.forEach(r => {
+      const due = r.cells?.[dueCol.id];
+      if (!due) return;
+      const dueDate = new Date(due); dueDate.setHours(0,0,0,0);
+      if (dueDate < today) result.push({ row: r, board, dueDate, days: Math.round((dueDate-today)/86400000) });
+    });
+  });
+  return result;
+}
+
+function renderUrgent(boards, allRows) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const items = [];
+
+  boards.forEach(board => {
+    const dueCol = getDueCol(board);
+    const tagCol = getTagCol(board);
+    if (!dueCol) return;
+    const boardRows = allRows.filter(r => r.board_id === board.id && !r.done);
+    boardRows.forEach(r => {
+      const due = r.cells?.[dueCol.id];
+      if (!due) return;
+      const dueDate = new Date(due); dueDate.setHours(0,0,0,0);
+      const days = Math.round((dueDate - today) / 86400000);
+      if (days > 7) return; // 只显示7天内 + 已逾期
+      const tagIds = tagCol ? (Array.isArray(r.cells?.[tagCol.id]) ? r.cells[tagCol.id] : []) : [];
+      const tagLabel = tagIds.length > 0 ? (tagCol.options||[]).find(o => o.id===tagIds[0])?.label || '' : '';
+      const name = r.cells?.[board.columns?.[0]?.id || 'c0'] || '（未命名）';
+      items.push({ name, due: dueDate, days, tagLabel, board });
+    });
+  });
+
+  // 排序：最紧急最前
+  items.sort((a,b) => a.days - b.days);
+
+  if (items.length === 0) {
+    document.getElementById('urgentList').innerHTML = `
+      <div class="urgent-empty">✅ 没有即将到期的任务，继续保持！</div>`;
+    return;
+  }
+
+  const palMap = {};
+  let pi = 0;
+
+  const html = items.slice(0, 8).map((it, i) => {
+    const cls = it.days < 0 ? 'overdue' : it.days <= 2 ? 'due-soon' : 'due-normal';
+    const badge = it.days < 0 ? `逾期 ${Math.abs(it.days)} 天` : it.days === 0 ? '今天截止' : it.days === 1 ? '明天截止' : `${it.days} 天后`;
+
+    // tag 颜色
+    if (it.tagLabel && !palMap[it.tagLabel]) palMap[it.tagLabel] = PALETTE_COLORS[pi++ % PALETTE_COLORS.length];
+    const tagColor = it.tagLabel ? palMap[it.tagLabel] : '#94A3B8';
+    const tagBg = tagColor + '20';
+    const tagHtml = it.tagLabel
+      ? `<span class="urgent-tag-pill" style="background:${tagBg};color:${tagColor}">${it.tagLabel}</span>`
+      : '';
+
+    return `
+    <div class="urgent-item ${cls} anim" style="animation-delay:${i*.05}s" onclick="window.location.href='index.html'">
+      <div class="urgent-badge">${badge}</div>
+      <div class="urgent-name">${escHtml(String(it.name))}</div>
+      ${tagHtml}
+      <div class="urgent-date">${fmt(it.due)}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('urgentList').innerHTML = html;
+}
+
+function renderBoards(boards, allRows) {
+  if (!boards.length) {
+    document.getElementById('boardGrid').innerHTML = `<div style="color:var(--text3);font-size:13px;padding:16px;">暂无清单</div>`;
+    return;
+  }
+  const html = boards.map((b, i) => {
+    const bRows = allRows.filter(r => r.board_id === b.id);
+    const total = bRows.length;
+    const done = bRows.filter(r => r.done).length;
+    const pct = total > 0 ? Math.round(done/total*100) : 0;
+    const updated = b.updated_at ? new Date(b.updated_at).toLocaleDateString('zh-CN',{month:'short',day:'numeric'}) : '';
+    return `
+    <div class="board-card anim" style="animation-delay:${i*.04}s" onclick="window.location.href='index.html'">
+      <div class="board-emoji">${b.emoji || '📋'}</div>
+      <div class="board-info">
+        <div class="board-title">${escHtml(b.title || '未命名清单')}</div>
+        <div class="board-meta">${total} 项 · ${updated}</div>
+      </div>
+      <div class="board-progress">${pct}%</div>
+    </div>`;
+  }).join('');
+  document.getElementById('boardGrid').innerHTML = html;
+}
+
+function renderEmpty() {
+  document.getElementById('heroDate').textContent = getGreeting();
+  document.getElementById('heroDesc').textContent = '还没有任务，去添加第一个吧';
+  document.getElementById('heroBadges').innerHTML = '';
+  document.getElementById('tagGrid').innerHTML = `<div style="color:rgba(255,255,255,.6);font-size:13px;">暂无数据</div>`;
+  document.getElementById('urgentList').innerHTML = `<div class="urgent-empty">✅ 暂无需要关注的任务</div>`;
+  document.getElementById('boardGrid').innerHTML = `<div style="color:var(--text3);font-size:13px;padding:16px;">暂无清单</div>`;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// 启动
+loadAll();
+</script>
+</body>
+</html>

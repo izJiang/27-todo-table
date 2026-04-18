@@ -936,7 +936,7 @@ body.dark-mode .matrix-card { background:var(--white); }
     <span class="title-display" id="titleDisplay" onclick="startEditTitle()">📋 多维 Todo</span>
     <input class="title-input" id="titleInput" onblur="stopEditTitle()" onkeydown="if(event.key==='Enter')stopEditTitle()">
   </div>
-  <button class="tb-btn" onclick="goHome()" style="margin-right:4px">← 返回</button>
+  <a class="tb-btn" href="home.html" style="margin-right:4px;text-decoration:none">← 主页</a>
   <span class="sync-badge sync-ok" id="syncBadge">🟢 已同步</span>
   <div class="spacer"></div>
   <button class="tb-btn btn-icon" id="darkModeBtn" onclick="toggleDarkMode()" title="深色模式">🌙</button>
