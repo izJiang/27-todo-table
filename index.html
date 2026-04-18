@@ -882,9 +882,455 @@ body.dark-mode .matrix-card { background:var(--white); }
 .pass-modal-btns { display:flex; gap:10px; margin-top:16px; }
 .pass-modal-btns button { flex:1; padding:10px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; border:none; }
 
+/* ═══════════════════════════════════════════════════════
+   🍎 APPLE GLASS UI LAYER
+   注入方式：纯 CSS 叠加，不修改任何原有样式和 JS
+   星空系统：完整保留原版（#starsBg / .star / generateStars）
+═══════════════════════════════════════════════════════ */
+
+/* ── 天气动态背景层 ── */
+#weatherBg {
+  position: fixed; inset: 0; z-index: -2;
+  transition: background 1.8s ease, opacity 1.2s ease;
+  pointer-events: none;
+}
+/* 晴天白天 */
+body.wx-sunny #weatherBg {
+  background: linear-gradient(160deg, #87CEEB 0%, #B8E0FF 35%, #EBF6FF 65%, #FFF8F0 100%);
+}
+/* 晴天夜晚 — 配合 dark-mode */
+body.dark-mode.wx-sunny #weatherBg {
+  background: linear-gradient(170deg, #080C24 0%, #0F1642 40%, #161E5A 70%, #0A0D2E 100%);
+}
+/* 多云 */
+body.wx-cloudy #weatherBg {
+  background: linear-gradient(150deg, #B8C4D4 0%, #CAD4E0 40%, #DCE4EE 70%, #EDF0F5 100%);
+}
+body.dark-mode.wx-cloudy #weatherBg {
+  background: linear-gradient(160deg, #161B26 0%, #1E2535 45%, #222D40 100%);
+}
+/* 雨天 */
+body.wx-rainy #weatherBg {
+  background: linear-gradient(160deg, #4A5A72 0%, #5E708A 40%, #7080A0 70%, #8898B5 100%);
+}
+body.dark-mode.wx-rainy #weatherBg {
+  background: linear-gradient(160deg, #0E1420 0%, #141D2E 45%, #1A2438 100%);
+}
+/* 雪天 */
+body.wx-snowy #weatherBg {
+  background: linear-gradient(150deg, #D0DFF0 0%, #E0EBF8 45%, #EEF5FC 75%, #F6FAFE 100%);
+}
+body.dark-mode.wx-snowy #weatherBg {
+  background: linear-gradient(160deg, #0F1520 0%, #151D2D 45%, #1C2538 100%);
+}
+/* 默认（无天气）白天 */
+body:not([class*="wx-"]) #weatherBg {
+  background: linear-gradient(160deg, #E8F4FD 0%, #F0F7FF 50%, #F8F9FF 100%);
+}
+body.dark-mode:not([class*="wx-"]) #weatherBg {
+  background: linear-gradient(170deg, #0B0F1E 0%, #111827 50%, #141C2E 100%);
+}
+
+/* ── 太阳光晕 ── */
+#sunGlow {
+  display: none;
+  position: fixed; top: -80px; right: 80px; z-index: -1;
+  width: 340px; height: 340px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,220,80,0.32) 0%, rgba(255,180,50,0.12) 50%, transparent 70%);
+  pointer-events: none;
+  animation: sunPulse 5s ease-in-out infinite;
+}
+@keyframes sunPulse {
+  0%,100% { transform: scale(1);   opacity: 0.7; }
+  50%      { transform: scale(1.1); opacity: 1; }
+}
+body.wx-sunny:not(.dark-mode) #sunGlow { display: block; }
+
+/* ── 雨滴层 ── */
+#rainLayer {
+  display: none;
+  position: fixed; inset: 0; z-index: -1;
+  pointer-events: none; overflow: hidden;
+}
+body.wx-rainy #rainLayer { display: block; }
+.rdrop {
+  position: absolute;
+  width: 1.5px;
+  background: linear-gradient(transparent, rgba(200,225,255,0.55));
+  border-radius: 2px;
+  animation: rdfall linear infinite;
+}
+@keyframes rdfall {
+  from { transform: translateY(-10vh) rotate(5deg); }
+  to   { transform: translateY(110vh) rotate(5deg); }
+}
+
+/* ── 雪花层 ── */
+#snowLayer {
+  display: none;
+  position: fixed; inset: 0; z-index: -1;
+  pointer-events: none; overflow: hidden;
+}
+body.wx-snowy #snowLayer { display: block; }
+.sflake {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.82);
+  animation: sfall linear infinite;
+}
+@keyframes sfall {
+  from { transform: translateY(-5vh) rotate(0deg); }
+  to   { transform: translateY(105vh) rotate(720deg); }
+}
+
+/* ── 云朵层 ── */
+#cloudLayer {
+  display: none;
+  position: fixed; inset: 0; z-index: -1;
+  pointer-events: none; overflow: hidden;
+}
+body.wx-cloudy #cloudLayer { display: block; }
+.cpuff {
+  position: absolute;
+  background: rgba(255,255,255,0.5);
+  border-radius: 50%;
+  filter: blur(20px);
+  animation: cdrift linear infinite;
+}
+@keyframes cdrift {
+  from { transform: translateX(-15%); }
+  to   { transform: translateX(115%); }
+}
+
+/* ── reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .rdrop, .sflake, .cpuff, #sunGlow { animation: none !important; }
+}
+
+/* ── 主页背景通透（让天气背景透出来）── */
+#homePage {
+  background: transparent !important;
+}
+#homePage .hp-body {
+  background: transparent !important;
+}
+
+/* ── 顶栏 Apple Glass ── */
+.hp-bar {
+  background: rgba(255,255,255,0.72) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.5) !important;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.06), 0 4px 20px rgba(0,0,0,0.06) !important;
+}
+body.dark-mode .hp-bar {
+  background: rgba(20,24,36,0.78) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.10) !important;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.3), 0 4px 20px rgba(0,0,0,0.25) !important;
+}
+
+/* 表格页顶栏 */
+.topbar {
+  background: rgba(255,255,255,0.72) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.5) !important;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.06), 0 4px 20px rgba(0,0,0,0.06) !important;
+}
+body.dark-mode .topbar {
+  background: rgba(20,24,36,0.82) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.09) !important;
+}
+
+/* theme overrides — 保留 theme-nature / theme-magazine / theme-27 顶栏颜色 */
+body.theme-nature .topbar,
+body.theme-nature .hp-bar,
+body.theme-magazine .topbar,
+body.theme-magazine .hp-bar,
+body.theme-27 .topbar,
+body.theme-27 .hp-bar {
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+}
+
+/* ── 主页 Board 卡片 Apple Glass ── */
+.board-card {
+  background: rgba(255,255,255,0.68) !important;
+  backdrop-filter: blur(16px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
+  border: 1px solid rgba(255,255,255,0.55) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04) !important;
+  transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), box-shadow 0.22s !important;
+}
+.board-card:hover {
+  transform: translateY(-3px) scale(1.012) !important;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06) !important;
+}
+body.dark-mode .board-card {
+  background: rgba(28,34,52,0.78) !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.3) !important;
+}
+
+/* ── 主页 grid 区域背景 ── */
+.hp-grid {
+  padding: 8px 16px 16px !important;
+}
+
+/* ── 主页日历区域 Apple Glass ── */
+#homeCalendar {
+  background: rgba(255,255,255,0.6) !important;
+  backdrop-filter: blur(14px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(150%) !important;
+  border: none !important;
+  border-radius: 20px !important;
+  margin: 0 16px 16px !important;
+}
+body.dark-mode #homeCalendar {
+  background: rgba(20,26,42,0.72) !important;
+}
+
+/* ── 每日名言 Apple Glass ── */
+.hp-quote {
+  background: rgba(255,255,255,0.55) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid rgba(255,255,255,0.5) !important;
+  border-radius: 16px !important;
+  margin: 0 16px 8px !important;
+  padding: 18px 24px !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06) !important;
+}
+body.dark-mode .hp-quote {
+  background: rgba(28,34,52,0.68) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+}
+
+/* ── 表格页背景通透 ── */
+#boardPage {
+  background: transparent !important;
+  min-height: 100vh;
+}
+
+/* ── 表格容器 Apple Glass ── */
+.table-wrap {
+  background: rgba(255,255,255,0.62) !important;
+  backdrop-filter: blur(20px) saturate(170%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(170%) !important;
+  border: 1px solid rgba(255,255,255,0.52) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.08) !important;
+  overflow: hidden !important;
+}
+body.dark-mode .table-wrap {
+  background: rgba(20,26,42,0.75) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.35) !important;
+}
+
+/* ── 表头 Apple Glass sticky ── */
+.grid-table thead th {
+  background: rgba(245,248,255,0.88) !important;
+  backdrop-filter: blur(10px) !important;
+  border-bottom: 1px solid rgba(0,0,0,0.07) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: .06em !important;
+  text-transform: uppercase !important;
+  color: #8a8fa8 !important;
+}
+body.dark-mode .grid-table thead th {
+  background: rgba(22,28,46,0.9) !important;
+  color: #5a6280 !important;
+  border-bottom: 1px solid rgba(255,255,255,0.07) !important;
+}
+
+/* ── 行 hover ── */
+.grid-table tbody tr:hover td {
+  background: rgba(255,255,255,0.55) !important;
+}
+body.dark-mode .grid-table tbody tr:hover td {
+  background: rgba(255,255,255,0.06) !important;
+}
+
+/* ── 统计栏 ── */
+.stats-bar {
+  background: rgba(255,255,255,0.62) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.45) !important;
+}
+body.dark-mode .stats-bar {
+  background: rgba(18,22,36,0.72) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.07) !important;
+}
+
+/* ── 面板（筛选/排序/分组）── */
+.panel {
+  background: rgba(255,255,255,0.85) !important;
+  backdrop-filter: blur(20px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
+  border: 1px solid rgba(255,255,255,0.6) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12) !important;
+}
+body.dark-mode .panel {
+  background: rgba(20,26,44,0.9) !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
+}
+
+/* ── 模态框 ── */
+.modal-box, .hp-modal {
+  background: rgba(255,255,255,0.9) !important;
+  backdrop-filter: blur(24px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+  border: 1px solid rgba(255,255,255,0.6) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15) !important;
+}
+body.dark-mode .modal-box,
+body.dark-mode .hp-modal {
+  background: rgba(20,26,44,0.92) !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+}
+.modal-overlay {
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+  background: rgba(0,0,0,0.3) !important;
+}
+
+/* ── 按钮 Apple 化 ── */
+.tb-btn {
+  border-radius: 10px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  transition: all 0.15s ease !important;
+}
+.tb-btn:hover {
+  transform: scale(1.03) !important;
+}
+.hp-new-btn {
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: .01em !important;
+  transition: all 0.18s ease !important;
+}
+.hp-new-btn:hover {
+  transform: scale(1.04) translateY(-1px) !important;
+  box-shadow: 0 4px 16px rgba(76,175,130,0.35) !important;
+}
+
+/* ── Popover / 右键菜单 ── */
+.popover, .ctx-menu {
+  background: rgba(255,255,255,0.88) !important;
+  backdrop-filter: blur(20px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
+  border: 1px solid rgba(255,255,255,0.55) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12) !important;
+}
+body.dark-mode .popover,
+body.dark-mode .ctx-menu {
+  background: rgba(22,28,46,0.92) !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
+}
+
+/* ── bottom sheet ── */
+.bottom-sheet {
+  background: rgba(248,250,255,0.95) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border-radius: 26px 26px 0 0 !important;
+}
+body.dark-mode .bottom-sheet {
+  background: rgba(16,20,36,0.96) !important;
+}
+
+/* ── 看板列 ── */
+.kb-col {
+  background: rgba(255,255,255,0.55) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255,255,255,0.5) !important;
+  border-radius: 16px !important;
+}
+.kb-card {
+  background: rgba(255,255,255,0.8) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255,255,255,0.55) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
+  transition: transform 0.18s ease, box-shadow 0.18s !important;
+}
+.kb-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.10) !important;
+}
+body.dark-mode .kb-col {
+  background: rgba(24,30,50,0.72) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+}
+body.dark-mode .kb-card {
+  background: rgba(30,38,60,0.85) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+}
+
+/* ── 天气切换按钮栏（右下角浮动）── */
+#wxSwitcher {
+  position: fixed; bottom: 24px; right: 24px; z-index: 500;
+  display: flex; flex-direction: column; gap: 7px; align-items: flex-end;
+}
+.wx-sw-btn {
+  padding: 7px 14px; border-radius: 20px;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  background: rgba(255,255,255,0.22);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: inherit;
+  transition: all .18s ease;
+  white-space: nowrap;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+.wx-sw-btn:hover { background: rgba(255,255,255,0.38); transform: scale(1.04); }
+.wx-sw-btn.wx-active {
+  background: rgba(255,255,255,0.45);
+  box-shadow: 0 2px 14px rgba(0,0,0,0.15);
+  font-weight: 700;
+}
+body.dark-mode .wx-sw-btn {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.8);
+}
+body.dark-mode .wx-sw-btn:hover { background: rgba(255,255,255,0.16); }
+body.dark-mode .wx-sw-btn.wx-active { background: rgba(255,255,255,0.2); }
+#wxSwitcher .wx-label {
+  font-size: 10px; opacity: .45; text-align: right;
+  padding-right: 4px; font-weight: 500; letter-spacing: .05em;
+}
+
 </style>
 </head>
 <body>
+
+<!-- ── Apple Glass: 天气背景层 ── -->
+<div id="weatherBg"></div>
+<div id="sunGlow"></div>
+<div id="rainLayer"></div>
+<div id="snowLayer"></div>
+<div id="cloudLayer"></div>
+
+<!-- ── 天气切换按钮（右下角浮动，自动隐藏）── -->
+<div id="wxSwitcher">
+  <div class="wx-label">天气背景</div>
+  <button class="wx-sw-btn" onclick="setWeather('sunny')" id="wxBtnSunny">☀️ 晴天</button>
+  <button class="wx-sw-btn" onclick="setWeather('cloudy')" id="wxBtnCloudy">⛅ 多云</button>
+  <button class="wx-sw-btn" onclick="setWeather('rainy')" id="wxBtnRainy">🌧 雨天</button>
+  <button class="wx-sw-btn" onclick="setWeather('snowy')" id="wxBtnSnowy">❄️ 雪天</button>
+  <button class="wx-sw-btn" onclick="setWeather('auto')" id="wxBtnAuto">🔄 自动</button>
+</div>
 
 <!-- Stars background (dark mode) -->
 <div id="starsBg"></div>
@@ -936,7 +1382,7 @@ body.dark-mode .matrix-card { background:var(--white); }
     <span class="title-display" id="titleDisplay" onclick="startEditTitle()">📋 多维 Todo</span>
     <input class="title-input" id="titleInput" onblur="stopEditTitle()" onkeydown="if(event.key==='Enter')stopEditTitle()">
   </div>
-  <a class="tb-btn" href="home.html" style="margin-right:4px;text-decoration:none">← 主页</a>
+  <button class="tb-btn" onclick="goHome()" style="margin-right:4px">← 主页</button>
   <span class="sync-badge sync-ok" id="syncBadge">🟢 已同步</span>
   <div class="spacer"></div>
   <button class="tb-btn btn-icon" id="darkModeBtn" onclick="toggleDarkMode()" title="深色模式">🌙</button>
@@ -4527,6 +4973,165 @@ function dropToQuadrant(e,quadrant){const rowId=e.dataTransfer.getData('rowId');
 
 <!-- Stats Panel -->
 <div id="statsPanel" style="display:none;position:fixed;top:0;right:0;width:360px;height:100vh;background:var(--white);border-left:1px solid var(--border);z-index:1000;overflow-y:auto;box-shadow:-4px 0 20px rgba(0,0,0,.08)"></div>
+
+<!-- ═══════════════════════════════════════════════
+     🍎 Apple Glass Weather System
+═══════════════════════════════════════════════ -->
+<script>
+(function(){
+  /* ── 天气粒子生成 ── */
+  function buildRain(){
+    const rl = document.getElementById('rainLayer');
+    if (!rl || rl.dataset.built) return;
+    rl.dataset.built = '1';
+    let h = '';
+    for (let i = 0; i < 60; i++) {
+      const dur = (0.55 + Math.random() * 0.7).toFixed(2);
+      const delay = (Math.random() * 1.5).toFixed(2);
+      h += `<div class="rdrop" style="left:${(Math.random()*100).toFixed(1)}%;top:${(Math.random()*80).toFixed(1)}%;height:${14+Math.floor(Math.random()*22)}px;opacity:${(0.3+Math.random()*0.4).toFixed(2)};animation-duration:${dur}s;animation-delay:-${delay}s"></div>`;
+    }
+    rl.innerHTML = h;
+  }
+  function buildSnow(){
+    const sl = document.getElementById('snowLayer');
+    if (!sl || sl.dataset.built) return;
+    sl.dataset.built = '1';
+    let h = '';
+    for (let i = 0; i < 45; i++) {
+      const sz = 3 + Math.random() * 6;
+      const dur = (6 + Math.random() * 10).toFixed(1);
+      const delay = (Math.random() * 10).toFixed(1);
+      h += `<div class="sflake" style="left:${(Math.random()*100).toFixed(1)}%;top:${(Math.random()*80).toFixed(1)}%;width:${sz.toFixed(1)}px;height:${sz.toFixed(1)}px;opacity:${(0.5+Math.random()*0.5).toFixed(2)};animation-duration:${dur}s;animation-delay:-${delay}s"></div>`;
+    }
+    sl.innerHTML = h;
+  }
+  function buildClouds(){
+    const cl = document.getElementById('cloudLayer');
+    if (!cl || cl.dataset.built) return;
+    cl.dataset.built = '1';
+    let h = '';
+    const configs = [
+      {w:220,h:90,top:8,opacity:0.55,dur:28},
+      {w:160,h:70,top:18,opacity:0.42,dur:36},
+      {w:280,h:110,top:5,opacity:0.38,dur:44},
+      {w:140,h:60,top:25,opacity:0.5,dur:32},
+    ];
+    configs.forEach(c => {
+      h += `<div class="cpuff" style="width:${c.w}px;height:${c.h}px;top:${c.top}%;opacity:${c.opacity};animation-duration:${c.dur}s;animation-delay:-${(Math.random()*c.dur).toFixed(1)}s"></div>`;
+    });
+    cl.innerHTML = h;
+  }
+
+  /* ── 设置天气 ── */
+  const WX_CLASSES = ['wx-sunny','wx-cloudy','wx-rainy','wx-snowy'];
+  const WX_BTN_IDS = {sunny:'wxBtnSunny',cloudy:'wxBtnCloudy',rainy:'wxBtnRainy',snowy:'wxBtnSnowy',auto:'wxBtnAuto'};
+
+  window.setWeather = function(wx){
+    const body = document.body;
+    WX_CLASSES.forEach(c => body.classList.remove(c));
+    // 更新按钮状态
+    Object.values(WX_BTN_IDS).forEach(id => {
+      const b = document.getElementById(id);
+      if (b) b.classList.remove('wx-active');
+    });
+    const activeBtn = document.getElementById(WX_BTN_IDS[wx]);
+    if (activeBtn) activeBtn.classList.add('wx-active');
+
+    if (wx === 'auto') {
+      fetchWeather();
+      localStorage.removeItem('wxManual');
+      return;
+    }
+    localStorage.setItem('wxManual', wx);
+    if (wx !== 'auto') body.classList.add('wx-' + wx);
+    if (wx === 'rainy')  buildRain();
+    if (wx === 'snowy')  buildSnow();
+    if (wx === 'cloudy') buildClouds();
+  };
+
+  /* ── 自动获取天气 (OpenWeatherMap free API) ── */
+  function fetchWeather(){
+    if (!navigator.geolocation) { setFromCode('clear'); return; }
+    navigator.geolocation.getCurrentPosition(pos => {
+      const {latitude: lat, longitude: lon} = pos.coords;
+      // 用 wttr.in 免费 JSON API，无需 API key
+      fetch(`https://wttr.in/?format=j1&lang=zh`)
+        .then(r => r.json())
+        .then(d => {
+          const code = parseInt(d?.current_condition?.[0]?.weatherCode || '113');
+          setFromCode(code);
+          // 同时更新顶栏天气文字
+          const temp = d?.current_condition?.[0]?.temp_C;
+          const desc = d?.current_condition?.[0]?.lang_zh?.[0]?.value || '';
+          updateWeatherBadge(temp, desc);
+        })
+        .catch(() => setFromCode(113));
+    }, () => {
+      // 拒绝定位：用时段判断
+      const h = new Date().getHours();
+      setFromCode(h >= 6 && h < 20 ? 113 : 113);
+    });
+  }
+
+  function setFromCode(code){
+    code = parseInt(code);
+    let wx;
+    if ([395,392,389,386,383,377,374,371,368,365,362,359,356,353,338,335,332,329,326,323,320,317,314,311,308,305,302,299,296,293].includes(code)) wx = 'rainy';
+    else if ([230,227,222,219,215,212,209,206,203,200,185,182,179,176].includes(code)) wx = 'snowy';
+    else if ([143,248,260,263,266,281,284,311,314,317,320,323,326].includes(code)) wx = 'cloudy';
+    else if ([119,122].includes(code)) wx = 'cloudy';
+    else wx = 'sunny';
+    const body = document.body;
+    WX_CLASSES.forEach(c => body.classList.remove(c));
+    body.classList.add('wx-' + wx);
+    if (wx === 'rainy')  buildRain();
+    if (wx === 'snowy')  buildSnow();
+    if (wx === 'cloudy') buildClouds();
+    // 更新按钮高亮
+    Object.values(WX_BTN_IDS).forEach(id => {
+      const b = document.getElementById(id);
+      if (b) b.classList.remove('wx-active');
+    });
+    const ab = document.getElementById(WX_BTN_IDS[wx]);
+    if (ab) ab.classList.add('wx-active');
+  }
+
+  function updateWeatherBadge(temp, desc){
+    // 在 hp-title 旁边加天气徽章（如果没有的话）
+    const title = document.querySelector('.hp-title');
+    if (!title) return;
+    let badge = document.getElementById('wxBadge');
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.id = 'wxBadge';
+      badge.style.cssText = 'font-size:12px;font-weight:400;opacity:.65;margin-left:8px;';
+      title.parentNode.insertBefore(badge, title.nextSibling);
+    }
+    if (temp && desc) badge.textContent = `${temp}°C · ${desc}`;
+  }
+
+  /* ── 初始化 ── */
+  function init(){
+    const manual = localStorage.getItem('wxManual');
+    if (manual) {
+      setWeather(manual);
+    } else {
+      // 默认根据时段给一个初始值，同时尝试获取真实天气
+      const h = new Date().getHours();
+      const defaultWx = (h >= 6 && h < 20) ? 'sunny' : 'sunny';
+      document.body.classList.add('wx-' + defaultWx);
+      fetchWeather();
+    }
+  }
+
+  // DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
 
 </body>
 </html>
