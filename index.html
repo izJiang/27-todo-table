@@ -2262,10 +2262,24 @@ async function openBoard(boardId, readOnly) {
     S.sorts = board.sorts || [];
   }
   // Normalize rows
+  // 🔧 数据迁移：把"距离截止日"select列改成备注text列
+  S.columns.forEach(c => {
+    if (c.label === '距离截止日' && c.type === 'select') {
+      c.type = 'text';
+      c.label = '备注';
+      c.width = c.width || 160;
+      delete c.options;
+    }
+  });
+
   S.rows.forEach(r => {
     if(r.p===undefined) r.p=null;
     if(r.col===undefined) r.col=false;
     S.columns.forEach(c => {
+      // 备注列：把旧 select 数组值清空为空字符串
+      if(c.type==='text' && c.label==='备注' && Array.isArray(r.cells[c.id])) {
+        r.cells[c.id] = '';
+      }
       if((c.type==='select'||c.type==='url')&&!Array.isArray(r.cells[c.id])) r.cells[c.id]=[];
       if(c.type==='bool'&&r.cells[c.id]===undefined) r.cells[c.id]=false;
     });
@@ -2663,11 +2677,7 @@ async function seedIfNeeded() {
       {id:'o3',label:'香港',colorIdx:2},
     ]},
     {id:'c3', type:'date',   label:'截止日期',   width:130},
-    {id:'c4', type:'select', label:'距离截止日', width:120, options:[
-      {id:'d1',label:'已延期',colorIdx:7},
-      {id:'d2',label:'进行中',colorIdx:5},
-      {id:'d3',label:'未开始',colorIdx:6},
-    ]},
+    {id:'c4', type:'text', label:'备注', width:160},
     {id:'c5', type:'bool',   label:'是否已完成', width:110},
     {id:'c6', type:'select', label:'优先级',     width:110, options:[
       {id:'p1',label:'P0-紧急',colorIdx:7},
@@ -2777,11 +2787,7 @@ const DEF={
       {id:'o3',label:'香港',colorIdx:2},
     ]},
     {id:'c3', type:'date',   label:'截止日期',   width:130},
-    {id:'c4', type:'select', label:'距离截止日', width:120, options:[
-      {id:'d1',label:'已延期',colorIdx:7},
-      {id:'d2',label:'进行中',colorIdx:5},
-      {id:'d3',label:'未开始',colorIdx:6},
-    ]},
+    {id:'c4', type:'text', label:'备注', width:160},
     {id:'c5', type:'bool',   label:'是否已完成', width:110},
     {id:'c6', type:'select', label:'优先级',     width:110, options:[
       {id:'p1',label:'P0-紧急',colorIdx:7},
