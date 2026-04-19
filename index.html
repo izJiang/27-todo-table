@@ -1603,11 +1603,21 @@ body.theme-27 .hp-bar {
 /* 全局变量 + body */
 body.dark-mode {
   background: #000 !important;
-  color: #e0e0e0 !important;
+  color: #c8c8c8 !important;
 }
 
-/* 星空背景纯黑 */
+/* 星空背景 + 星星显示 */
 body.dark-mode #weatherBg { background: #000 !important; }
+body.dark-mode #starsBg {
+  display: block !important;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+  background: transparent !important;
+}
+body.dark-mode #homePage,
+body.dark-mode #boardPage { position: relative !important; z-index: 1 !important; }
 
 /* ── Sidebar ── */
 body.dark-mode #appSidebar {
@@ -1619,11 +1629,11 @@ body.dark-mode .sb-logo { border-bottom-color: #1a1a1a !important; }
 body.dark-mode .sb-logo-name,
 body.dark-mode .sb-logo-sub { color: #888 !important; -webkit-text-fill-color: #888 !important; }
 body.dark-mode .sb-section-label { color: #333 !important; }
-body.dark-mode .sb-item { color: #555 !important; background: transparent !important; }
+body.dark-mode .sb-item { color: #6a6a6a !important; background: transparent !important; }
 body.dark-mode .sb-item:hover { background: #111 !important; color: #e0e0e0 !important; }
 body.dark-mode .sb-item.active { background: #161616 !important; color: #fff !important; }
 body.dark-mode .sb-item.active::before { background: #fff !important; }
-body.dark-mode .sb-board-item { color: #444 !important; background: transparent !important; }
+body.dark-mode .sb-board-item { color: #5a5a5a !important; background: transparent !important; }
 body.dark-mode .sb-board-item:hover { background: #0e0e0e !important; color: #e0e0e0 !important; }
 body.dark-mode .sb-board-item.active { background: #141414 !important; color: #fff !important; }
 body.dark-mode .sb-board-item.active::before { background: #fff !important; }
@@ -1677,17 +1687,17 @@ body.dark-mode .table-wrap {
 body.dark-mode .grid-table { color: #e0e0e0 !important; }
 body.dark-mode .grid-table thead tr { background: #060606 !important; }
 body.dark-mode .grid-table thead th {
-  background: #060606 !important;
-  border-bottom-color: #1a1a1a !important;
-  border-right-color: #141414 !important;
-  color: #333 !important;
+  background: #080808 !important;
+  border-bottom-color: #222 !important;
+  border-right-color: #1a1a1a !important;
+  color: #404040 !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
-body.dark-mode .grid-table tbody tr { border-bottom-color: #111 !important; }
+body.dark-mode .grid-table tbody tr { border-bottom-color: #1e1e1e !important; }
 body.dark-mode .grid-table tbody tr:hover td { background: #0f0f0f !important; }
-body.dark-mode .grid-table tbody td { border-right-color: #111 !important; color: #e0e0e0 !important; background: transparent !important; }
-body.dark-mode .cell-text { color: #e0e0e0 !important; background: transparent !important; }
+body.dark-mode .grid-table tbody td { border-right-color: #1e1e1e !important; color: #c8c8c8 !important; background: transparent !important; }
+body.dark-mode .cell-text { color: #c8c8c8 !important; background: transparent !important; }
 body.dark-mode textarea.cell-text { background: #0a0a0a !important; color: #e0e0e0 !important; border-color: #1f1f1f !important; }
 body.dark-mode td input,
 body.dark-mode td input[type=text],
