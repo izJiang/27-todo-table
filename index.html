@@ -2819,7 +2819,8 @@ function closePop(){
 function togglePanel(name){
   if(openPanel===name){openPanel=null;}else{openPanel=name;}
   ['filter','sort','group'].forEach(n=>{
-    document.getElementById(n+'Btn').classList.toggle('active',openPanel===n);
+    const el=document.getElementById(n+'Btn');
+    if(el) el.classList.toggle('active',openPanel===n);
   });
   renderPanels();
 }
