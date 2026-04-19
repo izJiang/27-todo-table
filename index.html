@@ -1542,6 +1542,8 @@ body.dark-mode .wb-text h2 { color: #E2E8F0; }
   transition: transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s;
 }
 .bento-cell:hover { transform: translateY(-3px); box-shadow: 0 10px 32px rgba(99,102,241,.12); }
+.bento-cell[onclick] { cursor: pointer; }
+.bento-cell[onclick]:active { transform: scale(0.97); }
 body.dark-mode .bento-cell {
   background: rgba(22,28,52,.72);
   border-color: rgba(255,255,255,.08);
@@ -5491,20 +5493,39 @@ function dropToQuadrant(e,quadrant){const rowId=e.dataTransfer.getData('rowId');
 
     const pct = stats.total > 0 ? Math.round(stats.done / stats.total * 100) : 0;
     bento.style.display = 'grid';
+    // 找第一个有任务的清单 id（用于点击跳转）
+    const firstBoardId = homeBoards.length > 0 ? homeBoards[0].id : null;
+    // 找有截止日期任务最多的清单
+    let urgentBoardId = firstBoardId;
+    let maxUrgent = 0;
+    homeBoards.forEach(b => {
+      const rows = JSON.parse(localStorage.getItem('jt_v7_' + b.id) || 'null');
+      if (!rows) return;
+      const now = Date.now();
+      const u = (rows.rows||[]).filter(r => {
+        const dc = Object.values(r.cells||{}).find(v => typeof v === 'string' && v.match(/^\d{4}-\d{2}-\d{2}$/));
+        if (!dc) return false;
+        const diff = (new Date(dc) - now) / 86400000;
+        return diff >= 0 && diff <= 7;
+      }).length;
+      if (u > maxUrgent) { maxUrgent = u; urgentBoardId = b.id; }
+    });
+    const clickFirst = firstBoardId ? `openBoard('${firstBoardId}')` : `toast('还没有清单，先新建一个吧')`;
+    const clickUrgent = urgentBoardId ? `openBoard('${urgentBoardId}')` : `toast('还没有清单')`;
     bento.innerHTML = `
-      <div class="bento-cell">
+      <div class="bento-cell" onclick="${clickFirst}" style="cursor:pointer" title="点击查看清单">
         <div class="bc-header"><span class="bc-title">今日完成</span><span class="bc-icon">✅</span></div>
         <div class="bc-num">${stats.todayDone || 0}</div>
         <div class="bc-sub">共 ${stats.total} 项任务</div>
         <div class="bc-prog"><div class="bc-prog-fill" style="width:${stats.total>0?Math.round((stats.todayDone||0)/stats.total*100):0}%"></div></div>
       </div>
-      <div class="bento-cell">
+      <div class="bento-cell" onclick="${clickFirst}" style="cursor:pointer" title="点击查看整体进度">
         <div class="bc-header"><span class="bc-title">整体进度</span><span class="bc-icon">📈</span></div>
         <div class="bc-num" style="color:#10B981">${pct}%</div>
         <div class="bc-sub">${stats.done} / ${stats.total} 项已完成</div>
         <div class="bc-prog"><div class="bc-prog-fill" style="width:${pct}%;background:linear-gradient(90deg,#10B981,#34D399)"></div></div>
       </div>
-      <div class="bento-cell">
+      <div class="bento-cell" onclick="${clickUrgent}" style="cursor:pointer" title="点击查看即将到期任务">
         <div class="bc-header"><span class="bc-title">即将到期</span><span class="bc-icon">⏰</span></div>
         <div class="bc-num" style="color:#F59E0B">${stats.urgent}</div>
         <div class="bc-sub">近 7 天内到期</div>
