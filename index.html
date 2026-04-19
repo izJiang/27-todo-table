@@ -16,6 +16,196 @@
 <style>
   body { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
   #batchBar, #clBar { padding-bottom: max(24px, env(safe-area-inset-bottom)); }
+/* ════════════════════════════════════════════════════
+   🌑  DARK MODE  v3 — OLED Black / WCAG AAA
+   Design: #020617 bg, #F8FAFC text, #1E293B surface
+   All values use !important to override scattered rules
+════════════════════════════════════════════════════ */
+
+/* ── Base ── */
+body.dark-mode { background:#000 !important; color:#f1f5f9 !important; }
+
+/* ── Stars ── */
+body.dark-mode #weatherBg { background:#000 !important; }
+body.dark-mode #starsBg {
+  display:block !important; position:fixed !important; inset:0 !important;
+  z-index:0 !important; pointer-events:none !important; background:transparent !important;
+}
+body.dark-mode #homePage,
+body.dark-mode #boardPage { position:relative !important; z-index:1 !important; }
+
+/* ── Sidebar ── */
+body.dark-mode #appSidebar {
+  background:#040404 !important;
+  border-right:1px solid #1c1c1c !important;
+  box-shadow:none !important;
+}
+body.dark-mode .sb-logo { border-bottom-color:#1c1c1c !important; }
+body.dark-mode .sb-logo-name { color:#94a3b8 !important; -webkit-text-fill-color:#94a3b8 !important; }
+body.dark-mode .sb-section-label { color:#334155 !important; }
+body.dark-mode .sb-item { color:#64748b !important; background:transparent !important; }
+body.dark-mode .sb-item:hover { background:#0f172a !important; color:#e2e8f0 !important; }
+body.dark-mode .sb-item.active { background:#1e293b !important; color:#f8fafc !important; font-weight:600 !important; }
+body.dark-mode .sb-item.active::before { background:#f8fafc !important; }
+body.dark-mode .sb-board-item { color:#475569 !important; background:transparent !important; }
+body.dark-mode .sb-board-item:hover { background:#0f172a !important; color:#e2e8f0 !important; }
+body.dark-mode .sb-board-item.active { background:#1e293b !important; color:#f8fafc !important; }
+body.dark-mode .sb-board-item.active::before { background:#94a3b8 !important; }
+body.dark-mode .sb-badge { background:#1e293b !important; color:#64748b !important; }
+body.dark-mode .sb-footer { border-top-color:#1c1c1c !important; background:#040404 !important; }
+body.dark-mode .sb-footer-btn { color:#475569 !important; background:transparent !important; }
+body.dark-mode .sb-footer-btn:hover { background:#0f172a !important; color:#e2e8f0 !important; }
+
+/* ── Topbar ── */
+body.dark-mode .topbar {
+  background:#020202 !important;
+  border-bottom:1px solid #1c1c1c !important;
+  box-shadow:none !important;
+  backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
+}
+body.dark-mode .title-display { color:#f8fafc !important; }
+body.dark-mode .chip { background:#1e293b !important; color:#64748b !important; }
+body.dark-mode .tb-sep { background:#1c1c1c !important; }
+body.dark-mode .tb-btn {
+  background:#0f172a !important; border-color:#1e293b !important; color:#64748b !important;
+  backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
+}
+body.dark-mode .tb-btn:hover { background:#1e293b !important; color:#e2e8f0 !important; border-color:#334155 !important; }
+body.dark-mode .tb-btn.active { background:#1e293b !important; color:#f8fafc !important; border-color:#475569 !important; }
+body.dark-mode .tb-btn.green { background:#052e16 !important; color:#4ade80 !important; border-color:#14532d !important; }
+
+/* ── Stats bar（隐藏彩色 chip，只保留文字）── */
+body.dark-mode #statsBar {
+  background:#020202 !important; border-bottom:1px solid #1c1c1c !important;
+  backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
+}
+body.dark-mode .stat-item { background:#0f172a !important; border-color:#1e293b !important; color:#475569 !important; }
+body.dark-mode .stat-item:hover { background:#1e293b !important; color:#e2e8f0 !important; }
+body.dark-mode .stat-val { color:#f8fafc !important; }
+body.dark-mode .stat-divider { background:#1c1c1c !important; }
+
+/* ── Table ── */
+body.dark-mode .wrapper { background:transparent !important; }
+body.dark-mode .table-wrap {
+  background:#08080a !important; border-color:#1c1c1c !important;
+  backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
+}
+body.dark-mode .grid-table { color:#f1f5f9 !important; }
+body.dark-mode .grid-table thead tr { background:#050507 !important; }
+body.dark-mode .grid-table thead th {
+  background:#050507 !important; color:#475569 !important;
+  border-bottom-color:#1e293b !important; border-right-color:#1c1c1c !important;
+  backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
+}
+body.dark-mode th { background:#050507 !important; color:#475569 !important; }
+body.dark-mode .grid-table tbody tr { border-bottom-color:#1c1c1c !important; }
+body.dark-mode .grid-table tbody tr:hover td { background:#0f172a !important; }
+body.dark-mode .grid-table tbody td {
+  border-right-color:#1c1c1c !important; color:#f1f5f9 !important; background:transparent !important;
+}
+/* 任务名 — 最重要，必须纯白 */
+body.dark-mode .cell-text-view { color:#f8fafc !important; }
+body.dark-mode .cell-text-wrap { color:#f8fafc !important; }
+body.dark-mode .cell-text { color:#f8fafc !important; background:transparent !important; }
+body.dark-mode .cell-edit-ta,
+body.dark-mode textarea.cell-text { background:#0f172a !important; color:#f8fafc !important; border-color:#1e293b !important; }
+body.dark-mode td input,
+body.dark-mode td input[type=text],
+body.dark-mode td input[type=date] { background:#0f172a !important; color:#94a3b8 !important; border-color:#1e293b !important; }
+/* 已完成行删除线 */
+body.dark-mode .grid-table tbody tr.row-done td .cell-text-view,
+body.dark-mode .grid-table tbody tr.row-done td .cell-text-wrap { color:#334155 !important; }
+/* 新建行 */
+body.dark-mode .add-row-btn { color:#334155 !important; }
+body.dark-mode .add-row-btn:hover { color:#94a3b8 !important; background:#0f172a !important; }
+/* 分组标题 */
+body.dark-mode .grp-hdr { background:#050507 !important; border-color:#1c1c1c !important; }
+body.dark-mode .grp-hdr-label { color:#64748b !important; }
+body.dark-mode .grp-hdr-count { color:#475569 !important; }
+
+/* ── Panels ── */
+body.dark-mode .panel { background:#0f172a !important; border-color:#1e293b !important; box-shadow:0 8px 32px rgba(0,0,0,.8) !important; }
+body.dark-mode .panel-title { color:#f8fafc !important; }
+body.dark-mode .panel-close { color:#475569 !important; background:transparent !important; }
+body.dark-mode select,
+body.dark-mode .group-sel,
+body.dark-mode .form-select { background:#0f172a !important; color:#f8fafc !important; border-color:#1e293b !important; }
+
+/* ── Modal ── */
+body.dark-mode .modal-box,
+body.dark-mode .hp-modal { background:#0f172a !important; color:#f8fafc !important; border-color:#1e293b !important; box-shadow:0 20px 60px rgba(0,0,0,.9) !important; }
+body.dark-mode .modal-hdr { border-bottom-color:#1e293b !important; color:#f8fafc !important; }
+body.dark-mode .modal-ftr { border-top-color:#1e293b !important; }
+
+/* ── Popover / Context menu ── */
+body.dark-mode .popover,
+body.dark-mode .ctx-menu { background:#0f172a !important; border-color:#1e293b !important; box-shadow:0 8px 24px rgba(0,0,0,.8) !important; }
+body.dark-mode .pop-item { color:#94a3b8 !important; }
+body.dark-mode .pop-item:hover { background:#1e293b !important; color:#f8fafc !important; }
+body.dark-mode .pop-item.danger:hover { background:#1a0808 !important; color:#f87171 !important; }
+body.dark-mode .tag-opt-item:hover { background:#1e293b !important; }
+body.dark-mode .tag-opt-item.sel { background:#0f172a !important; }
+body.dark-mode .pop-opt-item:hover { background:#1e293b !important; }
+
+/* ── Kanban ── */
+body.dark-mode .kb-col { background:#050507 !important; border-color:#1c1c1c !important; }
+body.dark-mode .kb-col-title { color:#e2e8f0 !important; }
+body.dark-mode .kb-col-count { background:#0f172a !important; color:#475569 !important; }
+body.dark-mode .kb-card { background:#0f172a !important; border-color:#1e293b !important; box-shadow:none !important; }
+body.dark-mode .kb-card:hover { background:#1e293b !important; box-shadow:none !important; }
+body.dark-mode .kb-card-title { color:#f8fafc !important; }
+body.dark-mode .kb-card-date { color:#475569 !important; }
+
+/* ── Calendar ── */
+body.dark-mode #homeCalendar { background:#000 !important; border-color:#1c1c1c !important; }
+body.dark-mode .cal-dow { background:#050507 !important; color:#334155 !important; }
+body.dark-mode .cal-cell { background:#08080a !important; }
+body.dark-mode .cal-cell.cal-empty { background:#040404 !important; }
+body.dark-mode .cal-cell.cal-today { box-shadow:inset 0 0 0 1.5px #475569 !important; }
+body.dark-mode .cal-day-num { color:#475569 !important; }
+body.dark-mode .cal-cell.cal-today .cal-day-num { color:#f8fafc !important; }
+body.dark-mode .cal-header .tb-btn { background:#0f172a !important; border-color:#1e293b !important; color:#64748b !important; }
+
+/* ── Home page ── */
+body.dark-mode .hp-bar { background:#000 !important; border-bottom-color:#1c1c1c !important; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
+body.dark-mode .board-card { background:#0f172a !important; border-color:#1e293b !important; box-shadow:none !important; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
+body.dark-mode .board-card:hover { background:#1e293b !important; }
+body.dark-mode .board-card-title { color:#f8fafc !important; }
+body.dark-mode .board-card-meta { color:#475569 !important; }
+body.dark-mode .bento-cell { background:#0f172a !important; border-color:#1e293b !important; box-shadow:none !important; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
+body.dark-mode .sv-card { background:#0f172a !important; border-color:#1e293b !important; }
+
+/* ── Bottom sheet ── */
+body.dark-mode .bottom-sheet { background:#0f172a !important; }
+body.dark-mode .sheet-item { color:#64748b !important; }
+body.dark-mode .sheet-item:hover { background:#1e293b !important; color:#f8fafc !important; }
+
+/* ── CL bar ── */
+body.dark-mode #clBar { background:#0a0a0c !important; border-color:#1c1c1c !important; }
+body.dark-mode .cl-bar-board-btn { background:#0f172a !important; color:#475569 !important; }
+body.dark-mode .cl-bar-board-btn.sel { background:#1e293b !important; color:#f8fafc !important; }
+body.dark-mode .cl-bar-chip { background:#0f172a !important; color:#475569 !important; }
+
+/* ── Weather switcher — 折叠成小按钮，不发光 ── */
+body.dark-mode #wxToggleBtn {
+  background:#0f172a !important; border-color:#1e293b !important;
+  box-shadow:none !important; opacity:0.6 !important;
+}
+body.dark-mode #wxToggleBtn:hover { opacity:1 !important; background:#1e293b !important; }
+body.dark-mode .wx-sw-btn { background:#0f172a !important; border-color:#1e293b !important; color:#64748b !important; }
+body.dark-mode .wx-sw-btn:hover { background:#1e293b !important; color:#e2e8f0 !important; }
+body.dark-mode .wx-sw-btn.wx-active { background:#1e293b !important; color:#f8fafc !important; border-color:#475569 !important; }
+
+/* ── Heat map ── */
+body.dark-mode .heat-0 { background:#1c1c1c !important; }
+
+/* ── Stats view ── */
+body.dark-mode #statsView { background:transparent !important; }
+
+/* ── 全局兜底 ── */
+body.dark-mode input,
+body.dark-mode textarea { background:#0f172a; color:#f8fafc; border-color:#1e293b; }
+
 </style>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1594,216 +1784,6 @@ body.theme-27 .hp-bar {
 .topbar .spacer { display: none !important; }
 /* 表格页标题和名言共存 */
 .topbar .title-wrap { flex-shrink: 0; }
-
-/* ════════════════════════════════════════════
-   🌑  DARK MODE  — 从零重写，纯黑体系
-   所有颜色在此统一定义，!important 收口
-════════════════════════════════════════════ */
-
-/* 全局变量 + body */
-body.dark-mode {
-  background: #000 !important;
-  color: #ffffff !important;
-}
-
-/* 星空背景 + 星星显示 */
-body.dark-mode #weatherBg { background: #000 !important; }
-body.dark-mode #starsBg {
-  display: block !important;
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: 0 !important;
-  pointer-events: none !important;
-  background: transparent !important;
-}
-body.dark-mode #homePage,
-body.dark-mode #boardPage { position: relative !important; z-index: 1 !important; }
-
-/* ── Sidebar ── */
-body.dark-mode #appSidebar {
-  background: #040404 !important;
-  border-right: 1px solid #1a1a1a !important;
-  box-shadow: none !important;
-}
-body.dark-mode .sb-logo { border-bottom-color: #1a1a1a !important; }
-body.dark-mode .sb-logo-name,
-body.dark-mode .sb-logo-sub { color: #888 !important; -webkit-text-fill-color: #888 !important; }
-body.dark-mode .sb-section-label { color: #333 !important; }
-body.dark-mode .sb-item { color: #888 !important; background: transparent !important; }
-body.dark-mode .sb-item:hover { background: #111 !important; color: #e0e0e0 !important; }
-body.dark-mode .sb-item.active { background: #161616 !important; color: #fff !important; }
-body.dark-mode .sb-item.active::before { background: #fff !important; }
-body.dark-mode .sb-board-item { color: #777 !important; background: transparent !important; }
-body.dark-mode .sb-board-item:hover { background: #0e0e0e !important; color: #e0e0e0 !important; }
-body.dark-mode .sb-board-item.active { background: #141414 !important; color: #fff !important; }
-body.dark-mode .sb-board-item.active::before { background: #fff !important; }
-body.dark-mode .sb-badge { background: #1a1a1a !important; color: #555 !important; }
-body.dark-mode .sb-footer { border-top-color: #1a1a1a !important; background: #040404 !important; }
-body.dark-mode .sb-footer-btn { color: #444 !important; background: transparent !important; }
-body.dark-mode .sb-footer-btn:hover { background: #111 !important; color: #e0e0e0 !important; }
-
-/* ── Topbar ── */
-body.dark-mode .topbar {
-  background: #030303 !important;
-  border-bottom: 1px solid #1a1a1a !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-body.dark-mode .title-display { color: #e0e0e0 !important; }
-body.dark-mode .chip { background: #111 !important; color: #555 !important; }
-body.dark-mode .tb-sep { background: #1a1a1a !important; }
-body.dark-mode .tb-btn {
-  background: #0e0e0e !important;
-  border-color: #1f1f1f !important;
-  color: #555 !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-body.dark-mode .tb-btn:hover { background: #161616 !important; color: #e0e0e0 !important; border-color: #2a2a2a !important; }
-body.dark-mode .tb-btn.active { background: #1a1a1a !important; color: #e0e0e0 !important; border-color: #333 !important; }
-body.dark-mode .tb-btn.green { background: #1a2e1a !important; color: #4ade80 !important; border-color: #2a4a2a !important; }
-
-/* ── Stats bar ── */
-body.dark-mode #statsBar {
-  background: #030303 !important;
-  border-bottom: 1px solid #1a1a1a !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-body.dark-mode .stat-item { background: #0e0e0e !important; border-color: #1a1a1a !important; color: #444 !important; }
-body.dark-mode .stat-item:hover { background: #161616 !important; color: #e0e0e0 !important; }
-body.dark-mode .stat-val { color: #e0e0e0 !important; }
-body.dark-mode .stat-divider { background: #1a1a1a !important; }
-
-/* ── Table ── */
-body.dark-mode .wrapper { background: transparent !important; }
-body.dark-mode .table-wrap {
-  background: #080808 !important;
-  border-color: #1a1a1a !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-body.dark-mode .grid-table { color: #e0e0e0 !important; }
-body.dark-mode .grid-table thead tr { background: #060606 !important; }
-body.dark-mode .grid-table thead th {
-  background: #080808 !important;
-  border-bottom-color: #222 !important;
-  border-right-color: #1a1a1a !important;
-  color: #555 !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-body.dark-mode .grid-table tbody tr { border-bottom-color: #1e1e1e !important; }
-body.dark-mode .grid-table tbody tr:hover td { background: #0f0f0f !important; }
-body.dark-mode .grid-table tbody td { border-right-color: #1e1e1e !important; color: #ffffff !important; background: transparent !important; }
-body.dark-mode .cell-text { color: #ffffff !important; background: transparent !important; }
-body.dark-mode .cell-text-view { color: #e8e8e8 !important; }
-body.dark-mode .cell-text-wrap { color: #e8e8e8 !important; }
-body.dark-mode .grid-table tbody tr.row-done td .cell-text-view { color: #444 !important; }
-body.dark-mode input.cell-edit-ta { background: #0a0a0a !important; color: #e8e8e8 !important; }
-body.dark-mode textarea.cell-text { background: #0a0a0a !important; color: #ffffff !important; border-color: #1f1f1f !important; }
-body.dark-mode td input,
-body.dark-mode td input[type=text],
-body.dark-mode td input[type=date] { background: #0a0a0a !important; color: #ffffff !important; border-color: #1f1f1f !important; }
-body.dark-mode .add-row-btn { color: #444 !important; }
-body.dark-mode .add-row-btn:hover { color: #e0e0e0 !important; background: #0f0f0f !important; }
-body.dark-mode .grp-hdr { background: #060606 !important; border-color: #1a1a1a !important; }
-body.dark-mode .grp-hdr-label { color: #888 !important; }
-body.dark-mode .grp-hdr-count { color: #666 !important; }
-body.dark-mode th { background: #080808 !important; color: #555 !important; }
-
-/* ── Panels ── */
-body.dark-mode .panel { background: #0c0c0c !important; border-color: #1f1f1f !important; box-shadow: 0 8px 32px rgba(0,0,0,.8) !important; }
-body.dark-mode .panel-title { color: #e0e0e0 !important; }
-body.dark-mode .panel-close { color: #444 !important; background: transparent !important; }
-body.dark-mode select,
-body.dark-mode .group-sel,
-body.dark-mode .form-select { background: #111 !important; color: #e0e0e0 !important; border-color: #222 !important; }
-
-/* ── Modal ── */
-body.dark-mode .modal-box,
-body.dark-mode .hp-modal { background: #0c0c0c !important; color: #e0e0e0 !important; border-color: #1f1f1f !important; box-shadow: 0 20px 60px rgba(0,0,0,.9) !important; }
-body.dark-mode .modal-hdr { border-bottom-color: #1a1a1a !important; color: #e0e0e0 !important; }
-body.dark-mode .modal-ftr { border-top-color: #1a1a1a !important; }
-
-/* ── Popover / Context menu ── */
-body.dark-mode .popover,
-body.dark-mode .ctx-menu { background: #0c0c0c !important; border-color: #1f1f1f !important; box-shadow: 0 8px 24px rgba(0,0,0,.8) !important; }
-body.dark-mode .pop-item { color: #888 !important; }
-body.dark-mode .pop-item:hover { background: #141414 !important; color: #e0e0e0 !important; }
-body.dark-mode .pop-item.danger:hover { background: #1a0808 !important; color: #f87171 !important; }
-body.dark-mode .tag-opt-item:hover { background: #141414 !important; }
-body.dark-mode .tag-opt-item.sel { background: #111 !important; }
-body.dark-mode .pop-opt-item:hover { background: #141414 !important; }
-
-/* ── Kanban ── */
-body.dark-mode .kb-col { background: #060606 !important; border-color: #1a1a1a !important; }
-body.dark-mode .kb-col-title { color: #e0e0e0 !important; }
-body.dark-mode .kb-col-count { background: #111 !important; color: #444 !important; }
-body.dark-mode .kb-card { background: #0e0e0e !important; border-color: #1a1a1a !important; box-shadow: none !important; }
-body.dark-mode .kb-card:hover { background: #141414 !important; box-shadow: none !important; }
-body.dark-mode .kb-card-title { color: #e0e0e0 !important; }
-body.dark-mode .kb-card-date { color: #444 !important; }
-
-/* ── Calendar ── */
-body.dark-mode #homeCalendar { background: #000 !important; border-color: #1a1a1a !important; }
-body.dark-mode .cal-dow { background: #060606 !important; color: #333 !important; }
-body.dark-mode .cal-cell { background: #090909 !important; }
-body.dark-mode .cal-cell.cal-empty { background: #040404 !important; }
-body.dark-mode .cal-cell.cal-today { box-shadow: inset 0 0 0 1.5px #555 !important; }
-body.dark-mode .cal-cell.cal-today .cal-day-num { color: #e0e0e0 !important; }
-body.dark-mode .cal-day-num { color: #444 !important; }
-body.dark-mode .cal-header .tb-btn { background: #0e0e0e !important; border-color: #1f1f1f !important; color: #666 !important; }
-
-/* ── Home page ── */
-body.dark-mode .hp-bar { background: #000 !important; border-bottom-color: #1a1a1a !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
-body.dark-mode .board-card { background: #0c0c0c !important; border-color: #1a1a1a !important; box-shadow: none !important; }
-body.dark-mode .board-card:hover { background: #111 !important; box-shadow: none !important; }
-body.dark-mode .board-card-title { color: #e0e0e0 !important; }
-body.dark-mode .board-card-meta { color: #444 !important; }
-body.dark-mode .bento-cell { background: #0c0c0c !important; border-color: #1a1a1a !important; box-shadow: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
-body.dark-mode .sv-card { background: #0c0c0c !important; border-color: #1a1a1a !important; }
-
-/* ── Bottom sheet ── */
-body.dark-mode .bottom-sheet { background: #0c0c0c !important; }
-body.dark-mode .sheet-item { color: #555 !important; }
-body.dark-mode .sheet-item:hover { background: #111 !important; color: #e0e0e0 !important; }
-
-/* ── CL bar ── */
-body.dark-mode #clBar { background: #0a0a0a !important; border-color: #1a1a1a !important; }
-body.dark-mode .cl-bar-board-btn { background: #0e0e0e !important; color: #555 !important; }
-body.dark-mode .cl-bar-board-btn.sel { background: #161616 !important; color: #e0e0e0 !important; }
-body.dark-mode .cl-bar-chip { background: #0e0e0e !important; color: #555 !important; }
-
-/* ── Weather switcher ── */
-body.dark-mode #wxToggleBtn { background: #0e0e0e !important; border-color: #1f1f1f !important; }
-body.dark-mode .wx-sw-btn { background: #0e0e0e !important; border-color: #1f1f1f !important; color: #666 !important; }
-body.dark-mode .wx-sw-btn:hover { background: #161616 !important; color: #e0e0e0 !important; }
-body.dark-mode .wx-sw-btn.wx-active { background: #1a1a1a !important; color: #e0e0e0 !important; border-color: #333 !important; }
-
-/* ── Heat map ── */
-body.dark-mode .heat-0 { background: #111 !important; }
-
-/* ── Stats panel ── */
-body.dark-mode #statsView { background: transparent !important; }
-
-/* ── Misc inputs / buttons ── */
-body.dark-mode input,
-body.dark-mode textarea,
-body.dark-mode button:not(.tb-btn):not(.sb-item):not(.sb-footer-btn):not(.sb-board-item) {
-  background: #0a0a0a;
-  color: #ffffff;
-  border-color: #1f1f1f;
-}
-/* date input placeholder 提亮 */
-body.dark-mode input[type=date]::-webkit-datetime-edit { color: #888 !important; }
-body.dark-mode input[type=date]::-webkit-datetime-edit-fields-wrapper { color: #888 !important; }
-body.dark-mode input[type=date]:not([value=""]) { color: #fff !important; }
-/* 行号、序号等次要数字 */
-body.dark-mode .row-num { color: #444 !important; }
-/* 统计 bar 标签 */
-body.dark-mode .stats-bar { color: #888 !important; }
 
 </style>
 </head>
