@@ -1339,6 +1339,20 @@ body.dark-mode .kb-card {
 }
 
 /* ── 天气切换按钮栏（右下角浮动）── */
+/* ── 统计视图卡片（inline，和 bento 同风格）── */
+.sv-card {
+  background: rgba(255,255,255,0.62);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.55);
+  border-radius: 18px; padding: 18px;
+  box-shadow: 0 4px 18px rgba(0,0,0,.05);
+}
+body.dark-mode .sv-card {
+  background: rgba(22,28,52,.72); border-color: rgba(255,255,255,.08);
+}
+.sv-num { font-size: 30px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+.sv-lbl { font-size: 11px; color: var(--text3); font-weight: 600; letter-spacing: .04em; }
+
 /* ── 天气切换：默认折叠成小按钮，hover/点击展开 ── */
 #wxSwitcher {
   position: fixed; bottom: 24px; right: 24px; z-index: 500;
@@ -1720,7 +1734,7 @@ body.dark-mode .bc-prog { background: rgba(255,255,255,.08); }
     <div class="sb-item" id="sbCalBtn" onclick="sbOpenCalendar()">
       <span class="sb-icon">📅</span> 日历
     </div>
-    <div class="sb-item" onclick="toggleStatsPanel()">
+    <div class="sb-item" id="sbStatsBtn" onclick="toggleStats()">
       <span class="sb-icon">📊</span> 统计
     </div>
 
@@ -1831,6 +1845,7 @@ body.dark-mode .bc-prog { background: rgba(255,255,255,.08); }
   <button class="tb-btn tb-btn-desktop" id="groupBtn" onclick="togglePanel('group')">⊞ 分组</button>
   <button class="tb-btn tb-btn-desktop" id="kanbanBtn" onclick="toggleKanban()">⊞ 看板</button>
   <button class="tb-btn tb-btn-desktop" id="calBtn" onclick="toggleCalendar()">📅 日历</button>
+  <button class="tb-btn tb-btn-desktop" id="statsBtn" onclick="toggleStats()">📊 统计</button>
   <!-- 更多下拉 -->
   <div class="tb-more-wrap tb-btn-desktop" id="tbMoreWrap">
     <button class="tb-btn" id="tbMoreBtn" onclick="toggleTbMore(event)">⋯ 更多</button>
@@ -1869,6 +1884,9 @@ body.dark-mode .bc-prog { background: rgba(255,255,255,.08); }
 
 <!-- Calendar View -->
 <div id="calendarView" style="display:none;"></div>
+
+<!-- Stats View (inline, like calendar) -->
+<div id="statsView" style="display:none;padding:0 16px 40px;"></div>
 
 <!-- Timeline View -->
 <div id="timelineView" style="display:none;"></div>
@@ -5221,16 +5239,39 @@ function clearReminder(rowId) {
 }
 
 /* ─── Feature 4: Stats Panel ─── */
-function toggleStatsPanel() {
-  const panel = document.getElementById('statsPanel');
-  if (!panel) return;
-  const showing = panel.style.display !== 'none';
-  panel.style.display = showing ? 'none' : 'block';
-  if (!showing) renderStatsPanel();
+let statsView = false;
+function toggleStatsPanel() { toggleStats(); } // backward compat alias
+function toggleStats() {
+  statsView = !statsView;
+  const view = document.getElementById('statsView');
+  if (statsView) {
+    // 关掉其他所有视图
+    kanbanMode = false; document.getElementById('kanbanBtn')?.classList.remove('active');
+    document.getElementById('kanbanView').style.display = 'none';
+    calendarView = false; document.getElementById('calendarView').style.display = 'none';
+    document.getElementById('calBtn')?.classList.remove('active');
+    timelineView = false; document.getElementById('timelineView').style.display = 'none';
+    document.getElementById('tlBtn')?.classList.remove('active');
+    matrixView = false; document.getElementById('matrixView').style.display = 'none';
+    document.getElementById('mtxBtn')?.classList.remove('active');
+    document.querySelector('.wrapper').style.display = 'none';
+    document.getElementById('mobileView').style.display = 'none';
+    view.style.display = 'block';
+    document.getElementById('statsBtn')?.classList.add('active');
+    document.getElementById('sbStatsBtn')?.classList.add('active');
+    renderStatsView();
+  } else {
+    view.style.display = 'none';
+    document.querySelector('.wrapper').style.display = '';
+    document.getElementById('mobileView').style.display = '';
+    document.getElementById('statsBtn')?.classList.remove('active');
+    document.getElementById('sbStatsBtn')?.classList.remove('active');
+  }
 }
 
-function renderStatsPanel() {
-  const panel = document.getElementById('statsPanel');
+function renderStatsPanel() { renderStatsView(); } // alias
+function renderStatsView() {
+  const panel = document.getElementById('statsView');
   if (!panel) return;
   const allRows = S.rows.filter(r => !r.p);
   const total = allRows.length;
@@ -5264,35 +5305,50 @@ function renderStatsPanel() {
       Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="stats-bar-row"><span class="stats-bar-lbl">${k}</span><div class="stats-bar-track"><div class="stats-bar-fill" style="width:${(v/maxCnt*100).toFixed(0)}%"></div></div><span class="stats-bar-cnt">${v}</span></div>`).join('')+'</div>';
   }
 
-  panel.innerHTML = `<div class="stats-panel-inner">
-    <div class="stats-panel-hdr">
-      <span class="sp-title">📊 统计</span>
-      <button onclick="toggleStatsPanel()" style="background:rgba(0,0,0,0.06);border:none;cursor:pointer;font-size:14px;color:var(--text3);line-height:1;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .15s" onmouseover="this.style.background='rgba(0,0,0,0.12)'" onmouseout="this.style.background='rgba(0,0,0,0.06)'">✕</button>
-    </div>
-    <div class="stats-panel-body">
-      <div class="stats-nums-row">
-        <div class="sp-num-card"><div class="sp-num" style="color:#6366F1">${total}</div><div class="sp-lbl">总任务</div></div>
-        <div class="sp-num-card"><div class="sp-num" style="color:#10B981">${done}</div><div class="sp-lbl">已完成</div></div>
-        <div class="sp-num-card"><div class="sp-num" style="color:#F59E0B">${pending}</div><div class="sp-lbl">进行中</div></div>
-        <div class="sp-num-card"><div class="sp-num" style="color:#EF4444">${overdue}</div><div class="sp-lbl">已逾期</div></div>
+  panel.innerHTML = `
+    <div style="max-width:800px;margin:0 auto;padding-top:16px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+        <span style="font-size:18px;font-weight:800;background:linear-gradient(135deg,#6366F1,#8B5CF6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">📊 数据统计</span>
+        <span style="font-size:12px;color:var(--text3);font-weight:500">${S.title || '当前清单'}</span>
       </div>
-      <div class="sp-prog-wrap">
-        <div class="sp-prog-label">
-          <span class="sp-prog-title">完成进度</span>
-          <span class="sp-prog-pct">${rate}%</span>
+
+      <!-- 四格数字卡 -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">
+        <div class="sv-card"><div class="sv-num" style="color:#6366F1">${total}</div><div class="sv-lbl">总任务</div></div>
+        <div class="sv-card"><div class="sv-num" style="color:#10B981">${done}</div><div class="sv-lbl">已完成</div></div>
+        <div class="sv-card"><div class="sv-num" style="color:#F59E0B">${pending}</div><div class="sv-lbl">进行中</div></div>
+        <div class="sv-card"><div class="sv-num" style="color:#EF4444">${overdue}</div><div class="sv-lbl">已逾期</div></div>
+      </div>
+
+      <!-- 进度 + 热力图 两列 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <!-- 完成进度 -->
+        <div class="sv-card" style="display:flex;flex-direction:column;justify-content:center;gap:12px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline">
+            <span style="font-size:13px;font-weight:700;color:var(--text2)">完成进度</span>
+            <span style="font-size:32px;font-weight:800;color:#6366F1;line-height:1">${rate}%</span>
+          </div>
+          <div style="height:10px;background:rgba(0,0,0,0.07);border-radius:100px;overflow:hidden">
+            <div style="height:100%;width:${rate}%;background:linear-gradient(90deg,#6366F1,#8B5CF6);border-radius:100px;transition:width .6s ease"></div>
+          </div>
+          <div style="font-size:12px;color:var(--text3)">${done} / ${total} 项已完成</div>
         </div>
-        <div class="sp-prog-track"><div class="sp-prog-fill" style="width:${rate}%"></div></div>
+
+        <!-- 热力图 -->
+        <div class="sv-card">
+          <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">完成热力图 · 近90天</div>
+          ${heatmapHtml}
+          <div style="display:flex;gap:4px;margin-top:8px;align-items:center">
+            <span style="font-size:10px;color:var(--text3)">少</span>
+            ${[0,1,2,3,4].map(i=>`<div class="heat-cell heat-${i}" style="width:11px;height:11px;flex-shrink:0"></div>`).join('')}
+            <span style="font-size:10px;color:var(--text3)">多</span>
+          </div>
+        </div>
       </div>
-      <div class="stats-sec-title">完成热力图 · 近90天</div>
-      ${heatmapHtml}
-      <div style="display:flex;gap:4px;margin-top:4px;margin-bottom:16px;align-items:center">
-        <span style="font-size:10px;color:var(--text3)">少</span>
-        ${[0,1,2,3,4].map(i=>`<div class="heat-cell heat-${i}" style="width:12px;height:12px;flex-shrink:0"></div>`).join('')}
-        <span style="font-size:10px;color:var(--text3)">多</span>
-      </div>
-      ${tagBreakdown}
-    </div>
-  </div>`;
+
+      <!-- 分布（如有） -->
+      ${tagBreakdown ? `<div class="sv-card">${tagBreakdown}</div>` : ''}
+    </div>`;
 }
 
 /* ─── Feature 5: AI Task Decomposition ─── */
@@ -5447,7 +5503,7 @@ function dropToQuadrant(e,quadrant){const rowId=e.dataTransfer.getData('rowId');
 </script>
 
 <!-- Stats Panel -->
-<div id="statsPanel" style="display:none;position:fixed;top:0;right:0;width:340px;height:100vh;background:rgba(255,255,255,0.82);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border-left:1px solid rgba(255,255,255,0.5);z-index:1000;overflow:hidden;box-shadow:-8px 0 40px rgba(99,102,241,0.12)"></div>
+<!-- statsPanel removed; stats now inline via #statsView -->
 
 <!-- ═══════════════════════════════════════════════
      🗂️ Sidebar + TopbarQuote + WelcomeBanner JS
