@@ -24,7 +24,6 @@
 <link rel="manifest" id="manifestLink">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
-<style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#f5f6fa;--white:#fff;--border:#e0e3e8;--border2:#c9cdd4;
@@ -1339,10 +1338,12 @@ body.dark-mode #appSidebar {
   box-shadow: 4px 0 28px rgba(0,0,0,.3) !important;
 }
 
-/* Logo 区 */
+/* Logo 区 — 高度与 hp-bar/topbar 对齐（62px），消除左上角棱角缝隙 */
 .sb-logo {
   display: flex; align-items: center; gap: 10px;
-  padding: 18px 16px 14px;
+  padding: 0 16px;
+  height: var(--topbar-h);
+  min-height: var(--topbar-h);
   border-bottom: 1px solid rgba(99,102,241,.1);
   flex-shrink: 0;
 }
@@ -1406,10 +1407,13 @@ body.dark-mode .sb-badge { background: #818cf8; }
   padding: 7px 12px; border-radius: 10px;
   font-size: 12.5px; font-weight: 500; color: var(--text2);
   cursor: pointer; transition: all .14s;
-  margin-bottom: 1px;
+  margin-bottom: 1px; position: relative;
 }
 .sb-board-item:hover { background: rgba(99,102,241,.08); color: #6366F1; }
+.sb-board-item.active { background: rgba(99,102,241,.14); color: #6366F1; font-weight: 700; }
+.sb-board-item.active::before { content:''; position:absolute; left:0; top:4px; bottom:4px; width:3px; border-radius:0 3px 3px 0; background:#6366F1; }
 body.dark-mode .sb-board-item:hover { background: rgba(129,140,248,.1); color: #818cf8; }
+body.dark-mode .sb-board-item.active { background: rgba(129,140,248,.18); color: #818cf8; }
 .sb-board-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 .sb-board-count { margin-left: auto; font-size: 11px; color: var(--text3); font-weight: 600; }
 
@@ -5368,6 +5372,10 @@ function dropToQuadrant(e,quadrant){const rowId=e.dataTransfer.getData('rowId');
     goHome();
     setSbActive(null);
   };
+  window.loadBoard = function(boardId) {
+    openBoard(boardId);
+    document.getElementById('appSidebar').classList.remove('sb-open');
+  };
   function setSbActive(id) {
     document.querySelectorAll('.sb-item').forEach(el => el.classList.remove('active'));
     if (id) { const el = document.getElementById(id); if (el) el.classList.add('active'); }
@@ -5391,6 +5399,14 @@ function dropToQuadrant(e,quadrant){const rowId=e.dataTransfer.getData('rowId');
   };
   window.setSbBoardActive = function(boardId) {
     document.querySelectorAll('.sb-item, .sb-board-item').forEach(el => el.classList.remove('active'));
+    if (boardId) {
+      const items = document.querySelectorAll('.sb-board-item');
+      items.forEach(el => {
+        if (el.getAttribute('onclick') && el.getAttribute('onclick').includes(boardId)) {
+          el.classList.add('active');
+        }
+      });
+    }
   };
 
   /* ── 深色模式同步侧边栏图标 ── */
