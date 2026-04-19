@@ -720,20 +720,68 @@ body.dark-mode .cdp-btn-danger { background:#2a1f1f; color:#e35454; }
 .cdt-board { font-size:10px; flex-shrink:0; opacity:.7; }
 
 /* ── Stats Panel ── */
-.stats-panel-inner { padding:20px; }
-.stats-panel-hdr { display:flex; justify-content:space-between; align-items:center; font-size:16px; font-weight:700; color:var(--text); margin-bottom:20px; }
-.stats-summary { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-bottom:20px; }
-.stats-card { background:var(--header-bg); border-radius:10px; padding:14px 12px; text-align:center; }
-.stats-num { font-size:26px; font-weight:800; color:var(--text); }
-.stats-lbl { font-size:11px; color:var(--text3); margin-top:2px; }
-.stats-sec-title { font-size:13px; font-weight:700; color:var(--text2); margin:16px 0 8px; }
-.heat-grid { display:grid; grid-template-columns:repeat(13,1fr); gap:3px; margin-bottom:8px; }
-.heat-cell { aspect-ratio:1; border-radius:2px; }
-.heat-0 { background:var(--border); }
-.heat-1 { background:#b7dfcc; }
-.heat-2 { background:#5dbf91; }
-.heat-3 { background:#3aaa78; }
-.heat-4 { background:#1d7a52; }
+/* ── 统计面板（侧滑抽屉）全新设计 ── */
+.stats-panel-inner { padding:0; height:100%; display:flex; flex-direction:column; }
+.stats-panel-hdr {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:20px 20px 16px;
+  border-bottom:1px solid rgba(0,0,0,0.06);
+  position:sticky; top:0;
+  background:rgba(255,255,255,0.92);
+  backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  z-index:2;
+}
+.stats-panel-hdr .sp-title {
+  font-size:16px; font-weight:800;
+  background:linear-gradient(135deg,#6366F1,#8B5CF6);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.stats-panel-body { flex:1; overflow-y:auto; padding:16px 20px 32px; }
+
+/* 数字行 — 改成横排4格，compact */
+.stats-nums-row { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:18px; }
+.sp-num-card {
+  background:rgba(255,255,255,0.6);
+  border:1px solid rgba(0,0,0,0.06);
+  backdrop-filter:blur(10px);
+  border-radius:14px; padding:12px 8px; text-align:center;
+  transition:transform .15s;
+}
+.sp-num-card:hover { transform:translateY(-2px); }
+.sp-num { font-size:22px; font-weight:800; line-height:1; }
+.sp-lbl { font-size:10px; color:var(--text3); margin-top:4px; font-weight:600; letter-spacing:.04em; }
+
+/* 进度条行 */
+.sp-prog-wrap { margin-bottom:18px; }
+.sp-prog-label { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px; }
+.sp-prog-title { font-size:12px; font-weight:700; color:var(--text2); }
+.sp-prog-pct { font-size:20px; font-weight:800; color:#6366F1; }
+.sp-prog-track { height:8px; background:rgba(0,0,0,0.07); border-radius:100px; overflow:hidden; }
+.sp-prog-fill { height:100%; border-radius:100px; background:linear-gradient(90deg,#6366F1,#8B5CF6); transition:width .6s ease; }
+
+/* section 标题 */
+.stats-sec-title {
+  font-size:11px; font-weight:700; color:var(--text3);
+  text-transform:uppercase; letter-spacing:.1em;
+  margin:16px 0 8px;
+}
+
+/* 热力图 */
+.heat-grid { display:grid; grid-template-columns:repeat(13,1fr); gap:3px; margin-bottom:4px; }
+.heat-cell { aspect-ratio:1; border-radius:3px; cursor:default; transition:transform .1s; }
+.heat-cell:hover { transform:scale(1.3); }
+.heat-0 { background:rgba(0,0,0,0.06); }
+.heat-1 { background:#c4b5fd; }
+.heat-2 { background:#a78bfa; }
+.heat-3 { background:#7c3aed; }
+.heat-4 { background:#4c1d95; }
+body.dark-mode .heat-0 { background:rgba(255,255,255,0.08); }
+
+/* 分布条 */
+.stats-summary { display:none; } /* 隐藏旧的 */
+.stats-card,.stats-num,.stats-lbl { /* 兼容旧变量 */ }
+
 
 /* ── 顶栏「更多」下拉 ── */
 .tb-more-wrap { position:relative; }
@@ -1669,7 +1717,7 @@ body.dark-mode .bc-prog { background: rgba(255,255,255,.08); }
       <span class="sb-icon">📋</span> 所有清单
       <span class="sb-badge" id="sbBoardCount">0</span>
     </div>
-    <div class="sb-item" onclick="goHomeFromSidebar();setTimeout(()=>document.querySelector('.hp-section-title button')?.click?.(),200)">
+    <div class="sb-item" id="sbCalBtn" onclick="sbOpenCalendar()">
       <span class="sb-icon">📅</span> 日历
     </div>
     <div class="sb-item" onclick="toggleStatsPanel()">
@@ -5217,24 +5265,33 @@ function renderStatsPanel() {
   }
 
   panel.innerHTML = `<div class="stats-panel-inner">
-    <div class="stats-panel-hdr"><span>📊 数据统计</span><button onclick="toggleStatsPanel()" style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--text3);line-height:1">✕</button></div>
-    <div class="stats-summary">
-      <div class="stats-card"><div class="stats-num">${total}</div><div class="stats-lbl">总任务</div></div>
-      <div class="stats-card" style="background:#edf7f2"><div class="stats-num" style="color:#2d9e6b">${done}</div><div class="stats-lbl">已完成</div></div>
-      <div class="stats-card" style="background:#fff8e6"><div class="stats-num" style="color:#ff9800">${pending}</div><div class="stats-lbl">进行中</div></div>
-      <div class="stats-card" style="background:#fff0f0"><div class="stats-num" style="color:#f44336">${overdue}</div><div class="stats-lbl">已逾期</div></div>
+    <div class="stats-panel-hdr">
+      <span class="sp-title">📊 统计</span>
+      <button onclick="toggleStatsPanel()" style="background:rgba(0,0,0,0.06);border:none;cursor:pointer;font-size:14px;color:var(--text3);line-height:1;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .15s" onmouseover="this.style.background='rgba(0,0,0,0.12)'" onmouseout="this.style.background='rgba(0,0,0,0.06)'">✕</button>
     </div>
-    <div style="text-align:center;margin-bottom:16px">
-      <svg width="80" height="80" viewBox="0 0 80 80">
-        <circle cx="40" cy="40" r="32" fill="none" stroke="var(--border)" stroke-width="8"/>
-        <circle cx="40" cy="40" r="32" fill="none" stroke="var(--accent)" stroke-width="8" stroke-dasharray="${rate*2.01} 201" stroke-dashoffset="50.25" stroke-linecap="round"/>
-        <text x="40" y="45" text-anchor="middle" font-size="16" font-weight="800" fill="var(--text)">${rate}%</text>
-      </svg>
-      <div style="font-size:12px;color:var(--text3);margin-top:4px">完成率</div>
+    <div class="stats-panel-body">
+      <div class="stats-nums-row">
+        <div class="sp-num-card"><div class="sp-num" style="color:#6366F1">${total}</div><div class="sp-lbl">总任务</div></div>
+        <div class="sp-num-card"><div class="sp-num" style="color:#10B981">${done}</div><div class="sp-lbl">已完成</div></div>
+        <div class="sp-num-card"><div class="sp-num" style="color:#F59E0B">${pending}</div><div class="sp-lbl">进行中</div></div>
+        <div class="sp-num-card"><div class="sp-num" style="color:#EF4444">${overdue}</div><div class="sp-lbl">已逾期</div></div>
+      </div>
+      <div class="sp-prog-wrap">
+        <div class="sp-prog-label">
+          <span class="sp-prog-title">完成进度</span>
+          <span class="sp-prog-pct">${rate}%</span>
+        </div>
+        <div class="sp-prog-track"><div class="sp-prog-fill" style="width:${rate}%"></div></div>
+      </div>
+      <div class="stats-sec-title">完成热力图 · 近90天</div>
+      ${heatmapHtml}
+      <div style="display:flex;gap:4px;margin-top:4px;margin-bottom:16px;align-items:center">
+        <span style="font-size:10px;color:var(--text3)">少</span>
+        ${[0,1,2,3,4].map(i=>`<div class="heat-cell heat-${i}" style="width:12px;height:12px;flex-shrink:0"></div>`).join('')}
+        <span style="font-size:10px;color:var(--text3)">多</span>
+      </div>
+      ${tagBreakdown}
     </div>
-    <div class="stats-sec-title">完成热力图 <span style="font-size:11px;font-weight:400;color:var(--text3)">近90天</span></div>
-    ${heatmapHtml}
-    ${tagBreakdown}
   </div>`;
 }
 
@@ -5390,7 +5447,7 @@ function dropToQuadrant(e,quadrant){const rowId=e.dataTransfer.getData('rowId');
 </script>
 
 <!-- Stats Panel -->
-<div id="statsPanel" style="display:none;position:fixed;top:0;right:0;width:360px;height:100vh;background:var(--white);border-left:1px solid var(--border);z-index:1000;overflow-y:auto;box-shadow:-4px 0 20px rgba(0,0,0,.08)"></div>
+<div id="statsPanel" style="display:none;position:fixed;top:0;right:0;width:340px;height:100vh;background:rgba(255,255,255,0.82);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border-left:1px solid rgba(255,255,255,0.5);z-index:1000;overflow:hidden;box-shadow:-8px 0 40px rgba(99,102,241,0.12)"></div>
 
 <!-- ═══════════════════════════════════════════════
      🗂️ Sidebar + TopbarQuote + WelcomeBanner JS
@@ -5410,6 +5467,17 @@ function dropToQuadrant(e,quadrant){const rowId=e.dataTransfer.getData('rowId');
   window.loadBoard = function(boardId) {
     openBoard(boardId);
     document.getElementById('appSidebar').classList.remove('sb-open');
+  };
+  window.sbOpenCalendar = function() {
+    // 跳到第一个清单并自动打开日历视图
+    const firstBoard = homeBoards && homeBoards[0];
+    if (!firstBoard) { alert('还没有清单，先新建一个吧'); return; }
+    document.getElementById('appSidebar').classList.remove('sb-open');
+    openBoard(firstBoard.id).then ? openBoard(firstBoard.id).then(() => {
+      setTimeout(() => { if (!calendarView) toggleCalendar(); }, 300);
+    }) : (openBoard(firstBoard.id), setTimeout(() => { if (!calendarView) toggleCalendar(); }, 400));
+    document.querySelectorAll('.sb-item').forEach(el => el.classList.remove('active'));
+    document.getElementById('sbCalBtn')?.classList.add('active');
   };
   function setSbActive(id) {
     document.querySelectorAll('.sb-item').forEach(el => el.classList.remove('active'));
