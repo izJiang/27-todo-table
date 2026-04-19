@@ -479,11 +479,11 @@ body.theme-27 .board-card.all-done::after {
 
 /* ── Dark mode ── */
 body.dark-mode{
-  --bg:#080808;--white:#0f0f0f;--border:#1c1c1c;--border2:#242424;
-  --text:#d8dce8;--text2:#6b7280;--text3:#404550;
-  --header-bg:#0a0a0a;--row-hover:#141414;--accent:#4caf82;
-  --shadow:0 2px 16px rgba(0,0,0,.8);
-  background:#080808;
+  --bg:#000000;--white:#0a0a0a;--border:#1c1c1c;--border2:#222222;
+  --text:#ededf0;--text2:#666872;--text3:#3a3c44;
+  --header-bg:#050505;--row-hover:#111111;--accent:#7c6aff;
+  --shadow:0 2px 20px rgba(0,0,0,.9);
+  background:#000000;
 }
 /* stars handled via JS #starsBg element */
 /* homepage card dark fix */
@@ -582,9 +582,24 @@ body.dark-mode #homePage,
 body.dark-mode #boardPage { position:relative; z-index:1; }
 
 /* twinkle animation */
-@keyframes twinkle{0%,100%{opacity:.9}50%{opacity:.2}}
-@keyframes twinkle2{0%,100%{opacity:.5}60%{opacity:.9}}
-.star { position:absolute; border-radius:50%; background:rgba(255,255,255,0.85); animation:twinkle 2s ease-in-out infinite alternate; }
+/* 呼吸星星动画 */
+@keyframes breathe  { 0%,100%{opacity:.08;transform:scale(1)}   50%{opacity:.95;transform:scale(1.3)} }
+@keyframes breathe2 { 0%,100%{opacity:.6;transform:scale(1)}    50%{opacity:.12;transform:scale(0.8)} }
+@keyframes breathe3 { 0%,100%{opacity:.3;transform:scale(1.1)}  50%{opacity:1;  transform:scale(1.5)} }
+@keyframes breathe4 { 0%,100%{opacity:.9;transform:scale(1)}    33%{opacity:.2;transform:scale(0.9)} 66%{opacity:.7;transform:scale(1.2)} }
+.star {
+  position:absolute; border-radius:50%;
+  background:rgba(255,255,255,0.9);
+  animation:breathe 3s ease-in-out infinite;
+}
+.star.t2 { animation-name:breathe2; }
+.star.t3 { animation-name:breathe3; animation-duration:4.5s; }
+.star.t4 { animation-name:breathe4; animation-duration:5.5s; }
+/* 大星 + 光晕 */
+.star.big {
+  box-shadow: 0 0 4px 1px rgba(255,255,255,0.3);
+  animation-duration: 6s;
+}
 .star.t2 { animation-name:twinkle2; }
 .star.t3 { animation-duration:3.5s; }
 
@@ -990,7 +1005,7 @@ body:not([class*="wx-"]) #weatherBg {
   background: linear-gradient(160deg, #E8F4FD 0%, #F0F7FF 50%, #F8F9FF 100%);
 }
 body.dark-mode:not([class*="wx-"]) #weatherBg {
-  background: linear-gradient(170deg, #020202 0%, #060606 50%, #080808 100%);
+  background: #000000;
 }
 
 /* ── 太阳光晕 ── */
@@ -4490,18 +4505,33 @@ function generateStars() {
   if (!bg || bg.dataset.built) return;
   bg.dataset.built = '1';
   let html = '';
-  for (let i = 0; i < 80; i++) {
-    const x = (Math.random()*100).toFixed(1);
-    const y = (Math.random()*100).toFixed(1);
-    const size = Math.random()<.7?1:Math.random()<.85?2:3;
-    const delay = (Math.random()*4).toFixed(1);
-    const cls = ['','t2','t3'][Math.floor(Math.random()*3)];
-    const op = (.3+Math.random()*.7).toFixed(2);
-    html += `<div class="star ${cls}" style="left:${x}%;top:${y}%;width:${size}px;height:${size}px;opacity:${op};animation-delay:${delay}s"></div>`;
+  const anims = ['','t2','t3','t4'];
+  // 小星 160颗
+  for (let i = 0; i < 160; i++) {
+    const x = (Math.random()*100).toFixed(2);
+    const y = (Math.random()*100).toFixed(2);
+    const size = Math.random() < .65 ? 1 : 1.5;
+    const delay = (Math.random() * 7).toFixed(2);
+    const dur = (2.5 + Math.random() * 4).toFixed(1);
+    const cls = anims[Math.floor(Math.random() * 4)];
+    html += `<div class="star ${cls}" style="left:${x}%;top:${y}%;width:${size}px;height:${size}px;animation-delay:${delay}s;animation-duration:${dur}s"></div>`;
   }
-  for (let i = 0; i < 6; i++) {
-    const x=(Math.random()*100).toFixed(1), y=(Math.random()*50).toFixed(1);
-    html += `<div class="star" style="left:${x}%;top:${y}%;width:3px;height:3px;opacity:.9;box-shadow:0 0 5px 2px rgba(255,255,255,.35);animation-delay:${(Math.random()*3).toFixed(1)}s"></div>`;
+  // 中星 30颗
+  for (let i = 0; i < 30; i++) {
+    const x = (Math.random()*100).toFixed(2);
+    const y = (Math.random()*100).toFixed(2);
+    const delay = (Math.random() * 6).toFixed(2);
+    const dur = (3 + Math.random() * 5).toFixed(1);
+    const cls = anims[Math.floor(Math.random() * 4)];
+    html += `<div class="star ${cls}" style="left:${x}%;top:${y}%;width:2px;height:2px;animation-delay:${delay}s;animation-duration:${dur}s"></div>`;
+  }
+  // 大星（带光晕）12颗
+  for (let i = 0; i < 12; i++) {
+    const x = (Math.random()*100).toFixed(2);
+    const y = (Math.random()*100).toFixed(2);
+    const delay = (Math.random() * 5).toFixed(2);
+    const dur = (5 + Math.random() * 6).toFixed(1);
+    html += `<div class="star big" style="left:${x}%;top:${y}%;width:3px;height:3px;animation-delay:${delay}s;animation-duration:${dur}s"></div>`;
   }
   bg.innerHTML = html;
 }
@@ -4514,7 +4544,11 @@ function toggleDarkMode() {
   if (btn) btn.textContent = isDark ? '☀️' : '🌙';
   const hbtn = document.getElementById('darkModeBtnHome');
   if (hbtn) hbtn.textContent = isDark ? '☀️' : '🌙';
-  if (isDark) generateStars();
+  if (isDark) {
+    const bg = document.getElementById('starsBg');
+    if (bg) { bg.removeAttribute('data-built'); bg.innerHTML = ''; }
+    generateStars();
+  }
 }
 // Initialize dark mode on load
 if (localStorage.getItem('darkMode') === '1') {
