@@ -479,11 +479,11 @@ body.theme-27 .board-card.all-done::after {
 
 /* ── Dark mode ── */
 body.dark-mode{
-  --bg:#0f1117;--white:#1a1e2a;--border:#2a2f3d;--border2:#363c4d;
-  --text:#e2e6f0;--text2:#8b94a8;--text3:#555e72;
-  --header-bg:#161b27;--row-hover:#1e2334;--accent:#4caf82;
-  --shadow:0 2px 16px rgba(0,0,0,.5);
-  background:#0f1117;
+  --bg:#09090f;--white:#13141e;--border:#1e2030;--border2:#282a3a;
+  --text:#dde1ec;--text2:#7a8296;--text3:#4a5068;
+  --header-bg:#10111a;--row-hover:#16182a;--accent:#4caf82;
+  --shadow:0 2px 16px rgba(0,0,0,.6);
+  background:#09090f;
 }
 /* stars handled via JS #starsBg element */
 /* homepage card dark fix */
@@ -584,7 +584,7 @@ body.dark-mode #boardPage { position:relative; z-index:1; }
 /* twinkle animation */
 @keyframes twinkle{0%,100%{opacity:.9}50%{opacity:.2}}
 @keyframes twinkle2{0%,100%{opacity:.5}60%{opacity:.9}}
-.star { position:absolute; border-radius:50%; background:#fff; animation:twinkle 2s ease-in-out infinite alternate; }
+.star { position:absolute; border-radius:50%; background:rgba(255,255,255,0.85); animation:twinkle 2s ease-in-out infinite alternate; }
 .star.t2 { animation-name:twinkle2; }
 .star.t3 { animation-duration:3.5s; }
 
@@ -990,7 +990,7 @@ body:not([class*="wx-"]) #weatherBg {
   background: linear-gradient(160deg, #E8F4FD 0%, #F0F7FF 50%, #F8F9FF 100%);
 }
 body.dark-mode:not([class*="wx-"]) #weatherBg {
-  background: linear-gradient(170deg, #0B0F1E 0%, #111827 50%, #141C2E 100%);
+  background: linear-gradient(170deg, #07080f 0%, #0d0f18 45%, #0f1120 100%);
 }
 
 /* ── 太阳光晕 ── */
@@ -4869,26 +4869,54 @@ function renderHomeCalendarGrid() {
     const storeKey = STORE_PREFIX + board.id;
     const data = JSON.parse(localStorage.getItem(storeKey) || 'null');
     if (data && data.rows) {
-      data.rows.forEach(row => {
-        const dateVal = row.cells?.[dateCol.id];
+      // 找"处理时间"类 select 列（label 含月份选项）
+      const monthCol = board.columns?.find(c => c.type === 'select' &&
+        c.options?.some(o => /^\d+月$|^[3-9]月$|^[1-9][0-9]月$/.test(o.label)));
+      const monthKey = `m${month+1}`; // e.g. "m4" for April
+      const monthLabel = `${month+1}月`;
+
+      data.rows.filter(r => !r.p).forEach(row => {
+        // 优先：有精确日期
+        const dateVal = dateCol && row.cells?.[dateCol.id];
         if (dateVal && dateVal.startsWith(`${year}-${String(month+1).padStart(2,'0')}`)) {
           allTodos.push({
             date: dateVal,
             title: row.cells?.[board.columns[0]?.id] || '无标题',
-            done: row.done,
-            boardName: board.title,
-            boardId: board.id
+            done: row.done, boardName: board.title, boardId: board.id, exact: true
           });
+          return;
+        }
+        // 次选：按"处理时间"月份列，归到该月1日（作为"本月待办"）
+        if (monthCol) {
+          const mVal = row.cells?.[monthCol.id];
+          const vals = Array.isArray(mVal) ? mVal : (mVal ? [mVal] : []);
+          const matched = vals.some(v => {
+            const opt = monthCol.options?.find(o => o.id === v || o.label === v);
+            return opt && (opt.id === monthKey || opt.label === monthLabel || opt.label === `${month+1}月`);
+          });
+          if (matched) {
+            const fallbackDate = `${year}-${String(month+1).padStart(2,'0')}-01`;
+            allTodos.push({
+              date: fallbackDate,
+              title: row.cells?.[board.columns[0]?.id] || '无标题',
+              done: row.done, boardName: board.title, boardId: board.id, exact: false
+            });
+          }
         }
       });
     }
   });
   
-  // 按日期分组
+  // 按日期分组；非精确（本月任务）单独汇总
   const byDate = {};
+  const monthTodos = []; // 无精确日期、只有月份的任务
   allTodos.forEach(t => {
-    byDate[t.date] = byDate[t.date] || [];
-    byDate[t.date].push(t);
+    if (t.exact) {
+      byDate[t.date] = byDate[t.date] || [];
+      byDate[t.date].push(t);
+    } else {
+      monthTodos.push(t);
+    }
   });
   
   let h = `<div class="cal-dow">日</div><div class="cal-dow">一</div>
@@ -4929,19 +4957,30 @@ function renderHomeCalendarGrid() {
     homeBoards.forEach((b,i) => { boardColorMap[b.id] = BOARD_COLORS[i % BOARD_COLORS.length]; });
 
     let bars = '';
-    if (todos.length > 0) {
-      const show = todos.slice(0, 3);
-      bars = `<div class="cal-todo-list">` + show.map(t => {
+    const showMonthSummary = (d === 1) && monthTodos.length > 0;
+    const allCellTodos = [...(todos || [])];
+
+    if (showMonthSummary || allCellTodos.length > 0) {
+      bars = `<div class="cal-todo-list">`;
+      // 本月待办汇总条（仅1号显示）
+      if (showMonthSummary) {
+        const undone = monthTodos.filter(t => !t.done).length;
+        bars += `<div class="cal-todo-bar" style="background:rgba(99,102,241,0.1);color:#6366F1;border-left:3px solid #6366F1;font-size:10px" onclick="event.stopPropagation();onHomeCalDayClick('${dateStr}')">
+          📋 本月 ${undone} 项待办</div>`;
+      }
+      // 精确日期的任务
+      const show = allCellTodos.slice(0, showMonthSummary ? 2 : 3);
+      show.forEach(t => {
         const color = boardColorMap[t.boardId] || '#4a90d9';
-        const bg = t.done ? '#e0e0e0' : color + '22'; // 透明背景
+        const bg = t.done ? '#e0e0e0' : color + '22';
         const textColor = t.done ? '#9e9e9e' : color;
         const barColor = t.done ? '#bdbdbd' : color;
         const truncated = t.title.length > 9 ? t.title.slice(0,9)+'…' : t.title;
-        return `<div class="cal-todo-bar${t.done?' done':''}" style="background:${bg};color:${textColor};border-left:3px solid ${barColor}" onclick="event.stopPropagation();onHomeCalDayClick('${dateStr}')">
+        bars += `<div class="cal-todo-bar${t.done?' done':''}" style="background:${bg};color:${textColor};border-left:3px solid ${barColor}" onclick="event.stopPropagation();onHomeCalDayClick('${dateStr}')">
           <span class="cal-todo-text" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${truncated}</span>
         </div>`;
-      }).join('');
-      if (todos.length > 3) bars += `<div class="cal-more">+${todos.length - 3} 个</div>`;
+      });
+      if (allCellTodos.length > (showMonthSummary ? 2 : 3)) bars += `<div class="cal-more">+${allCellTodos.length - (showMonthSummary?2:3)} 个</div>`;
       bars += `</div>`;
     }
 
@@ -4961,14 +5000,32 @@ function renderHomeCalendarGrid() {
 /* ── 获取某天所有待办 ── */
 function getTodosForDate(dateStr) {
   const todos = [];
+  const isFirst = dateStr.endsWith('-01');
+  const [y, m] = dateStr.split('-');
   homeBoards.forEach(board => {
     const dateCol = board.columns?.find(c => c.type === 'date');
-    if (!dateCol) return;
+    const monthCol = board.columns?.find(c => c.type === 'select' &&
+      c.options?.some(o => /^\d+月$/.test(o.label)));
     const data = JSON.parse(localStorage.getItem(STORE_PREFIX + board.id) || 'null');
     if (data?.rows) {
-      data.rows.forEach(row => {
-        if (row.cells?.[dateCol.id] === dateStr) {
-          todos.push({ board: board.title, boardId: board.id, title: row.cells?.[board.columns[0]?.id] || '无标题', done: row.done });
+      data.rows.filter(r => !r.p).forEach(row => {
+        // 精确日期
+        if (dateCol && row.cells?.[dateCol.id] === dateStr) {
+          todos.push({ board: board.title, boardId: board.id, title: row.cells?.[board.columns[0]?.id] || '无标题', done: row.done, exact: true });
+          return;
+        }
+        // 1号：补充本月待办（无精确日期但有月份标签）
+        if (isFirst && monthCol) {
+          const mLabel = `${parseInt(m)}月`;
+          const mVal = row.cells?.[monthCol.id];
+          const vals = Array.isArray(mVal) ? mVal : (mVal ? [mVal] : []);
+          const matched = vals.some(v => {
+            const opt = monthCol.options?.find(o => o.id === v || o.label === v);
+            return opt && opt.label === mLabel;
+          });
+          if (matched && !(dateCol && row.cells?.[dateCol.id])) {
+            todos.push({ board: board.title, boardId: board.id, title: row.cells?.[board.columns[0]?.id] || '无标题', done: row.done, exact: false });
+          }
         }
       });
     }
